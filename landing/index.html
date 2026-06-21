@@ -771,9 +771,8 @@
   }
 
   (function(){
-    let lang='en';
-    try{ lang = localStorage.getItem('tabaqa-lang') || 'en'; }catch(e){}
-    const q = new URLSearchParams(location.search).get('lang');   // ?lang=ar / ?lang=en wins
+    let lang='en';                                                  // always open in English
+    const q = new URLSearchParams(location.search).get('lang');     // ?lang=ar only when explicit
     if(q==='ar' || q==='en') lang=q;
     applyLang(lang);
   })();

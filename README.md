@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/header.gif" alt="Tabaqa — the credit-intelligence layer for Saudi open banking" width="100%" />
+</p>
+
 # طبقة · Tabaqa
 
 > **The credit-intelligence layer for Saudi open banking.**
