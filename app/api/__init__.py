@@ -1,0 +1,1 @@
+"""Tabaqa FastAPI service."""

@@ -1,6 +1,6 @@
 # طبقة · Tabaqa — "We are not Lean." (Pitch & Q&A battle-card)
 
-> Use this on stage and in judge Q&A. One job: end the objection *"this is just Lean for wallets."*
+> Use this on stage and in judge Q&A. Jobs: end *"this is just Lean for wallets,"* *"Lean / SiFi already solved this,"* and *"you're just an AI data-processing layer"* — the last two are killed in **§2½**.
 > **Lean is the pipe. Tabaqa is the answer.** · لين هي الأنبوب. طبقة هي الإجابة.
 
 ---
@@ -41,6 +41,38 @@ Lean fills the **left pipe**. The **right pipe doesn't exist in open banking yet
 - Tarabut is the same shape: AIS aggregator with **Categorization + Income/Account Verification** — **on bank data, generic, no wallet, no Masdr provenance.**
 
 **So the honest summary:** Lean/Tarabut are excellent **bank-data infrastructure**. The wallet ledger and the verified-income *answer* are simply **not what they sell.**
+
+---
+
+## 2½ · "Lean / SiFi already solved this" — the pipe-vs-decision kill
+
+> **The real objection (paraphrased from a judge):** *"Lean, SiFi, and many companies already solve this. Today you're just an **AI layer for data processing** — what proves there's a need for it?"*
+> **The 1-line kill:** *"Those companies sell **data, pipes, spend-control, or a bureau score**. We sell a **decision**. Having the pipe is not having the score — everywhere in the world that's a separate, separately-paid product."*
+
+**First — refuse the frame.** We are **not** "an AI layer that processes data." Enrichment (Drahim / Tarabut Categorization) already processes data. **Tabaqa outputs a *decision*:** a verified income figure **+** a 1–99 cash-flow PD score **+** an APPROVE / REVIEW / DECLINE financing line. Processing is the *means*; the **decision** is the *product*.
+
+**Second — the named players don't ship that decision.** What each actually outputs:
+
+| Player | What it actually outputs | Category |
+|---|---|---|
+| **Lean** | Open-banking APIs — data access, balances, transactions, categorization, account/income verification, payments. Calls itself "financial infrastructure"; partners (Tabby, Tamara) run their **own** underwriting on top. | **pipe / data** |
+| **SiFi** | **B2B corporate spend-management** — corporate cards, expense workflows, e-wallet for businesses. **EMI-licensed**, 5,000+ *business* customers, $34M+ raised. **No consumer credit, scoring, or income-verification product at all.** | **spend-mgmt** |
+| **Tarabut** | Open-banking connectivity + data (categorization, income verification). "Intelligent decisioning" is **roadmap** — it acquired Servable.dev (31 Jan 2026) to *start* building it. | **pipe / data** (decision = future) |
+| **Drahim** | Consumer PFM — budgeting, categorization, auto-investing. 65% bought by Al Rajhi (Sep 2024). No PD / credit decision. | **data / PFM** |
+| **SIMAH** | National bureau — a **history-based** score (MOLIM, 300–850) on loans/cards/repayment. Structurally **blind** to thin-file / credit-invisible / wallet-income earners. | **bureau** |
+
+**None ships a productized consumer cash-flow PD decision — least of all one that includes wallet income.** That is the unbuilt lane Tabaqa occupies.
+
+**Third — the SiFi judo (use it).** SiFi is itself an **EMI** — the very category that *holds* wallet ledgers — and it *still* outputs **zero** credit decisions. That's the whole thesis in miniature: **holding the data, even *being* the wallet, is not the same as turning it into an underwriting answer.**
+
+**Fourth — pipe-vs-decision is the global market structure, not our invention:**
+- **Pipes:** Plaid, Tink, TrueLayer — connectivity, not the decision.
+- **Decision layers on top:** **Prism Data CashScore®** ("predicts probability of default from deposit-account data, not credit history") ships *through* Plaid / Equifax; **FICO cash-flow UltraFICO** (Nov 2025) pairs FICO's model with Plaid's data; **Experian's Cashflow Score** (2025) — Experian itself calls the data and the decisioning *"complementary but distinct."*
+- Different products, different buyers: the **pipe** is bought by a data/engineering team; the **PD score** by a credit/risk officer.
+
+> **So "we have open banking, therefore cash-flow scoring is solved" is a false equivalence.** Open banking *moves the data*. Someone still has to build **attribution → model → decision** on top — which is exactly why FICO, Experian and Prism are *separate companies riding on Plaid*, not absorbed by it. In KSA that decision layer — **with wallet income** — is unbuilt. **That's us.**
+
+*Sources: [sifi.app](https://www.sifi.app/en) · [TechCrunch — SiFi $10M seed (2024-06-03)](https://techcrunch.com/2024/06/03/sifi-raises-10m-seed/) · [leantech.me](https://www.leantech.me/) · [Tarabut × Servable (2026-01-31)](https://www.tarabut.com/blogs/post/tarabut-acquires-bahrain-founded-ai-platform-servable) · [Al Rajhi × Drahim (2024-09)](https://www.alrajhibank.com.sa/en/About-alrajhi-bank/Media-Center/2024/Drahim) · [SIMAH Scoring](https://www.simah.com/en/products/services/pages/simah-scoring.aspx) · [Prism Data CashScore](https://www.prismdata.com/cashscore/) · [FICO + Plaid (American Banker, 2025-11)](https://www.americanbanker.com/news/fico-upgrades-its-cashflow-powered-score-with-real-time-data) · [Experian Cashflow Score (2025)](https://www.experianplc.com/newsroom/press-releases/2025/launch-of-experian-s-cashflow-score-signals-new-era-of-open-bank).*
 
 ---
 
@@ -92,6 +124,12 @@ Lean's pipe literally cannot output that line. The reveal **is** the differentia
 **Q: "Isn't this just Lean / Tarabut?"**
 > No. They read **banks**; we add the **wallet layer + verification + Arabic** and output a **verified-income answer**, not raw lines. We sit **on top** of Lean — it's a channel, not a competitor.
 
+**Q: "Lean / SiFi / many companies already solved this — why do we need you?"**
+> Different categories. Lean is a **pipe** (data access). **SiFi is B2B spend-management** — corporate cards and expense control, *no consumer credit product at all* (it's even an EMI and still issues no score). Neither outputs a **score or a financing decision**. We're the **decision layer** on top: verified income + 1–99 PD + approve/decline. (Full breakdown: §2½.)
+
+**Q: "You're just an AI layer that processes data — what's the need?"**
+> We're not a *processing* layer — enrichment vendors already process data. We output a **decision**, and the need for it is proven three ways: (1) it **predicts default** (FinRegLab — cash-flow data scores as well as a bureau and adds signal); (2) it's **legally required** to lend (SAMA DBR caps need a *verified-income* figure); (3) **no one in KSA ships it** with wallet income. Processing is the means; the decision is the product. (Evidence: [`PROOF.md`](./PROOF.md) §2/§4/§5.)
+
 **Q: "Can't Lean just add wallets?"**
 > Not easily — wallet data **isn't in open-banking scope** (0 EMIs licensed as OB providers). And even with the feed, the hard part is **attribution + Masdr verification + Arabic** — that's a product, not an endpoint. That's us.
 
@@ -111,6 +149,8 @@ Lean's pipe literally cannot output that line. The reveal **is** the differentia
 
 ### Verified-facts footer (for our own confidence)
 - Lean = first SAMA OB licensee, AIS over the 23 banks; neither Lean nor Tarabut expose wallet ledgers. `docs/research/15`, `docs/research/04`
+- SiFi = B2B **spend-management**, EMI-licensed, 5,000+ business customers, $34M+ raised — **no consumer credit / scoring product.** Listing it as a competitor is a category error. [sifi.app](https://www.sifi.app/en); [TechCrunch 2024-06](https://techcrunch.com/2024/06/03/sifi-raises-10m-seed/)
+- Pipe ≠ decision is the global structure: Plaid/Tink/TrueLayer (pipes) vs FICO cash-flow / Experian Cashflow / Prism CashScore (decisions on top). [Prism CashScore](https://www.prismdata.com/cashscore/); [Experian Cashflow Score](https://www.experianplc.com/newsroom/press-releases/2025/launch-of-experian-s-cashflow-score-signals-new-era-of-open-bank)
 - 0 EMIs in the OB regime; wallets outside OB scope today. `docs/research/15:170-171`
 - EMI ≠ bank: e-money at par, no interest on balances, no overdraft unless bank-partnered (Payments Law Art. 69). `docs/research/sources/…Payments_Law…`
 - Masdr 3-tier model + "Mofeed is Masdr's product." `PRD.md:62-71`, `UI.md:113`

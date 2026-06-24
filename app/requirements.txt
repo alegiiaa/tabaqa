@@ -1,0 +1,24 @@
+# ── Tabaqa backend — Python dependencies ──────────────────────────────────
+# The API + the demo pipeline/scoring run on just the first block (the pipeline
+# and scorecard are intentionally pure-stdlib). The rest are the production /
+# stretch integrations described in the README.
+
+# API (required to serve /v1/score, /v1/profile)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+
+# Scoring — train the real PD model on Berka (scoring/train.py)
+optbinning>=0.19
+scikit-learn>=1.4
+pandas>=2.2
+numpy>=1.26
+
+# Stretch: XGBoost + SHAP explainability
+# xgboost>=2.0
+# shap>=0.45
+
+# Arabic cleaning (production long-tail; the demo uses deterministic rules)
+# camel-tools>=1.5
+# arabic-reshaper>=3.0
+# python-bidi>=0.4

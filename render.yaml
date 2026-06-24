@@ -1,0 +1,18 @@
+# Render Blueprint for the Tabaqa API (native Python — no Docker needed).
+# In Render: New → Blueprint → pick this repo. It builds from app/ and serves
+# uvicorn. Set CORS_ORIGINS (and it's the only required secret-ish env) to your
+# deployed web origin in the dashboard after the first deploy.
+services:
+  - type: web
+    name: tabaqa-api
+    runtime: python
+    rootDir: app
+    plan: free
+    buildCommand: pip install -r requirements-api.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: CORS_ORIGINS
+        sync: false # set to e.g. https://tabaqa.vercel.app after deploying the web app

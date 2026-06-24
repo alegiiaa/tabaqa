@@ -1,0 +1,13 @@
+.venv/
+venv/
+web/
+supabase/
+**/__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+*.md
+.env
+.env.local
+.pytest_cache/

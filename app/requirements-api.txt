@@ -1,0 +1,7 @@
+# Slim runtime deps for deploying the Tabaqa API.
+# The pipeline + scorecard are pure-stdlib, so serving /v1/* needs only these
+# three. (Training deps — optbinning/pandas/sklearn — are in requirements.txt and
+# are NOT needed in production.) Keeps the deployed image small and fast to build.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
