@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { api, type ScoreResult, type Insights, type AffordabilityResult, type StatementInput } from '../lib/api'
-import { decodeStatement, shortHash } from '../lib/reportlink'
+import { decodeStatement, encodeFacts, shortHash } from '../lib/reportlink'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${Math.round(x * 100)}%`
@@ -91,8 +91,10 @@ export function CreditReport() {
   const issued = d.toISOString().slice(0, 10)
   const name = (result.applicant?.name as string) || 'المتقدّم'
   const inc = result.income
+  // Demo verifies by re-fetch (?c=); uploaded data carries a COMPACT issued-facts token
+  // (?v=) so the QR always fits — a full statement in the QR would overflow and crash.
   const verifyUrl = statement
-    ? `${window.location.origin}/verify?r=${ref}&d=${dParam}`
+    ? `${window.location.origin}/verify?r=${ref}&v=${encodeFacts({ r: ref, n: name, s: result.tabaqa_score, pd: result.pd, rf: result.risk_flag, ti: inc.true_monthly_income, bo: inc.bank_only_income, vs: inc.verified_share })}`
     : `${window.location.origin}/verify?r=${ref}&c=${conn}`
   const riskAr = RISK_AR[result.risk_flag] ?? result.risk_flag
 
@@ -226,7 +228,10 @@ export function CreditReport() {
             </div>
             <div className="rpt-foot-row">
               <div className="rpt-qr">
-                <QRCodeSVG value={verifyUrl} size={92} bgColor="#ffffff" fgColor="#0b1c46" level="M" />
+                {/* guard: never let an over-capacity value crash the whole report */}
+                {verifyUrl.length <= 1800
+                  ? <QRCodeSVG value={verifyUrl} size={92} bgColor="#ffffff" fgColor="#0b1c46" level="M" />
+                  : <span className="mono" style={{ fontSize: 10, color: '#8593ad' }}>{ref}</span>}
                 <span>امسح للتحقّق · SCAN TO VERIFY</span>
               </div>
               <div className="rpt-seal" aria-hidden>

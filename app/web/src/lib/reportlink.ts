@@ -32,6 +32,32 @@ export function decodeStatement(p: string): StatementInput {
   return JSON.parse(b64urlDecode(p)) as StatementInput
 }
 
+/**
+ * A compact, self-contained verification token — just the issued headline values.
+ * Small enough (~190 chars) to ALWAYS fit a scannable QR, so the verify QR never
+ * overflows no matter how large the uploaded statement is (a full statement in the
+ * QR would throw and blank the report). Demo reports verify by re-fetching ?c=; own
+ * data carries these issued facts via ?v=.
+ */
+export interface VerifyFacts {
+  r: string   // reference
+  n: string   // applicant name
+  s: number   // tabaqa score
+  pd: number  // probability of default
+  rf: string  // risk flag
+  ti: number  // true monthly income
+  bo: number  // bank-only income
+  vs: number  // verified income share
+}
+
+export function encodeFacts(f: VerifyFacts): string {
+  return b64urlEncode(JSON.stringify(f))
+}
+
+export function decodeFacts(p: string): VerifyFacts {
+  return JSON.parse(b64urlDecode(p)) as VerifyFacts
+}
+
 export interface ReportSource {
   connectionId?: string
   statement?: StatementInput
