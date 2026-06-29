@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
-import { api, type ScoreResult, type Insights, type AffordabilityResult } from '../lib/api'
+import { api, type ScoreResult, type Insights, type AffordabilityResult, type StatementInput } from '../lib/api'
+import { decodeStatement, shortHash } from '../lib/reportlink'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${Math.round(x * 100)}%`
@@ -43,7 +44,16 @@ function Mark({ fill, className }: { fill: string; className?: string }) {
  */
 export function CreditReport() {
   const [params] = useSearchParams()
-  const conn = params.get('c') || 'con_8842'
+  const c = params.get('c')
+  const dParam = params.get('d')
+  // Own/uploaded data travels as ?d=<encoded statement>; demo connections as ?c=<id>.
+  const statement = useMemo<StatementInput | null>(() => {
+    if (!dParam) return null
+    try { return decodeStatement(dParam) } catch { return null }
+  }, [dParam])
+  const decodeFailed = !!dParam && !statement
+  const conn = c || (dParam ? '' : 'con_8842')
+
   const [result, setResult] = useState<ScoreResult | null>(null)
   const [insights, setInsights] = useState<Insights | null>(null)
   const [afford, setAfford] = useState<AffordabilityResult | null>(null)
@@ -51,24 +61,39 @@ export function CreditReport() {
 
   useEffect(() => {
     let on = true
-    Promise.all([
-      api.scoreConnection(conn),
-      api.insightsConnection(conn).catch(() => null),
-      api.affordability({ connection_id: conn, amount: 60000, tenor_months: 48, annual_rate: 0.10, customer_type: 'employee' }).catch(() => null),
-    ]).then(([s, i, a]) => { if (on) { setResult(s); setInsights(i); setAfford(a) } })
-      .catch((e) => on && setErr(e.message ?? String(e)))
+    if (decodeFailed) { setErr('تعذّر قراءة بيانات التقرير من الرابط.'); return }
+    ;(async () => {
+      try {
+        const s = statement ? await api.scoreStatement(statement) : await api.scoreConnection(conn)
+        if (!on) return
+        setResult(s)
+        const [i, a] = await Promise.all([
+          (statement ? api.insightsStatement(statement) : api.insightsConnection(conn)).catch(() => null),
+          (statement
+            ? api.affordability({ verified_income: s.income.true_monthly_income, bank_only_income: s.income.bank_only_income, risk_flag: s.risk_flag, amount: 60000, tenor_months: 48, annual_rate: 0.10, customer_type: 'employee' })
+            : api.affordability({ connection_id: conn, amount: 60000, tenor_months: 48, annual_rate: 0.10, customer_type: 'employee' })
+          ).catch(() => null),
+        ])
+        if (on) { setInsights(i); setAfford(a) }
+      } catch (e) { if (on) setErr(e instanceof Error ? e.message : String(e)) }
+    })()
     return () => { on = false }
-  }, [conn])
+    // statement / conn / decodeFailed all derive from c + dParam
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [c, dParam])
 
   if (err) return <div className="rpt-load">تعذّر إنشاء التقرير: {err}</div>
   if (!result) return <div className="rpt-load"><span className="rpt-spin" /> جارٍ إنشاء التقرير الموثّق…</div>
 
   const d = new Date()
-  const ref = refId(conn, d)
+  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+  const ref = statement ? `TBQ-U${shortHash(dParam as string)}-${ymd}` : refId(conn, d)
   const issued = d.toISOString().slice(0, 10)
   const name = (result.applicant?.name as string) || 'المتقدّم'
   const inc = result.income
-  const verifyUrl = `${window.location.origin}/verify?r=${ref}&c=${conn}`
+  const verifyUrl = statement
+    ? `${window.location.origin}/verify?r=${ref}&d=${dParam}`
+    : `${window.location.origin}/verify?r=${ref}&c=${conn}`
   const riskAr = RISK_AR[result.risk_flag] ?? result.risk_flag
 
   return (
@@ -116,7 +141,10 @@ export function CreditReport() {
           {/* ── applicant strip ── */}
           <section className="rpt-applicant">
             <div><span className="rpt-k">المتقدّم</span><span className="rpt-v">{name}</span></div>
-            <div><span className="rpt-k">معرّف الاتصال</span><span className="rpt-v mono">{conn}</span></div>
+            <div>
+              <span className="rpt-k">{statement ? 'مصدر البيانات' : 'معرّف الاتصال'}</span>
+              {statement ? <span className="rpt-v">بيانات مرفوعة</span> : <span className="rpt-v mono">{conn}</span>}
+            </div>
             <div><span className="rpt-k">نسبة الدخل الموثّق</span><span className="rpt-v">{pct(inc.verified_share)}</span></div>
           </section>
 

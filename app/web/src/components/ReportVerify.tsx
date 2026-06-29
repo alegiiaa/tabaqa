@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { api, type ScoreResult } from '../lib/api'
+import { api, type ScoreResult, type StatementInput } from '../lib/api'
+import { decodeStatement } from '../lib/reportlink'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 
@@ -12,15 +13,25 @@ const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 export function ReportVerify() {
   const [params] = useSearchParams()
   const ref = params.get('r') || '—'
-  const conn = params.get('c') || 'con_8842'
+  const c = params.get('c')
+  const dParam = params.get('d')
+  // own/uploaded data verifies by re-scoring the carried statement; demo by connection id
+  const statement = useMemo<StatementInput | null>(() => {
+    if (!dParam) return null
+    try { return decodeStatement(dParam) } catch { return null }
+  }, [dParam])
+  const conn = c || (dParam ? '' : 'con_8842')
   const [result, setResult] = useState<ScoreResult | null>(null)
   const [err, setErr] = useState<string | null>(null)
 
   useEffect(() => {
     let on = true
-    api.scoreConnection(conn).then((s) => on && setResult(s)).catch((e) => on && setErr(e.message ?? String(e)))
+    if (dParam && !statement) { setErr('تعذّر قراءة بيانات التحقّق.'); return }
+    const p = statement ? api.scoreStatement(statement) : api.scoreConnection(conn)
+    p.then((s) => on && setResult(s)).catch((e) => on && setErr(e.message ?? String(e)))
     return () => { on = false }
-  }, [conn])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [c, dParam])
 
   return (
     <div className="vfy">
