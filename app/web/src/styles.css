@@ -1347,8 +1347,9 @@ table.ledger tr:last-child td{border-bottom:0}
 .rpt-mast-logo{display:grid;place-items:center}
 .rpt-mark{width:50px;height:auto}
 .rpt-mast-side{display:flex;flex-direction:column;gap:1px;line-height:1.34}
-.rpt-mast-side.ar{text-align:right;font-family:'Traditional Arabic','IBM Plex Sans Arabic',serif}
-.rpt-mast-side.en{text-align:left;font-family:'Inter',sans-serif}
+/* side blocks hug the centre logo (rtl grid puts .ar right / .en left) */
+.rpt-mast-side.ar{text-align:left;font-family:'Traditional Arabic','IBM Plex Sans Arabic',serif}
+.rpt-mast-side.en{text-align:right;font-family:'Inter',sans-serif}
 .rpt-mast-country{font-size:11px;color:#6a7790}
 .rpt-mast-side strong{font-size:15px;color:#0b1c46;font-weight:700}
 .rpt-mast-side.ar strong{font-size:17px}
