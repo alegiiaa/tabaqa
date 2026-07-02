@@ -31,8 +31,9 @@ function Mark({ fill, className }: { fill: string; className?: string }) {
 /**
  * Tabaqa Credit Report — a single-page, Watheeq-style Arabic attestation set in the traditional
  * Naskh face: KSA masthead, official title, ONE flowing paragraph that sums up the verified income,
- * score, risk and a financing headline, a clean 3-stat band, a verification seal + QR, and the green
- * blessing — all on one fixed A4 sheet, for any data (it stays a fixed height because no variable-
+ * score, risk and a financing headline (numbers inline, same face — no stat cards), a faint mid-page
+ * seal + watermark, QR bottom-right, the green blessing, and a flush bottom document band — all on
+ * one fixed A4 sheet, for any data (it stays a fixed height because no variable-
  * length table is rendered). Frontend-only: re-fetches the live /v1/score + /v1/affordability so the
  * numbers always match the engine. Truthfully Tabaqa-branded — NOT a government record (see note).
  */
@@ -102,6 +103,23 @@ export function CreditReport() {
         {/* faint layered watermark — fills the mid-page whitespace */}
         <div className="rpt-watermark" aria-hidden><Mark fill="currentColor" className="rpt-wm-mark" /></div>
 
+        {/* verification seal — sits quietly in the whitespace, Watheeq-stamp style */}
+        <div className="rpt-seal" aria-hidden>
+          <svg viewBox="0 0 132 132">
+            <defs><path id="rptArc" d="M66,66 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0" /></defs>
+            <circle cx="66" cy="66" r="63" fill="none" stroke="#1f3bff" strokeWidth="1.2" />
+            <circle cx="66" cy="66" r="57" fill="none" stroke="#1f3bff" strokeWidth="0.7" strokeDasharray="1.4 2.3" opacity=".7" />
+            <text className="rpt-seal-arc"><textPath href="#rptArc" startOffset="0">· TABAQA · VERIFIED CREDIT INTELLIGENCE </textPath></text>
+            <g fill="#1f3bff" transform="translate(45,27) scale(.42)">
+              <rect x="6" y="66" width="88" height="20" rx="8" />
+              <rect x="6" y="39" width="88" height="20" rx="8" />
+              <rect x="6" y="12" width="88" height="20" rx="8" transform="rotate(-8 50 22)" />
+            </g>
+            <text x="66" y="93" textAnchor="middle" className="rpt-seal-score">{result.tabaqa_score}</text>
+            <text x="66" y="107" textAnchor="middle" className="rpt-seal-lab">VERIFIED</text>
+          </svg>
+        </div>
+
         <div className="rpt-body" dir="rtl">
           {/* ── top group ── */}
           <div className="rpt-top">
@@ -132,81 +150,50 @@ export function CreditReport() {
               </div>
             </div>
 
-            {/* attestation — the summarised results, Watheeq-style */}
+            {/* attestation — one quiet paragraph, numbers inline in the same face (Watheeq) */}
             <p className="rpt-attest">
               يشهد هذا التقرير الصادر عن <b>منصة طبقة</b> بأنّ المتقدّم <b>{name}</b> قد جرى التحقّق من بياناته
               المالية إلكترونيًا عبر مصادر البيانات المفتوحة وبموافقته الصريحة. وقد بلغ دخله الشهري الموثّق{' '}
-              <b className="mono">{fmt(inc.true_monthly_income)}</b> ريالًا سعوديًا — مقابل{' '}
-              <span className="mono">{fmt(inc.bank_only_income)}</span> ريالًا في الكشف البنكي وحده — بفارقٍ موثّقٍ
-              قدره <b className="mono">{fmt(inc.reveal_delta)}</b> ريالًا يمثّل ما نسبته{' '}
-              <span className="mono">{pct(inc.verified_share)}</span> من دخله المُتحقَّق منه. وبناءً على ذلك بلغت
-              درجته الائتمانية <b className="mono">{result.tabaqa_score}</b> من <span className="mono">99</span>{' '}
-              بمستوى مخاطر <b>{riskAr}</b>، واحتمالِ تعثّرٍ قدره <span className="mono">{(result.pd * 100).toFixed(1)}%</span>
+              <span className="rpt-num">{fmt(inc.true_monthly_income)}</span> ريالًا سعوديًا، مقابل{' '}
+              <span className="rpt-num">{fmt(inc.bank_only_income)}</span> ريالًا في الكشف البنكي وحده، بفارقٍ موثّقٍ
+              قدره <span className="rpt-num">{fmt(inc.reveal_delta)}</span> ريالًا يمثّل ما نسبته{' '}
+              <span className="rpt-num">{pct(inc.verified_share)}</span> من دخله المُتحقَّق منه. وبناءً على ذلك بلغت
+              درجته الائتمانية <span className="rpt-num">{result.tabaqa_score}</span> من <span className="rpt-num">99</span>{' '}
+              بمستوى مخاطر <b>{riskAr}</b>، واحتمالِ تعثّرٍ قدره <span className="rpt-num">{(result.pd * 100).toFixed(1)}%</span>
               {afford
-                ? <>، ويؤهّله ذلك لتمويلٍ يصل إلى نحو <b className="mono">{fmt(afford.max_financing)}</b> ريال ضمن ضوابط ساما.</>
+                ? <>، ويؤهّله ذلك لتمويلٍ يصل إلى نحو <span className="rpt-num">{fmt(afford.max_financing)}</span> ريال ضمن ضوابط ساما.</>
                 : '.'}
             </p>
-
-            {/* clean, borderless 3-stat results band */}
-            <div className="rpt-summary">
-              <div className="rpt-stat">
-                <b className={`rpt-stat-v mono ${result.risk_flag}`}>{result.tabaqa_score}<small>/99</small></b>
-                <span className="rpt-stat-k">الدرجة الائتمانية · مخاطر {riskAr}</span>
-              </div>
-              <div className="rpt-stat">
-                <b className="rpt-stat-v mono">{fmt(inc.true_monthly_income)}<small> ريال</small></b>
-                <span className="rpt-stat-k">الدخل الشهري الموثّق</span>
-              </div>
-              <div className="rpt-stat">
-                <b className="rpt-stat-v mono delta">+{fmt(inc.reveal_delta)}<small> ريال</small></b>
-                <span className="rpt-stat-k">الكشف الإضافي عن البنك</span>
-              </div>
-            </div>
           </div>
 
           {/* ── bottom group (pinned to the foot of the page) ── */}
           <div className="rpt-bottom">
             <footer className="rpt-foot">
               <div className="rpt-foot-statement">
+                <span className="rpt-foot-en" dir="ltr">Verified by Tabaqa</span>
                 <strong>وُثِّقت هذه البيانات وتحقّقت إلكترونيًا عبر منصة طبقة</strong>
-                <span>This data was electronically verified via Tabaqa Platform</span>
                 <div className="rpt-bless">والله ولي التوفيق</div>
               </div>
               <div className="rpt-foot-row">
                 <div className="rpt-qr">
                   {/* guard: never let an over-capacity value crash the whole report */}
                   {verifyUrl.length <= 1800
-                    ? <QRCodeSVG value={verifyUrl} size={88} bgColor="#ffffff" fgColor="#0b1c46" level="M" />
+                    ? <QRCodeSVG value={verifyUrl} size={68} bgColor="#ffffff" fgColor="#0b1c46" level="M" />
                     : <span className="mono" style={{ fontSize: 10, color: '#8593ad' }}>{ref}</span>}
-                  <span>امسح للتحقّق · SCAN TO VERIFY</span>
-                </div>
-                <div className="rpt-seal" aria-hidden>
-                  <svg viewBox="0 0 132 132">
-                    <defs><path id="rptArc" d="M66,66 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0" /></defs>
-                    <circle cx="66" cy="66" r="63" fill="none" stroke="#1f3bff" strokeWidth="1.2" />
-                    <circle cx="66" cy="66" r="57" fill="none" stroke="#1f3bff" strokeWidth="0.7" strokeDasharray="1.4 2.3" opacity=".7" />
-                    <text className="rpt-seal-arc"><textPath href="#rptArc" startOffset="0">· TABAQA · VERIFIED CREDIT INTELLIGENCE </textPath></text>
-                    <g fill="#1f3bff" transform="translate(45,27) scale(.42)">
-                      <rect x="6" y="66" width="88" height="20" rx="8" />
-                      <rect x="6" y="39" width="88" height="20" rx="8" />
-                      <rect x="6" y="12" width="88" height="20" rx="8" transform="rotate(-8 50 22)" />
-                    </g>
-                    <text x="66" y="93" textAnchor="middle" className="rpt-seal-score">{result.tabaqa_score}</text>
-                    <text x="66" y="107" textAnchor="middle" className="rpt-seal-lab">VERIFIED</text>
-                  </svg>
+                  <span>SCAN TO VERIFY</span>
                 </div>
               </div>
             </footer>
 
-            {/* bottom document bar (verify) */}
+            <p className="rpt-disclaimer">
+              صدر هذا التقرير عن منصة طبقة من بياناتٍ مصرفية مفتوحة وبموافقة المتقدّم — منصةٌ مستقلّة، وهذه الوثيقة ليست سجلًّا حكوميًا.
+            </p>
+
+            {/* bottom document band — flush to the page edge, Watheeq-style */}
             <div className="rpt-docbar">
               <span>المرجع · <span className="mono">{ref}</span></span>
               <span className="rpt-docbar-url mono">{window.location.host}/verify</span>
             </div>
-
-            <p className="rpt-disclaimer">
-              صدر هذا التقرير عن منصة طبقة من بياناتٍ مصرفية مفتوحة وبموافقة المتقدّم — منصةٌ مستقلّة، وهذه الوثيقة ليست سجلًّا حكوميًا.
-            </p>
           </div>
         </div>
       </div>
