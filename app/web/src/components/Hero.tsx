@@ -4,12 +4,12 @@ import { Rich } from './Rich'
 import { TabaqaMark } from './Logo'
 import { LangSwitcher } from './LangSwitcher'
 import GlowHorizon from './ui/glow-horizon'
+import { ProjectDock } from './ProjectDock'
 
 const NAV_LINKS = [
   { href: '#product', key: 'nav.product' },
   { href: '#how', key: 'nav.how' },
   { href: '#security', key: 'nav.security' },
-  { href: '#pricing', key: 'nav.pricing' },
   { href: '#faq', key: 'nav.faq' },
 ]
 
@@ -34,6 +34,9 @@ export function Hero() {
           </div>
           <div className="navright">
             <LangSwitcher />
+            <Link to="/developers" className="btn btn-ghost btn-sm">
+              {t('nav.developers')}
+            </Link>
             <Link to="/login" className="btn btn-ghost btn-sm">
               {t('nav.login')}
             </Link>
@@ -48,12 +51,12 @@ export function Hero() {
             <Rich k="heroimg.h1" as="h1" className="ho-h1" />
             <Rich k="heroimg.sub" as="p" className="ho-sub" />
             <div className="ho-cta">
-              <Link className="btn hero-cta-white" to="/signup">
+              <Link className="btn hero-cta-white" to="/demo">
+                {t('heroimg.demo')}
+              </Link>
+              <Link className="btn btn-ghost" to="/signup">
                 {t('heroimg.cta1')}
               </Link>
-              <a className="btn btn-ghost" href="#how">
-                {t('heroimg.cta2')}
-              </a>
             </div>
             <div className="powered">
               <span className="pb-label">{t('powered.by')}</span>
@@ -61,6 +64,8 @@ export function Hero() {
                 <img className="humain" src="/humain-logo.png" alt="HUMAIN" />
               </span>
             </div>
+
+            <ProjectDock />
           </div>
         </div>
 

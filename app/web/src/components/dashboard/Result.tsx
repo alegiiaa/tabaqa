@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useTx } from '../../lib/tx'
 import { api, type ScoreResult, type AffordabilityResult, type Transaction } from '../../lib/api'
+import { resolveMerchant, CATEGORY_LABELS } from '../../lib/merchants'
+import { sourceLabel } from '../../lib/institutions'
+import { MerchantLogo } from './MerchantLogo'
+import { AccountCard } from './AccountCard'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
@@ -66,7 +70,7 @@ export function Result({
 }
 
 // ── tier tag helper ─────────────────────────────────────────────────────────
-function useTierTag() {
+export function useTierTag() {
   const { tx } = useTx()
   return (v: string) => {
     if (v === 'amount_verified') return { cls: 't-ok', label: tx('✓ amount verified', '✓ مبلغ موثّق') }
@@ -76,15 +80,25 @@ function useTierTag() {
 }
 
 // ── ① the reveal ────────────────────────────────────────────────────────────
-function RevealScreen({ result }: { result: ScoreResult }) {
+export function RevealScreen({ result }: { result: ScoreResult }) {
   const { tx } = useTx()
   const tierTag = useTierTag()
   const inc = result.income
   const SAR = tx('SAR', 'ر.س')
   const reconciled = result.transactions.some((t) => t.txn_type === 'internal_movement')
+  const accounts = result.accounts ?? []
+  const holder = (result.applicant?.name as string) || tx('Card holder', 'حامل البطاقة')
 
   return (
     <div className="screen">
+      {accounts.length > 0 && (
+        <div className="acct-strip">
+          {accounts.map((a) => (
+            <AccountCard key={a.source} account={a} holder={holder} />
+          ))}
+        </div>
+      )}
+
       <div className="reveal-cards">
         <div className="reveal-card muted-card">
           <div className="reveal-cap">{tx('Bank-only view', 'رؤية البنك فقط')}</div>
@@ -124,8 +138,8 @@ function RevealScreen({ result }: { result: ScoreResult }) {
       {reconciled && (
         <div className="note-line">
           {tx(
-            'Bank ↔ Barq transfer detected and marked internal — not double-counted.',
-            'تم رصد تحويل بين البنك ومحفظة برق ووسمه داخليًا — دون احتساب مزدوج.',
+            'Bank ↔ wallet transfer detected and marked internal — not double-counted.',
+            'تم رصد تحويل بين البنك والمحفظة ووسمه داخليًا — دون احتساب مزدوج.',
           )}
         </div>
       )}
@@ -134,7 +148,7 @@ function RevealScreen({ result }: { result: ScoreResult }) {
 }
 
 // ── ② the score ─────────────────────────────────────────────────────────────
-function ScoreScreen({ result }: { result: ScoreResult }) {
+export function ScoreScreen({ result }: { result: ScoreResult }) {
   const { tx } = useTx()
   const R = 79
   const C = 2 * Math.PI * R
@@ -203,65 +217,80 @@ function ScoreScreen({ result }: { result: ScoreResult }) {
 }
 
 // ── ③ the ledger ────────────────────────────────────────────────────────────
-function LedgerScreen({ txns }: { txns: Transaction[] }) {
+const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+/** Humanize a Plaid PFC primary code, e.g. FOOD_AND_DRINK → "Food & Drink". */
+const pfcLabel = (p: string) =>
+  p.split('_').map((w) => w[0] + w.slice(1).toLowerCase()).join(' ').replace(/\bAnd\b/g, '&')
+
+export function LedgerScreen({ txns }: { txns: Transaction[] }) {
   const { tx } = useTx()
   const tierTag = useTierTag()
   const sorted = txns.slice().sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
 
+  // group into month buckets (newest first), preserving sort order within each
+  const groups: { key: string; label: string; items: Transaction[] }[] = []
+  for (const t of sorted) {
+    const key = t.timestamp.slice(0, 7)
+    const [y, m] = key.split('-')
+    const label = `${tx(MONTHS_EN[+m - 1], MONTHS_AR[+m - 1])} ${y}`
+    const g = groups.find((x) => x.key === key)
+    if (g) g.items.push(t)
+    else groups.push({ key, label, items: [t] })
+  }
+
   return (
     <div className="screen">
-      <div className="rc">
-        <div className="h">
-          {tx('Unified ledger · bank + wallet', 'السجل الموحّد · البنك + المحفظة')} ({txns.length})
-        </div>
-        <div className="ledger-scroll">
-          <table className="ledger">
-            <thead>
-              <tr>
-                <th>{tx('Source', 'المصدر')}</th>
-                <th>{tx('Date', 'التاريخ')}</th>
-                <th>{tx('Description', 'الوصف')}</th>
-                <th className="num-col">{tx('Amount', 'المبلغ')}</th>
-                <th>{tx('Type', 'النوع')}</th>
-                <th>{tx('Provenance', 'التوثيق')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((t, i) => {
-                const isWallet = t.source.startsWith('wallet:')
-                const inflow = t.direction === 'inflow'
-                const incomeRow = ['salary', 'gig_income', 'p2p'].includes(t.txn_type)
-                const tag = incomeRow ? tierTag(t.verification) : null
-                return (
-                  <tr key={i}>
-                    <td>
-                      <span className={`src-badge ${isWallet ? 'w' : 'b'}`}>
-                        {isWallet ? tx('Wallet', 'محفظة') : tx('Bank', 'بنك')}
+      <div className="feed-head">
+        <div className="h">{tx('Unified ledger · bank + wallet', 'السجل الموحّد · البنك + المحفظة')}</div>
+        <span className="faint small">{txns.length} {tx('transactions', 'عملية')}</span>
+      </div>
+
+      <div className="feed">
+        {groups.map((g) => (
+          <div className="feed-group" key={g.key}>
+            <div className="feed-month">{g.label}</div>
+            {g.items.map((t, i) => {
+              const r = resolveMerchant(t)
+              const isWallet = t.source.startsWith('wallet:')
+              const inflow = t.direction === 'inflow'
+              const incomeRow = ['salary', 'gig_income', 'p2p'].includes(t.txn_type)
+              const tag = incomeRow ? tierTag(t.verification) : null
+              const cat = CATEGORY_LABELS[r.category]
+              return (
+                <div className="feed-row" key={i}>
+                  <MerchantLogo r={r} />
+                  <div className="feed-main">
+                    <div className="feed-title">
+                      {r.title}
+                      <span className={`feed-src ${isWallet ? 'w' : 'b'}`}>
+                        {sourceLabel(t.source, tx)}
                       </span>
-                    </td>
-                    <td className="faint">{t.timestamp.slice(0, 10)}</td>
-                    <td>
-                      <div>{t.raw_desc}</div>
-                      {t.merchant && <div className="faint small">→ {t.merchant}</div>}
-                    </td>
-                    <td className={`num-col ${inflow ? 'pos' : 'neg'}`}>
-                      {inflow ? '+' : '−'}{fmt(t.amount)}
-                    </td>
-                    <td className="faint small">{t.txn_type}</td>
-                    <td>{tag && <span className={`tag ${tag.cls}`}>{tag.label}</span>}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <div className="feed-sub faint">
+                      {cat ? tx(cat[0], cat[1]) : t.txn_type} · {t.timestamp.slice(0, 10)}
+                      {t.pfc_primary && <span className="pfc-chip" title={t.pfc_detailed ?? ''}>{pfcLabel(t.pfc_primary)}</span>}
+                    </div>
+                  </div>
+                  <div className="feed-right">
+                    <div className={`feed-amt ${inflow ? 'pos' : 'neg'}`}>
+                      {inflow ? '+' : '−'}{fmt(t.amount)} <small>{tx('SAR', 'ر.س')}</small>
+                    </div>
+                    {tag && <span className={`tag ${tag.cls}`}>{tag.label}</span>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
 // ── ④ affordability ─────────────────────────────────────────────────────────
-function AffordScreen({ result }: { result: ScoreResult }) {
+export function AffordScreen({ result }: { result: ScoreResult }) {
   const { tx } = useTx()
   const SAR = tx('SAR', 'ر.س')
   const defaultObl = result.features
@@ -272,7 +301,9 @@ function AffordScreen({ result }: { result: ScoreResult }) {
   const [tenor, setTenor] = useState(48)
   const [rate, setRate] = useState(10) // percent
   const [obligations, setObligations] = useState(defaultObl)
-  const [cap, setCap] = useState(33) // percent
+  // SAMA preset drives the cap; "custom" lets a lender set its own policy.
+  const [capMode, setCapMode] = useState<'employee' | 'retiree' | 'custom'>('employee')
+  const [customCap, setCustomCap] = useState(33) // percent
   const [out, setOut] = useState<AffordabilityResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -288,7 +319,9 @@ function AffordScreen({ result }: { result: ScoreResult }) {
         tenor_months: tenor,
         annual_rate: rate / 100,
         existing_obligations: obligations,
-        dbr_cap: cap / 100,
+        ...(capMode === 'custom'
+          ? { dbr_cap: customCap / 100 }
+          : { customer_type: capMode }),
       })
       setOut(r)
     } catch (e: any) {
@@ -310,7 +343,15 @@ function AffordScreen({ result }: { result: ScoreResult }) {
         <Field label={tx('Tenor (months)', 'المدة (أشهر)')} v={tenor} set={setTenor} />
         <Field label={tx('Annual rate %', 'النسبة السنوية %')} v={rate} set={setRate} step={0.1} />
         <Field label={tx('Existing obligations / mo', 'الالتزامات الحالية / شهر')} v={obligations} set={setObligations} suffix={SAR} />
-        <Field label={tx('DBR cap %', 'سقف نسبة الدين %')} v={cap} set={setCap} />
+        <div className="field">
+          <label>{tx('SAMA cap policy', 'سياسة سقف ساما')}</label>
+          <div className="afford-seg">
+            {([['employee', tx('Employee 33%', 'موظف ٣٣٪')], ['retiree', tx('Retiree 25%', 'متقاعد ٢٥٪')], ['custom', tx('Custom', 'مخصص')]] as const).map(([m, label]) => (
+              <button key={m} type="button" className={`afford-seg-btn${capMode === m ? ' on' : ''}`} onClick={() => setCapMode(m)}>{label}</button>
+            ))}
+          </div>
+        </div>
+        {capMode === 'custom' && <Field label={tx('Custom DBR cap %', 'سقف نسبة الدين المخصص %')} v={customCap} set={setCustomCap} />}
         <button className="btn btn-primary" onClick={calc} disabled={loading}>
           {loading ? tx('Calculating…', 'جارٍ الحساب…') : tx('Calculate', 'احسب')}
         </button>
@@ -328,6 +369,12 @@ function AffordScreen({ result }: { result: ScoreResult }) {
             <Stat label={tx('DBR after', 'نسبة الدين بعد')} value={pct(out.dbr_after)} />
             <Stat label={tx('Max financing', 'أقصى تمويل')} value={`${fmt(out.max_financing)} ${SAR}`} />
           </div>
+          {out.dbr_policy && (
+            <div className="afford-policy">
+              <span className="afford-policy-cap">{tx('Cap applied', 'السقف المطبّق')}: {pct(out.dbr_policy.cap)}</span>
+              <span className="afford-policy-cite">{out.dbr_policy.label} · {tx('total-DBR ceiling', 'سقف إجمالي الالتزامات')} {pct(out.dbr_policy.total_obligations_ceiling)} · {out.dbr_policy.citation}</span>
+            </div>
+          )}
           {out.reasons.length > 0 && (
             <ul className="afford-reasons">
               {out.reasons.map((r, i) => <li key={i}>{r}</li>)}

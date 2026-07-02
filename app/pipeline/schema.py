@@ -47,6 +47,9 @@ class Transaction:
     verification: str = VERIFY_INFERRED
     verified_via: str = "none"  # masdr:payslip | masdr:establishment | masdr:akeed | none
     confidence: float = 0.0
+    # Plaid Personal Finance Category (industry-standard taxonomy; set by pipeline.pfc)
+    pfc_primary: Optional[str] = None
+    pfc_detailed: Optional[str] = None
 
     @property
     def month(self) -> str:

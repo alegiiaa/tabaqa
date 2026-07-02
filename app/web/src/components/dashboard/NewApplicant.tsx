@@ -3,37 +3,15 @@ import { useTx } from '../../lib/tx'
 import {
   api,
   type ScoreResult,
-  type StatementInput,
-  type StatementRowInput,
   type ApplicantFormInput,
   type Persona,
 } from '../../lib/api'
 import type { InputKind } from '../../lib/db'
+import { num } from '../../lib/csv'
+import { StatementUpload } from './StatementUpload'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const GIG_PLATFORMS = ['Jahez', 'HungerStation', 'Mrsool', 'Careem', 'Uber']
-
-const SAMPLE_IBAN = 'SA0380000000608010167519'
-const SAMPLE_CSV = `date,description,amount,source,counterparty_iban
-2026-03-05,قسط تمويل عقاري,-800,bank,
-2026-03-12,مدى - بنده الرياض,-600,bank,
-2026-03-27,راتب - شركة الأفق للتجارة,4000,bank,${SAMPLE_IBAN}
-2026-03-15,JAHEZ-RYD دفعة,2600,wallet,
-2026-03-18,تحويل من عبدالله,800,wallet,
-2026-03-22,HUNGERSTATION SA,2600,wallet,
-2026-04-05,قسط تمويل عقاري,-800,bank,
-2026-04-12,مدى - بنده الرياض,-600,bank,
-2026-04-27,راتب - شركة الأفق للتجارة,4000,bank,${SAMPLE_IBAN}
-2026-04-15,JAHEZ-RYD دفعة,2700,wallet,
-2026-04-18,تحويل من عبدالله,800,wallet,
-2026-04-22,HUNGERSTATION SA,2500,wallet,
-2026-05-05,قسط تمويل عقاري,-800,bank,
-2026-05-12,مدى - بنده الرياض,-600,bank,
-2026-05-27,راتب - شركة الأفق للتجارة,4000,bank,${SAMPLE_IBAN}
-2026-05-15,JAHEZ-RYD دفعة,2550,wallet,
-2026-05-18,تحويل من عبدالله,800,wallet,
-2026-05-22,HUNGERSTATION SA,2650,wallet,
-`
 
 export interface ScoredPayload {
   result: ScoreResult
@@ -107,171 +85,20 @@ export function NewApplicant({
   )
 }
 
-// ── CSV helpers ──────────────────────────────────────────────────────────────
-function splitCsvLine(line: string): string[] {
-  const out: string[] = []
-  let cur = ''
-  let q = false
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]
-    if (q) {
-      if (ch === '"') {
-        if (line[i + 1] === '"') { cur += '"'; i++ } else q = false
-      } else cur += ch
-    } else if (ch === '"') q = true
-    else if (ch === ',') { out.push(cur); cur = '' }
-    else cur += ch
-  }
-  out.push(cur)
-  return out
-}
-
-function parseCsv(text: string): Record<string, string>[] {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim().length)
-  if (!lines.length) return []
-  const headers = splitCsvLine(lines[0]).map((h) => h.trim().toLowerCase())
-  return lines.slice(1).map((line) => {
-    const cells = splitCsvLine(line)
-    const row: Record<string, string> = {}
-    headers.forEach((h, i) => (row[h] = (cells[i] ?? '').trim()))
-    return row
-  })
-}
-
-const num = (s?: string) => {
-  if (s === undefined || s === '') return undefined
-  const v = parseFloat(s.replace(/,/g, ''))
-  return Number.isFinite(v) ? v : undefined
-}
-
-function rowsToStatement(rows: Record<string, string>[]): StatementRowInput[] {
-  return rows.map((r) => ({
-    date: r.date || r.timestamp || '',
-    description: r.description || r.raw_desc || '',
-    amount: num(r.amount),
-    debit: num(r.debit),
-    credit: num(r.credit),
-    source: r.source || '',
-    counterparty_iban: r.counterparty_iban || undefined,
-    balance: num(r.balance),
-  }))
-}
-
 // ── upload mode ──────────────────────────────────────────────────────────────
 function UploadMode({
   busy, run, onScored,
 }: { busy: boolean; run: (fn: () => Promise<void>) => void; onScored: (p: ScoredPayload) => void }) {
-  const { tx } = useTx()
-  const [name, setName] = useState('Uploaded applicant')
-  const [csv, setCsv] = useState('')
-  const [employer, setEmployer] = useState('')
-  const [salaryIban, setSalaryIban] = useState('')
-  const [monthlyWage, setMonthlyWage] = useState('')
-  const [gigPlatforms, setGigPlatforms] = useState('')
-  const [bankOpening, setBankOpening] = useState('')
-  const [walletOpening, setWalletOpening] = useState('')
-
-  const rows = csv ? parseCsv(csv) : []
-
-  function loadSample() {
-    setCsv(SAMPLE_CSV)
-    setName('Fahd A. (sample)')
-    setEmployer('شركة الأفق للتجارة')
-    setSalaryIban(SAMPLE_IBAN)
-    setMonthlyWage('4000')
-    setGigPlatforms('Jahez, HungerStation')
-    setBankOpening('8000')
-    setWalletOpening('300')
-  }
-
-  function downloadSample() {
-    const blob = new Blob([SAMPLE_CSV], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'tabaqa-sample-statement.csv'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => setCsv(String(reader.result ?? ''))
-    reader.readAsText(file)
-  }
-
-  function submit() {
-    run(async () => {
-      const opening_balances: Record<string, number> = {}
-      if (num(bankOpening) !== undefined) opening_balances['bank'] = num(bankOpening)!
-      if (num(walletOpening) !== undefined) opening_balances['wallet'] = num(walletOpening)!
-      const statement: StatementInput = {
-        name,
-        rows: rowsToStatement(rows),
-        context: {
-          opening_balances,
-          employer: employer || undefined,
-          salary_iban: salaryIban || undefined,
-          monthly_wage: num(monthlyWage),
-          gig_platforms: gigPlatforms
-            ? gigPlatforms.split(',').map((s) => s.trim()).filter(Boolean)
-            : [],
-        },
-      }
-      const result = await api.scoreStatement(statement)
-      onScored({ result, name, input_kind: 'statement', input: statement })
-    })
-  }
-
   return (
-    <div className="mode-grid">
-      <div className="mode-main">
-        <p className="mode-help">
-          {tx(
-            'Upload a CSV with columns: date, description, amount (+ inflow / − outflow), source (bank|wallet), and optional counterparty_iban / balance.',
-            'ارفع ملف CSV بالأعمدة: date و description و amount (+ وارد / − صادر) و source (bank|wallet) واختياريًا counterparty_iban / balance.',
-          )}
-        </p>
-        <div className="upload-actions">
-          <label className="btn btn-ghost btn-sm file-btn">
-            {tx('Choose CSV…', 'اختر ملف CSV…')}
-            <input type="file" accept=".csv,text/csv" onChange={onFile} hidden />
-          </label>
-          <button className="btn btn-ghost btn-sm" onClick={loadSample}>{tx('Load sample', 'تحميل عيّنة')}</button>
-          <button className="btn btn-ghost btn-sm" onClick={downloadSample}>{tx('Download template', 'تنزيل القالب')}</button>
-        </div>
-        <textarea
-          className="csv-area"
-          dir="ltr"
-          placeholder="date,description,amount,source,counterparty_iban&#10;2026-03-27,راتب,4000,bank,SA03..."
-          value={csv}
-          onChange={(e) => setCsv(e.target.value)}
-        />
-        <div className="faint small">{rows.length} {tx('rows parsed', 'صف تم تحليله')}</div>
-      </div>
-
-      <div className="mode-side">
-        <div className="side-title">{tx('Name', 'الاسم')}</div>
-        <input className="ti" value={name} onChange={(e) => setName(e.target.value)} />
-        <div className="side-title">
-          {tx('Verification context', 'سياق التحقّق')}
-          <span className="faint small"> · {tx('optional — unlocks Masdr tiers', 'اختياري — يُفعّل مستويات مصدر')}</span>
-        </div>
-        <input className="ti" placeholder={tx('Employer', 'جهة العمل')} value={employer} onChange={(e) => setEmployer(e.target.value)} />
-        <input className="ti" dir="ltr" placeholder={tx('Salary IBAN', 'آيبان الراتب')} value={salaryIban} onChange={(e) => setSalaryIban(e.target.value)} />
-        <input className="ti" placeholder={tx('Monthly wage', 'الراتب الشهري')} value={monthlyWage} onChange={(e) => setMonthlyWage(e.target.value)} />
-        <input className="ti" placeholder={tx('Gig platforms (comma-sep)', 'منصات العمل الحر (مفصولة بفاصلة)')} value={gigPlatforms} onChange={(e) => setGigPlatforms(e.target.value)} />
-        <div className="two-col">
-          <input className="ti" placeholder={tx('Bank opening', 'رصيد البنك الافتتاحي')} value={bankOpening} onChange={(e) => setBankOpening(e.target.value)} />
-          <input className="ti" placeholder={tx('Wallet opening', 'رصيد المحفظة الافتتاحي')} value={walletOpening} onChange={(e) => setWalletOpening(e.target.value)} />
-        </div>
-        <button className="btn btn-primary full" onClick={submit} disabled={busy || rows.length === 0}>
-          {busy ? tx('Scoring…', 'جارٍ التقييم…') : tx('Reveal & score', 'اكشف وقيّم')}
-        </button>
-      </div>
-    </div>
+    <StatementUpload
+      busy={busy}
+      onSubmit={(statement) =>
+        run(async () => {
+          const result = await api.scoreStatement(statement)
+          onScored({ result, name: statement.name ?? 'Uploaded applicant', input_kind: 'statement', input: statement })
+        })
+      }
+    />
   )
 }
 

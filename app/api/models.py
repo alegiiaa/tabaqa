@@ -96,6 +96,9 @@ class AffordabilityRequest(BaseModel):
     dbr_cap: float = Field(default=0.3333, examples=[0.3333])
     bank_only_income: float | None = None
     risk_flag: str | None = None
+    # SAMA responsible-lending profile (drives the regulator-grounded cap)
+    customer_type: str | None = None       # "employee" | "retiree"; None → use dbr_cap
+    redf_beneficiary: bool = False
 
     @model_validator(mode="after")
     def _income_source(self) -> "AffordabilityRequest":
@@ -110,6 +113,24 @@ class AccessRequest(BaseModel):
     # optional email-validator dependency for the demo.
     company: str
     usecase: str = "Other"
+
+
+# ── in-app assistant ───────────────────────────────────────────────────────
+class AssistantMessage(BaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
+
+class AssistantRequest(BaseModel):
+    messages: list[AssistantMessage]
+    context: dict | None = None   # {section?, connected?} — guides the assistant
+
+
+class AssistantResponse(BaseModel):
+    reply: str
+    suggestions: list[str] = Field(default_factory=list)
+    source: str                   # "claude:<model>" | "rules"
+    action: dict | None = None    # {type: navigate|open|none, section?, target?}
 
 
 # ── shared sub-models ─────────────────────────────────────────────────────
@@ -160,6 +181,44 @@ class TransactionModel(BaseModel):
     txn_type: str
     verification: str
     verified_via: str
+    pfc_primary: str | None = None      # Plaid PFC primary (industry-standard)
+    pfc_detailed: str | None = None
+
+
+class AccountModel(BaseModel):
+    """One connected account — powers the designed bank/wallet cards."""
+    source: str                  # "bank:alinma" | "wallet:barq"
+    kind: str                    # "bank" | "wallet"
+    provider: str                # "alinma" | "barq" | …
+    opening_balance: float
+    current_balance: float
+    inflow: float
+    outflow: float
+    txn_count: int
+    currency: str = "SAR"
+
+
+class InsightsModel(BaseModel):
+    """Financial-intelligence layer — the 'deep meaning' of the history.
+
+    Deterministic signals (always present) + a narrative that is Claude-generated
+    when an API key is set (``generated_by`` says which), else a templated fallback.
+    Nested signal blocks are passed through as dicts (their shape is documented in
+    ``pipeline/insights.py``) to avoid over-constraining a fast-moving surface.
+    """
+    summary_line: str
+    narrative: str
+    highlights: list[str] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)
+    generated_by: str            # "claude:<model>" | "rules"
+    income_trend: dict           # {direction, pct_change, monthly:[...]}
+    diversification: dict        # {label, concentration, sources:[...]}
+    spending: dict               # {monthly_total, by_category:[...], top_merchants:[...]}
+    savings_rate: float
+    runway_months: float | None = None
+    recurring: dict              # {obligation_load, items:[...]}
+    health: dict                 # {stability, resilience, diversification}
+    flags: list[str] = Field(default_factory=list)
 
 
 # ── responses ─────────────────────────────────────────────────────────────
@@ -177,6 +236,9 @@ class ScoreResponse(BaseModel):
     # full picture so one /v1/score call powers all four dashboard screens
     features: FeaturesModel | None = None
     transactions: list[TransactionModel] = Field(default_factory=list)
+    accounts: list[AccountModel] = Field(default_factory=list)
+    # deterministic insights (fast); /v1/insights returns the Claude-narrated version
+    insights: InsightsModel | None = None
 
 
 class ProfileResponse(BaseModel):
@@ -184,6 +246,8 @@ class ProfileResponse(BaseModel):
     income: IncomeModel
     features: FeaturesModel
     transactions: list[TransactionModel]
+    accounts: list[AccountModel] = Field(default_factory=list)
+    insights: InsightsModel | None = None
 
 
 class AffordabilityResponse(BaseModel):
@@ -201,6 +265,8 @@ class AffordabilityResponse(BaseModel):
     bank_only_income: float | None = None
     # optional bank-only contrast (the reveal headline: what bank-only income alone unlocks)
     bank_only: dict | None = None
+    # SAMA responsible-lending policy applied (cap + citation + total-DBR ceiling)
+    dbr_policy: dict | None = None
 
 
 class PersonaModel(BaseModel):

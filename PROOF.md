@@ -108,6 +108,8 @@ These were killed 0–3 in adversarial verification. They appear in the wild and
 
 ## 7. 🔧 README corrections — fix before stage (SAMA-literate judges *will* catch these)
 
+> ✅ **RESOLVED 2026-06-29** — fixes #1 and #2 are applied; `README.md` and the web app are now regulator-accurate, and a full-repo sweep found **no** instances of the refuted claims ("26M credit-invisible", "Experian +25%") or the inverted DBR bands. The items below are kept as the verification record.
+
 The deep-research pass surfaced two factual errors and a few "vendor self-reported" figures in [`README.md`](./README.md) that are risky in front of regulator-savvy judges.
 
 1. **DBR bands are wrong (`README.md` §8.8, ~line 372).**
@@ -123,7 +125,7 @@ The deep-research pass surfaced two factual errors and a few "vendor self-report
    - **Drahim "2.5B transactions"** — vendor figure; the *acquisition* (§5.2) is verified, the volume is not.
    - **"32 licensed payment companies vs 0 EMIs"** — directionally true (EMIs aren't AIS providers yet) but the exact count is unconfirmed; say "no EMIs in open-banking AIS scope yet" without the hard numbers.
 
-> Want me to apply fixes #1 and #2 to `README.md` directly? They're clean factual corrections — say the word.
+> ✅ Done — applied and verified across the whole repo (README `:420`/`:606` + web app `DevelopersPage.tsx`/`Result.tsx`); no further action needed for these.
 
 ---
 

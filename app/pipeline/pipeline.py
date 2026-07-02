@@ -13,6 +13,7 @@ from .enrich import enrich_all
 from .reconcile import reconcile
 from .verify import verify_transactions, resolve_income, IncomeProfile
 from .features import extract_features, CashFlowFeatures
+from .pfc import apply_pfc
 
 
 @dataclass
@@ -37,6 +38,8 @@ def run_pipeline(fixture: dict) -> ProfileResult:
     reconcile(txns)
     # [3b] verify against Masdr ground-truth (3-tier provenance)
     verify_transactions(txns, fixture.get("masdr", {}))
+    # [3c] stamp the industry-standard Plaid PFC taxonomy (after classification is final)
+    apply_pfc(txns)
     # [4a] resolve the income breakdown (the reveal)
     income = resolve_income(txns)
 

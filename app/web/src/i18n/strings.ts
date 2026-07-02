@@ -14,14 +14,26 @@ export const I18N: Record<string, { en: string; ar: string }> = {
   'nav.cta': { en: `Request access`, ar: `اطلب الوصول` },
   'nav.login': { en: `Login`, ar: `تسجيل الدخول` },
   'nav.signup': { en: `Sign up`, ar: `إنشاء حساب` },
+  'nav.developers': { en: `Developers`, ar: `المطوّرون` },
 
   'heroimg.eyebrow': { en: `<span class="dot"></span> Saudi Open Banking · v1.0`, ar: `<span class="dot"></span> المصرفية المفتوحة السعودية · الإصدار 1.0` },
   'heroimg.h1': { en: `Score the <span class="hl">unscorable.</span>`, ar: `قيِّم <span class="hl">من لا يُقيَّم.</span>` },
   'heroimg.sub': { en: `The credit intelligence layer for Saudi open banking.`, ar: `طبقة الذكاء الائتماني للمصرفية المفتوحة السعودية.` },
   'heroimg.cta1': { en: `Sign up →`, ar: `إنشاء حساب ←` },
   'heroimg.cta2': { en: `See how it works`, ar: `آلية العمل` },
+  'heroimg.demo': { en: `Try the live demo →`, ar: `جرّب العرض المباشر ←` },
   'heroimg.scroll': { en: `Scroll down for more information`, ar: `اسحب للأسفل لمزيد من المعلومات` },
   'powered.by': { en: `Powered by`, ar: `مدعوم من قِبَل` },
+
+  'dock.eyebrow': { en: `Explore the project`, ar: `استكشف المشروع` },
+  'dock.canva.label': { en: `Pitch deck`, ar: `العرض التقديمي` },
+  'dock.canva.title': { en: `Tabaqa pitch deck`, ar: `عرض Tabaqa التقديمي` },
+  'dock.canva.desc': { en: `View our presentation live on Canva.`, ar: `شاهد عرضنا التقديمي مباشرةً على Canva.` },
+  'dock.canva.cta': { en: `Open presentation`, ar: `افتح العرض` },
+  'dock.github.label': { en: `GitHub`, ar: `GitHub` },
+  'dock.github.title': { en: `Tabaqa on GitHub`, ar: `Tabaqa على GitHub` },
+  'dock.github.desc': { en: `Browse the project's source code.`, ar: `تصفّح الكود المصدري للمشروع.` },
+  'dock.github.cta': { en: `Visit repository`, ar: `زيارة المستودع` },
 
   'hero.badge': { en: `<span class="dot"></span> v1.0 · Saudi Open Banking`, ar: `<span class="dot"></span> الإصدار 1.0 · المصرفية المفتوحة` },
   'hero.h1': { en: `Score the<br><span class="accent">unscorable.</span>`, ar: `قيِّم<br><span class="accent">من لا يُقيَّم.</span>` },
@@ -30,6 +42,9 @@ export const I18N: Record<string, { en: string; ar: string }> = {
   'hero.cta2': { en: `See how it works`, ar: `شاهد آلية العمل` },
   'rails.cap': { en: `Built on the Saudi data rails`, ar: `مبنيّ على البنية السعودية للبيانات` },
   'rails.row': { en: `<span class="item">Open Banking · AIS</span><span class="sep"></span><span class="item">Masdr / Mofeed</span><span class="sep"></span><span class="item">SAMA aligned</span><span class="sep"></span><span class="item">Lean</span><span class="sep"></span><span class="item">Tarabut</span><span class="sep"></span><span class="item">SIMAH complementary</span>`, ar: `<span class="item">المصرفية المفتوحة · AIS</span><span class="sep"></span><span class="item">مصدر / مُفيد</span><span class="sep"></span><span class="item">متوافق مع ساما</span><span class="sep"></span><span class="item">لين</span><span class="sep"></span><span class="item">ترابط</span><span class="sep"></span><span class="item">مُكمّل لِسمة</span>` },
+
+  'mock.vidcap': { en: `Try it with mocked-up data — or connect your own`, ar: `جرّبها ببيانات تجريبية — أو اربط بياناتك` },
+  'mock.vidsub': { en: `Test the full reveal on sample applicants, then plug in a real bank + wallet statement to score yourself.`, ar: `جرّب الكشف الكامل على متقدّمين تجريبيين، ثم أدخِل كشف بنك ومحفظة حقيقي لتقييم نفسك.` },
 
   'mock.scorelab': { en: `Tabaqa Score`, ar: `درجة Tabaqa` },
   'mock.verdict': { en: `✓ APPROVE · low risk (PD 4.1%)`, ar: `✓ موافقة · مخاطر منخفضة (PD 4.1%)` },

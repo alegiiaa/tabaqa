@@ -26,16 +26,24 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
 from pipeline import run_pipeline, ProfileResult, synthesize_fixture  # noqa: E402
 from pipeline.ingest_csv import build_fixture_from_statement  # noqa: E402
+from pipeline.insights import build_insights  # noqa: E402
 from scoring import score_profile  # noqa: E402
 from affordability import affordability  # noqa: E402
+import sama  # noqa: E402
+
+from assistant import respond as assistant_respond  # noqa: E402
 
 from .models import (  # noqa: E402
     AccessRequest,
+    AccountModel,
     AffordabilityRequest,
     AffordabilityResponse,
+    AssistantRequest,
+    AssistantResponse,
     FeaturesModel,
     IncomeComponentModel,
     IncomeModel,
+    InsightsModel,
     PersonaModel,
     ProfileResponse,
     ReasonCodeModel,
@@ -101,6 +109,49 @@ def _income_model(result: ProfileResult) -> IncomeModel:
     )
 
 
+def _account_models(result: ProfileResult) -> list[AccountModel]:
+    """Per-account opening + current balance, derived from the unified ledger.
+
+    Drives the designed bank/wallet cards. Current balance = opening + inflows −
+    outflows for that source (the same convention the feature engine uses).
+    """
+    sources: list[str] = []
+    for t in result.transactions:
+        if t.source not in sources:
+            sources.append(t.source)
+    for src in result.opening_balances:  # accounts with no transactions still show
+        if src not in sources:
+            sources.append(src)
+
+    accounts: list[AccountModel] = []
+    for src in sources:
+        txns = [t for t in result.transactions if t.source == src]
+        inflow = sum(t.amount for t in txns if t.direction == "inflow")
+        outflow = sum(t.amount for t in txns if t.direction != "inflow")
+        opening = float(result.opening_balances.get(src, 0.0))
+        kind, _, provider = src.partition(":")
+        accounts.append(AccountModel(
+            source=src,
+            kind="wallet" if kind == "wallet" else "bank",
+            provider=provider or kind,
+            opening_balance=round(opening, 2),
+            current_balance=round(opening + inflow - outflow, 2),
+            inflow=round(inflow, 2),
+            outflow=round(outflow, 2),
+            txn_count=len(txns),
+            currency=(txns[0].currency if txns else "SAR"),
+        ))
+    # banks first, then wallets — matches the visual order of the cards
+    accounts.sort(key=lambda a: (a.kind != "bank", a.provider))
+    return accounts
+
+
+def _insights_model(result: ProfileResult, *, use_llm: bool) -> InsightsModel:
+    """Build the financial-intelligence payload. ``use_llm=False`` is fast + offline
+    (deterministic signals + templated narrative); ``True`` adds the Claude narrative."""
+    return InsightsModel(**build_insights(result, use_llm=use_llm).to_dict())
+
+
 def _transaction_models(result: ProfileResult) -> list[TransactionModel]:
     return [
         TransactionModel(
@@ -114,6 +165,8 @@ def _transaction_models(result: ProfileResult) -> list[TransactionModel]:
             txn_type=t.txn_type,
             verification=t.verification,
             verified_via=t.verified_via,
+            pfc_primary=t.pfc_primary,
+            pfc_detailed=t.pfc_detailed,
         )
         for t in result.transactions
     ]
@@ -175,6 +228,8 @@ def score(req: ScoreRequest) -> ScoreResponse:
         applicant=result.applicant,
         features=FeaturesModel(**result.features.to_dict()),
         transactions=_transaction_models(result),
+        accounts=_account_models(result),
+        insights=_insights_model(result, use_llm=False),
     )
 
 
@@ -186,7 +241,26 @@ def profile(connection_id: str = "con_8842") -> ProfileResponse:
         income=_income_model(result),
         features=FeaturesModel(**result.features.to_dict()),
         transactions=_transaction_models(result),
+        accounts=_account_models(result),
+        insights=_insights_model(result, use_llm=False),
     )
+
+
+@app.post("/v1/insights", response_model=InsightsModel)
+def insights(req: ScoreRequest) -> InsightsModel:
+    """Service ③ — the deep financial-intelligence read of a money history.
+
+    Same input shapes as /v1/score (connection_id | form | statement | fixture).
+    Uses Claude for the narrative when ``ANTHROPIC_API_KEY`` is set, else a faithful
+    deterministic template — the structured signals are identical either way.
+    """
+    try:
+        result = _result_from_request(req)
+    except HTTPException:
+        raise
+    except (ValueError, KeyError) as e:
+        raise HTTPException(status_code=422, detail=f"Could not process the input: {e}")
+    return _insights_model(result, use_llm=True)
 
 
 @app.post("/v1/affordability", response_model=AffordabilityResponse)
@@ -214,14 +288,24 @@ def affordability_route(req: AffordabilityRequest) -> AffordabilityResponse:
     if verified_income <= 0:
         raise HTTPException(status_code=422, detail="verified_income must be greater than 0")
 
+    # SAMA responsible-lending cap. When a customer_type is given the regulator cap
+    # binds (employee 33.33% / retiree 25%); otherwise honour the caller's dbr_cap.
+    # Either way we report the cited policy + the segment's total-DBR ceiling.
+    policy = sama.resolve_policy(
+        customer_type=req.customer_type or "employee",
+        monthly_income=verified_income,
+        redf_beneficiary=req.redf_beneficiary,
+    )
+    cap = policy.cap if req.customer_type is not None else req.dbr_cap
+
     res = affordability(req.amount, req.tenor_months, req.annual_rate,
-                        verified_income, existing, req.dbr_cap, risk_flag, pd)
+                        verified_income, existing, cap, risk_flag, pd)
 
     # The reveal headline: what bank-only income alone would unlock (often a DECLINE).
     bank_block = None
     if bank_only is not None and bank_only > 0:
         b = affordability(req.amount, req.tenor_months, req.annual_rate,
-                          bank_only, existing, req.dbr_cap, risk_flag, pd)
+                          bank_only, existing, cap, risk_flag, pd)
         bank_block = {"verified_income": bank_only, "dbr_after": b.dbr_after,
                       "max_financing": b.max_financing, "decision": b.decision}
 
@@ -230,6 +314,7 @@ def affordability_route(req: AffordabilityRequest) -> AffordabilityResponse:
         dbr_cap=res.dbr_cap, max_installment=res.max_installment, max_financing=res.max_financing,
         decision=res.decision, annuity_factor=res.annuity_factor, pd=res.pd, reasons=res.reasons,
         verified_income=verified_income, bank_only_income=bank_only, bank_only=bank_block,
+        dbr_policy=policy.to_dict(),
     )
 
 
@@ -237,6 +322,14 @@ def affordability_route(req: AffordabilityRequest) -> AffordabilityResponse:
 def personas() -> list[dict]:
     """Sample applicants for the gallery — headline numbers from the real pipeline."""
     return PERSONAS
+
+
+@app.post("/v1/assistant", response_model=AssistantResponse)
+def assistant(req: AssistantRequest) -> AssistantResponse:
+    """Tabaqa Guide — the conversational in-app helper (Claude when a key is set,
+    else a bilingual scripted fallback). The Anthropic key stays server-side."""
+    out = assistant_respond([m.model_dump() for m in req.messages], req.context)
+    return AssistantResponse(**out)
 
 
 @app.post("/v1/access-request")

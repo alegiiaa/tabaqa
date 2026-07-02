@@ -8,11 +8,20 @@ fastapi>=0.110
 uvicorn[standard]>=0.29
 pydantic>=2.6
 
-# Scoring — train the real PD model on Berka (scoring/train.py)
+# AI augmentation (optional) — Claude long-tail enricher + the financial-intelligence
+# narrative (/v1/insights). The core pipeline/eval import this lazily and run fine
+# WITHOUT it; install it + set ANTHROPIC_API_KEY to light up the real-Claude path.
+anthropic>=0.49
+
+# Scoring / data validation — fit + validate the PD model on the real Berka
+# default dataset (eval/berka_train.py → eval/DATA_REPORT.md: CV AUC 0.858 / KS 0.562).
+# pymysql reads the public CTU "relational" MariaDB (no login). optbinning is the
+# production WOE-binned scorecard; pin it to a scikit-learn it supports.
 optbinning>=0.19
 scikit-learn>=1.4
 pandas>=2.2
 numpy>=1.26
+pymysql>=1.1
 
 # Stretch: XGBoost + SHAP explainability
 # xgboost>=2.0

@@ -1,217 +1,180 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import { useTx } from '../../lib/tx'
-import { LangSwitcher } from '../LangSwitcher'
-import { TabaqaMark } from '../Logo'
-import { NewApplicant, type ScoredPayload } from './NewApplicant'
-import { Result } from './Result'
-import { api, type ScoreResult } from '../../lib/api'
-import {
-  listApplicants,
-  saveScoredApplicant,
-  deleteApplicant,
-  PersistenceUnavailable,
-  type SavedApplicant,
-} from '../../lib/db'
+import { api, type ScoreResult, type StatementInput } from '../../lib/api'
+import { DashboardLayout, type NavSpec, type Section } from './DashboardLayout'
+import { Connect, type Picks } from './Connect'
+import { MyMoney } from './MyMoney'
+import { Applicants } from './Applicants'
+import { RevealScreen, ScoreScreen, LedgerScreen, AffordScreen } from './Result'
+import { ModelCardPanel } from './ModelCardPanel'
 
-const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
+const MY_CONNECTION = 'con_8842' // the signed-in user's own accounts (demo protagonist)
+const DEFAULT_PICKS: Picks = { bank: 'alinma', wallet: 'barq' }
 
-type View =
-  | { kind: 'list' }
-  | { kind: 'new' }
-  | { kind: 'result'; result: ScoreResult; name: string; source: string }
+/** Re-brand the demo accounts + transactions to the institutions the user picked. */
+function rethemeResult(result: ScoreResult, picks: Picks): ScoreResult {
+  const swap = (src: string) =>
+    src.startsWith('bank:') ? `bank:${picks.bank}` : src.startsWith('wallet:') ? `wallet:${picks.wallet}` : src
+  return {
+    ...result,
+    accounts: result.accounts?.map((a) => ({
+      ...a,
+      source: swap(a.source),
+      provider: a.kind === 'wallet' ? picks.wallet : a.kind === 'bank' ? picks.bank : a.provider,
+    })),
+    transactions: result.transactions.map((t) => ({ ...t, source: swap(t.source) })),
+  }
+}
 
 export function Dashboard() {
-  const { user, signOut } = useAuth()
-  const { tx, dir } = useTx()
-  const navigate = useNavigate()
-  const [view, setView] = useState<View>({ kind: 'list' })
-  const [applicants, setApplicants] = useState<SavedApplicant[]>([])
-  const [loading, setLoading] = useState(true)
-  const [persistMsg, setPersistMsg] = useState<string | null>(null)
+  const { user } = useAuth()
+  const { tx } = useTx()
+  const uid = user?.id ?? 'anon'
+  const flag = `tabaqa.connected.${uid}`
 
-  async function refresh() {
-    setLoading(true)
+  const initial = (() => {
     try {
-      setApplicants(await listApplicants())
-      setPersistMsg(null)
-    } catch (e: any) {
-      if (e instanceof PersistenceUnavailable) {
-        setPersistMsg(
-          tx(
-            'Saved history is unavailable until the applicants/scores migration is applied. Scoring still works.',
-            'حفظ السجل غير متاح حتى يتم تطبيق ترحيل قاعدة البيانات. التقييم يعمل.',
-          ),
-        )
-      } else {
-        setPersistMsg(e.message)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
-  useEffect(() => {
-    refresh()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  async function handleSignOut() {
-    await signOut()
-    navigate('/login', { replace: true })
-  }
-
-  async function onScored(p: ScoredPayload) {
-    // Show the result immediately; persist in the background (best-effort).
-    const source =
-      p.input_kind === 'statement'
-        ? tx('uploaded statement', 'كشف مرفوع')
-        : p.input_kind === 'persona'
-          ? tx('sample persona', 'نموذج جاهز')
-          : tx('guided form', 'نموذج موجّه')
-    setView({ kind: 'result', result: p.result, name: p.name, source })
-    try {
-      await saveScoredApplicant({
-        name: p.name,
-        connection_id: p.connection_id ?? p.result.applicant?.connection_id ?? null,
-        input_kind: p.input_kind,
-        input: p.input,
-        result: p.result,
-      })
-      refresh()
+      const raw = localStorage.getItem(flag)
+      if (!raw) return { connected: false, picks: DEFAULT_PICKS, input: null as StatementInput | null }
+      if (raw === '1') return { connected: true, picks: DEFAULT_PICKS, input: null } // legacy flag
+      const parsed = JSON.parse(raw)
+      // new format: { picks, input? }; legacy: bare picks { bank, wallet }.
+      const picks: Picks = parsed.picks
+        ? { ...DEFAULT_PICKS, ...parsed.picks }
+        : { ...DEFAULT_PICKS, ...parsed }
+      const input: StatementInput | null = parsed.input ?? null
+      return { connected: true, picks, input }
     } catch {
-      /* persistence optional — the score is already on screen */
+      return { connected: false, picks: DEFAULT_PICKS, input: null }
     }
+  })()
+
+  const [connected, setConnected] = useState<boolean>(initial.connected)
+  const [picks, setPicks] = useState<Picks>(initial.picks)
+  const [input, setInput] = useState<StatementInput | null>(initial.input)
+  const [section, setSection] = useState<Section>('home')
+  const [my, setMy] = useState<ScoreResult | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+
+  // If we land already-connected (e.g. a page refresh), reload the profile fresh:
+  // demo → re-score the canonical connection; own-data → re-score the saved
+  // statement (fall back to Connect if it's missing, e.g. cleared storage).
+  useEffect(() => {
+    if (!connected || my) return
+    let on = true
+    if (picks.mode === 'own_data') {
+      if (!input) { setConnected(false); return }
+      api.scoreStatement(input)
+        .then((r) => on && setMy(r))
+        .catch((e) => on && setErr(e.message ?? String(e)))
+    } else {
+      api.scoreConnection(MY_CONNECTION)
+        .then((r) => on && setMy(r))
+        .catch((e) => on && setErr(e.message ?? String(e)))
+    }
+    return () => { on = false }
+  }, [connected, my, picks.mode, input])
+
+  // Own-data sources are already correct (branded via bank_name/wallet_name on
+  // ingest), so skip the demo retheme; only the demo profile needs re-branding.
+  const themed = useMemo(
+    () => (picks.mode === 'own_data' ? my : (my ? rethemeResult(my, picks) : null)),
+    [my, picks],
+  )
+
+  function onConnected(r: ScoreResult, p: Picks, inp?: StatementInput) {
+    setMy(r)
+    setPicks(p)
+    setInput(inp ?? null)
+    setConnected(true)
+    setSection('home')
+    try {
+      localStorage.setItem(flag, JSON.stringify({ picks: p, input: p.mode === 'own_data' ? inp : undefined }))
+    } catch { /* ignore */ }
   }
 
-  async function openSaved(a: SavedApplicant) {
-    try {
-      let result: ScoreResult
-      if (a.input_kind === 'persona' && a.connection_id) {
-        result = await api.scoreConnection(a.connection_id)
-      } else if (a.input_kind === 'statement') {
-        result = await api.scoreStatement(a.input)
-      } else {
-        result = await api.scoreForm(a.input)
-      }
-      setView({ kind: 'result', result, name: a.name, source: tx('saved', 'محفوظ') })
-    } catch (e: any) {
-      setPersistMsg(e.message)
-    }
+  function reconnect() {
+    try { localStorage.removeItem(flag) } catch { /* ignore */ }
+    setMy(null)
+    setInput(null)
+    setConnected(false)
   }
 
-  async function remove(a: SavedApplicant, e: React.MouseEvent) {
-    e.stopPropagation()
-    try {
-      await deleteApplicant(a.id)
-      refresh()
-    } catch (err: any) {
-      setPersistMsg(err.message)
-    }
+  if (!connected) return <Connect onConnected={onConnected} />
+
+  const nav: NavSpec[] = [
+    { id: 'home', label: tx('Dashboard', 'الرئيسية'), cap: tx('My money', 'أموالي') },
+    { id: 'income', label: tx('Income & score', 'الدخل والدرجة') },
+    { id: 'ledger', label: tx('Ledger', 'السجل') },
+    { id: 'financing', label: tx('Financing', 'التمويل') },
+    { id: 'applicants', label: tx('Applicants', 'المتقدمون'), cap: tx('Lender tools', 'أدوات المموّل') },
+    { id: 'model', label: tx('Model validation', 'التحقق من النموذج') },
+  ]
+
+  const META: Record<Section, { title: string; sub: string }> = {
+    home: { title: tx('Dashboard', 'الرئيسية'), sub: tx('Your verified money picture — bank + wallet.', 'صورتك المالية الموثّقة — البنك + المحفظة.') },
+    income: { title: tx('Income & score', 'الدخل والدرجة'), sub: tx('Bank-only vs. your true verified income, and why.', 'دخل البنك مقابل دخلك الحقيقي الموثّق، ولماذا.') },
+    ledger: { title: tx('Ledger', 'السجل'), sub: tx('Unified bank + wallet activity, labelled.', 'نشاط موحّد للبنك والمحفظة، موسوم.') },
+    financing: { title: tx('Financing', 'التمويل'), sub: tx('How much you can safely borrow on your real income.', 'كم يمكنك أن تقترض بأمان بناءً على دخلك الحقيقي.') },
+    applicants: { title: tx('Applicants', 'المتقدمون'), sub: tx('Score other people for lending decisions.', 'قيّم أشخاصًا آخرين لاتخاذ قرارات الإقراض.') },
+    model: { title: tx('Model validation', 'التحقق من النموذج'), sub: tx('How the Tabaqa score performs on real default outcomes.', 'كيف يؤدي نموذج طبقة على نتائج تعثّر حقيقية.') },
   }
+
+  const meta = META[section]
+  const needsMine = section !== 'applicants' && section !== 'model'
+  // Where the Financial-intelligence panel should source its Claude narrative from.
+  const insightsConn = picks.mode === 'own_data' && input
+    ? { statement: input }
+    : { connectionId: MY_CONNECTION }
 
   return (
-    <div className="dash" dir={dir}>
-      <header className="dash-bar">
-        <div className="logo" onClick={() => setView({ kind: 'list' })} style={{ cursor: 'pointer' }}>
-          <TabaqaMark variant="gradient" />
-          <span>Tabaqa</span>
-        </div>
-        <div className="dash-bar-right">
-          <LangSwitcher />
-          <span className="dash-email faint">{user?.email ?? user?.id}</span>
-          <button className="btn btn-ghost btn-sm" onClick={handleSignOut}>
-            {tx('Sign out', 'تسجيل الخروج')}
-          </button>
-        </div>
-      </header>
-
-      <main className="dash-main">
-        {persistMsg && <div className="persist-banner">{persistMsg}</div>}
-
-        {view.kind === 'list' && (
-          <ApplicantsList
-            applicants={applicants}
-            loading={loading}
-            onNew={() => setView({ kind: 'new' })}
-            onOpen={openSaved}
-            onRemove={remove}
-          />
-        )}
-        {view.kind === 'new' && (
-          <NewApplicant onScored={onScored} onCancel={() => setView({ kind: 'list' })} />
-        )}
-        {view.kind === 'result' && (
-          <Result
-            result={view.result}
-            name={view.name}
-            source={view.source}
-            onBack={() => setView({ kind: 'list' })}
-          />
-        )}
-      </main>
-    </div>
+    <DashboardLayout
+      active={section}
+      onNavigate={setSection}
+      nav={nav}
+      title={meta.title}
+      subtitle={meta.sub}
+      onReconnect={reconnect}
+    >
+      {section === 'applicants' ? (
+        <Applicants />
+      ) : section === 'model' ? (
+        <ModelCardPanel />
+      ) : needsMine && !themed ? (
+        err ? <div className="afford-err">{err}</div> : <LoadingScreen />
+      ) : themed ? (
+        <SectionBody section={section} result={themed} onNavigate={setSection} conn={insightsConn} />
+      ) : null}
+    </DashboardLayout>
   )
 }
 
-function ApplicantsList({
-  applicants, loading, onNew, onOpen, onRemove,
-}: {
-  applicants: SavedApplicant[]
-  loading: boolean
-  onNew: () => void
-  onOpen: (a: SavedApplicant) => void
-  onRemove: (a: SavedApplicant, e: React.MouseEvent) => void
-}) {
+function SectionBody({
+  section, result, onNavigate, conn,
+}: { section: Section; result: ScoreResult; onNavigate: (s: Section) => void; conn: { connectionId?: string; statement?: StatementInput } }) {
   const { tx } = useTx()
-
-  return (
-    <div className="list">
-      <div className="list-head">
-        <div>
-          <h1>{tx('Applicants', 'المتقدمون')}</h1>
-          <p className="faint">{tx('Score anyone — upload a statement, fill the form, or pick a persona.', 'قيّم أي شخص — ارفع كشفًا، أو املأ النموذج، أو اختر نموذجًا جاهزًا.')}</p>
-        </div>
-        <button className="btn btn-primary" onClick={onNew}>+ {tx('New applicant', 'متقدم جديد')}</button>
+  if (section === 'home') return <MyMoney result={result} onNavigate={onNavigate} conn={conn} />
+  if (section === 'income') {
+    return (
+      <div className="screen">
+        <RevealScreen result={result} />
+        <div style={{ height: 22 }} />
+        <div className="section-head"><h1>{tx('The score', 'الدرجة')}</h1><p>{tx('Every point is explainable — no black box.', 'كل نقطة قابلة للتفسير — دون صندوق أسود.')}</p></div>
+        <ScoreScreen result={result} />
       </div>
+    )
+  }
+  if (section === 'ledger') return <LedgerScreen txns={result.transactions} />
+  return <AffordScreen result={result} />
+}
 
-      {loading ? (
-        <div className="faint" style={{ padding: 24 }}>{tx('Loading…', 'جارٍ التحميل…')}</div>
-      ) : applicants.length === 0 ? (
-        <div className="empty">
-          <div className="empty-icon">⬡</div>
-          <div className="empty-title">{tx('No applicants yet', 'لا يوجد متقدمون بعد')}</div>
-          <p className="faint">{tx('Create your first applicant to see the reveal, the score, the ledger and affordability.', 'أنشئ أول متقدم لرؤية الكشف والدرجة والسجل والقدرة على السداد.')}</p>
-          <button className="btn btn-primary" onClick={onNew}>+ {tx('New applicant', 'متقدم جديد')}</button>
-        </div>
-      ) : (
-        <div className="cards">
-          {applicants.map((a) => (
-            <div className="acard" key={a.id} onClick={() => onOpen(a)} role="button" tabIndex={0}>
-              <div className="acard-top">
-                <strong>{a.name}</strong>
-                <button className="acard-x" onClick={(e) => onRemove(a, e)} aria-label="delete">×</button>
-              </div>
-              <div className="acard-kind faint small">{a.input_kind}</div>
-              {a.score ? (
-                <>
-                  <div className="acard-reveal">
-                    <span className="faint">{fmt(a.score.bank_only_income ?? 0)}</span>
-                    <span className="arr">→</span>
-                    <span className="accent-num">{fmt(a.score.verified_income ?? 0)}</span>
-                  </div>
-                  <div className="acard-foot">
-                    <span className="tag t-src">{tx('Score', 'الدرجة')} {a.score.tabaqa_score}</span>
-                    <span className={`tag ${a.score.risk_flag === 'low' ? 't-ok' : 't-inf'}`}>{a.score.risk_flag}</span>
-                  </div>
-                </>
-              ) : (
-                <div className="faint small">{tx('open to score', 'افتح للتقييم')}</div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+function LoadingScreen() {
+  return (
+    <div className="skel-wrap">
+      <div className="skel" style={{ height: 150 }} />
+      <div className="skel" style={{ height: 92 }} />
+      <div className="skel" style={{ height: 240 }} />
     </div>
   )
 }

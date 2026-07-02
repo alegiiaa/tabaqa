@@ -49,6 +49,17 @@ _PERSONA_FORMS: dict[str, tuple[str, dict]] = {
     }),
 }
 
+# corpus-derived segment personas — representative archetypes drawn from the
+# millions-scale synthetic corpus (data/synthetic/corpus_segments.json), each
+# standing for a cohort of N accounts. Scored by the SAME real pipeline. Optional
+# and guarded: if the corpus hasn't been generated, the gallery is unchanged.
+try:
+    from .corpus_personas import corpus_persona_forms
+
+    _PERSONA_FORMS.update(corpus_persona_forms())
+except Exception:
+    pass
+
 
 def _load_fahd() -> dict | None:
     path = _DATA_DIR / "fahd.json"

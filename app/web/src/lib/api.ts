@@ -52,6 +52,67 @@ export interface Transaction {
   txn_type: string
   verification: string
   verified_via: string
+  pfc_primary?: string | null      // Plaid PFC primary category
+  pfc_detailed?: string | null
+}
+
+export interface Account {
+  source: string            // "bank:alinma" | "wallet:barq"
+  kind: 'bank' | 'wallet' | string
+  provider: string          // "alinma" | "barq" | …
+  opening_balance: number
+  current_balance: number
+  inflow: number
+  outflow: number
+  txn_count: number
+  currency: string
+}
+
+// ── financial-intelligence layer (the "deep meaning") ─────────────────────
+export interface IncomeTrend {
+  direction: 'growing' | 'declining' | 'stable' | string
+  pct_change: number
+  monthly: { month: string; amount: number }[]
+}
+
+export interface DiversificationSource {
+  label: string
+  txn_type: string
+  monthly: number
+  share: number
+}
+
+export interface Diversification {
+  label: 'single-source' | 'concentrated' | 'diversified' | string
+  concentration: number
+  sources: DiversificationSource[]
+}
+
+export interface Spending {
+  monthly_total: number
+  by_category: { category: string; monthly: number; share: number }[]
+  top_merchants: { merchant: string; monthly: number }[]
+}
+
+export interface Recurring {
+  obligation_load: number
+  items: { label: string; kind: 'obligation' | 'subscription' | string; monthly: number }[]
+}
+
+export interface Insights {
+  summary_line: string
+  narrative: string
+  highlights: string[]
+  risks: string[]
+  generated_by: string            // "claude:<model>" | "rules"
+  income_trend: IncomeTrend
+  diversification: Diversification
+  spending: Spending
+  savings_rate: number
+  runway_months: number | null
+  recurring: Recurring
+  health: { stability: number; resilience: number; diversification: number }
+  flags: string[]
 }
 
 export interface ScoreResult {
@@ -65,6 +126,8 @@ export interface ScoreResult {
   applicant: Record<string, any>
   features?: Features | null
   transactions: Transaction[]
+  accounts?: Account[]
+  insights?: Insights | null      // fast deterministic insights (from /v1/score)
 }
 
 export interface AffordabilityResult {
@@ -85,6 +148,13 @@ export interface AffordabilityResult {
     dbr_after: number
     max_financing: number
     decision: string
+  } | null
+  dbr_policy?: {
+    cap: number
+    code: string
+    label: string
+    total_obligations_ceiling: number
+    citation: string
   } | null
 }
 
@@ -149,7 +219,14 @@ export interface AffordabilityInput {
   dbr_cap?: number
   bank_only_income?: number
   risk_flag?: string
+  customer_type?: 'employee' | 'retiree'   // SAMA preset; drives the regulator cap
+  redf_beneficiary?: boolean
 }
+
+// ── assistant ──────────────────────────────────────────────────────────────
+export interface AssistantMessage { role: 'user' | 'assistant'; content: string }
+export interface AssistantAction { type: 'navigate' | 'open' | 'none'; section?: string | null; target?: string | null }
+export interface AssistantReply { reply: string; suggestions: string[]; source: string; action?: AssistantAction | null }
 
 // ── transport ──────────────────────────────────────────────────────────────
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -184,4 +261,11 @@ export const api = {
   affordability: (input: AffordabilityInput) =>
     postJson<AffordabilityResult>('/v1/affordability', input),
   personas: () => request<Persona[]>('/v1/personas'),
+  // /v1/insights mirrors /v1/score's inputs and returns the Claude-narrated read.
+  insightsConnection: (connection_id: string) =>
+    postJson<Insights>('/v1/insights', { connection_id }),
+  insightsStatement: (statement: StatementInput) =>
+    postJson<Insights>('/v1/insights', { statement }),
+  assistant: (messages: AssistantMessage[], context?: Record<string, unknown>) =>
+    postJson<AssistantReply>('/v1/assistant', { messages, context }),
 }

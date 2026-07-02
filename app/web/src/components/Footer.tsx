@@ -20,7 +20,6 @@ export function Footer() {
             <h4>{t('foot.product')}</h4>
             <a href="#product">{t('foot.overview')}</a>
             <a href="#how">{t('foot.how')}</a>
-            <a href="#pricing">{t('foot.pricing')}</a>
             <a href="#">{t('foot.api')}</a>
           </div>
           <div>
