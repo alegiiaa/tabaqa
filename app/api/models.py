@@ -115,6 +115,23 @@ class AccessRequest(BaseModel):
     usecase: str = "Other"
 
 
+# ── API keys (the self-serve dev on-ramp) ──────────────────────────────────
+class KeyRequest(BaseModel):
+    """Self-serve issuance. Only sandbox keys are mintable here; live keys are
+    granted through the lender access-request flow after review."""
+    label: str | None = None
+    email: str | None = None
+
+
+class KeyResponse(BaseModel):
+    api_key: str        # the plaintext — shown ONCE, never retrievable again
+    key_prefix: str
+    scope: str
+    daily_limit: int
+    docs_url: str
+    note: str
+
+
 # ── in-app assistant ───────────────────────────────────────────────────────
 class AssistantMessage(BaseModel):
     role: str  # "user" | "assistant"

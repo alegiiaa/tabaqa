@@ -21,7 +21,7 @@ APP_DIR = Path(__file__).resolve().parents[1]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
-from fastapi import FastAPI, HTTPException  # noqa: E402
+from fastapi import Depends, FastAPI, HTTPException  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
 from pipeline import run_pipeline, ProfileResult, synthesize_fixture  # noqa: E402
@@ -44,6 +44,8 @@ from .models import (  # noqa: E402
     IncomeComponentModel,
     IncomeModel,
     InsightsModel,
+    KeyRequest,
+    KeyResponse,
     PersonaModel,
     ProfileResponse,
     ReasonCodeModel,
@@ -51,6 +53,8 @@ from .models import (  # noqa: E402
     ScoreResponse,
     TransactionModel,
 )
+from .auth import KeyCtx, api_key  # noqa: E402
+from . import keystore  # noqa: E402
 from .personas import list_personas, persona_fixtures  # noqa: E402
 
 DATA_DIR = APP_DIR / "data" / "synthetic"
@@ -74,6 +78,8 @@ app.add_middleware(
     allow_origins=_cors_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
+    # Expose the rate-limit headers so the browser playground can read them.
+    expose_headers=["X-RateLimit-Scope", "X-RateLimit-Limit", "X-RateLimit-Remaining"],
 )
 
 
@@ -205,11 +211,42 @@ def _result_from_request(req: ScoreRequest) -> ProfileResult:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "connections": sorted(FIXTURES)}
+    # `keyed` tells the frontend whether real key issuance/metering is live (a
+    # service_role key is configured) or the API is running in open demo mode.
+    return {"status": "ok", "connections": sorted(FIXTURES),
+            "keyed": keystore.configured()}
+
+
+@app.post("/v1/keys", response_model=KeyResponse)
+def create_key(req: KeyRequest) -> KeyResponse:
+    """Self-serve a **sandbox** key (surface ② — the developer on-ramp).
+
+    Instant, no approval. Scoped to presets + uploaded statements, rate-limited
+    per key. Live keys are granted separately through /v1/access-request after
+    review. The plaintext key is returned exactly once — it is never stored.
+    """
+    if not keystore.configured():
+        raise HTTPException(
+            status_code=503,
+            detail="Key issuance is offline (no keystore configured). The public "
+                   "demo endpoints work without a key.",
+        )
+    minted = keystore.mint_key(scope="sandbox", label=req.label, owner_email=req.email)
+    if minted is None:
+        raise HTTPException(status_code=502, detail="Could not issue a key — try again.")
+    return KeyResponse(
+        api_key=minted["plaintext"],
+        key_prefix=minted["prefix"],
+        scope=minted["scope"],
+        daily_limit=minted["daily_limit"],
+        docs_url="https://tabaqa-api.vercel.app/docs",
+        note="Store this key now — it is shown only once. Send it as "
+             "'Authorization: Bearer <key>' on /v1/score, /v1/insights, /v1/affordability.",
+    )
 
 
 @app.post("/v1/score", response_model=ScoreResponse)
-def score(req: ScoreRequest) -> ScoreResponse:
+def score(req: ScoreRequest, ctx: KeyCtx = Depends(api_key)) -> ScoreResponse:
     try:
         result = _result_from_request(req)
     except HTTPException:
@@ -247,7 +284,7 @@ def profile(connection_id: str = "con_8842") -> ProfileResponse:
 
 
 @app.post("/v1/insights", response_model=InsightsModel)
-def insights(req: ScoreRequest) -> InsightsModel:
+def insights(req: ScoreRequest, ctx: KeyCtx = Depends(api_key)) -> InsightsModel:
     """Service ③ — the deep financial-intelligence read of a money history.
 
     Same input shapes as /v1/score (connection_id | form | statement | fixture).
@@ -264,7 +301,8 @@ def insights(req: ScoreRequest) -> InsightsModel:
 
 
 @app.post("/v1/affordability", response_model=AffordabilityResponse)
-def affordability_route(req: AffordabilityRequest) -> AffordabilityResponse:
+def affordability_route(req: AffordabilityRequest,
+                        ctx: KeyCtx = Depends(api_key)) -> AffordabilityResponse:
     """Service ② — installment, DBR before/after, max financing, decision.
 
     Income source is either a scored connection_id (reuse Service ①'s verified
