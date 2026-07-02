@@ -1,8 +1,7 @@
-# Tabaqa — The wallet-layer ablation (data-analysis phase)
+# Tabaqa — The wallet-layer ablation
 
-> **The proof, on real defaults, that the wallet layer is worth something — and the
-> in-app panel that puts it in front of a judge.** This is the deliverable for the
-> hackathon's **Data Analysis** criterion.
+> **What the wallet layer adds, measured on real defaults — and the in-app panel
+> that renders it.**
 >
 > Engine: [`eval/ablation.py`](./ablation.py) · Data: [`model_card.json`](./model_card.json)
 > · Panel: [`web/src/components/dashboard/ModelCardPanel.tsx`](../web/src/components/dashboard/ModelCardPanel.tsx)

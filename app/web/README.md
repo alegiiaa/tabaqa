@@ -1,8 +1,8 @@
 # Tabaqa · web
 
-The marketing landing page + product dashboard, built in **React + Vite +
-TypeScript**. Bilingual **EN / AR** with full RTL, hand-written CSS (no
-Tailwind), and the Tabaqa Score demo mock.
+The landing page + the Tabaqa dashboard, built in **React + Vite +
+TypeScript**. Bilingual **EN / AR** with full RTL and hand-written CSS (no
+Tailwind).
 
 ```bash
 npm install
@@ -24,11 +24,15 @@ src/
 ├── i18n/
 │   ├── strings.ts           EN/AR dictionary (single source of copy)
 │   └── I18nContext.tsx      lang state · RTL <html dir> · ?lang= · localStorage
+├── auth/                    Supabase auth context + route guard
+├── lib/                     API client, statement adapters, Supabase, merchants
 └── components/
     ├── Rich.tsx             renders translations that contain inline HTML
     ├── Logo.tsx  LangSwitcher.tsx
     ├── Hero.tsx  ProductMock.tsx  Features.tsx  HowItWorks.tsx
     ├── Security.tsx  ApiSection.tsx  Pricing.tsx  Faq.tsx  SignUp.tsx  Footer.tsx
+    └── dashboard/           the authed app — reveal, score, ledger, affordability,
+                             insights, model validation, statement upload, credit report
 ```
 
 ## Language / RTL
@@ -42,7 +46,3 @@ chips) are rendered via the `<Rich k="…">` helper. Switching to Arabic flips
 
 Copy lives in `src/i18n/strings.ts` — the single source of content truth. Fonts
 and images are in `public/` (29LT Bukra for Arabic, the hero billboard, icons).
-
-> Roadmap: the demo **dashboard** (calling `/v1/profile` to render the live
-> gauge + reason codes from the API instead of the static mock) lands next to
-> these landing components.

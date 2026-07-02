@@ -23,3 +23,22 @@ venv/
 !.env.example
 .vercel
 .env*.local
+
+# internal working docs — kept locally, not part of the public repo
+/PRD.md
+/PROOF.md
+/RESOURCES.md
+/ROI_TASKS.md
+/UI.md
+/VS_LEAN.md
+/WIN_PLAN.md
+/*.pdf
+app/TASKS.md
+app/CHECKLIST.md
+app/SESSION-*.md
+app/COPILOT_FEATURE.md
+
+# local media / working assets (the README uses assets/header.gif only)
+/gif/
+/assets/*
+!/assets/header.gif

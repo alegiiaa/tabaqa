@@ -1,13 +1,11 @@
 # Tabaqa — data
 
-The split that makes the 3-day build credible (README → *Data strategy*):
+How the data is split:
 
 | Use | Source | Why |
 |---|---|---|
 | **Train** the PD model | **Berka (PKDD'99)** — real bank transactions *with loan-default outcomes* | the only realistic cash-flow training set with labels |
 | **Demo** the reveal | **synthetic Saudi-format statements** (this folder) | mada / Geidea / Arabic strings + wallet income, run through the *same* pipeline |
-
-> Pitch line: *"Trained on real transaction-level default data, demoed on Saudi-format statements; in production it retrains on the lender's own AIS outcomes."*
 
 ---
 

@@ -5,9 +5,9 @@ import { LangSwitcher } from './LangSwitcher'
 import { TabaqaMark } from './Logo'
 
 /**
- * Minimal authenticated landing — the redirect target after login. The real demo
- * dashboard (the 4 screens in UI.md) replaces this body; for now it proves the
- * auth loop end-to-end and offers sign-out.
+ * Minimal authenticated landing — the redirect target after login. The full
+ * dashboard replaces this body; for now it proves the auth loop end-to-end and
+ * offers sign-out.
  */
 export function AppHome() {
   const { user, signOut } = useAuth()

@@ -3,8 +3,7 @@
 Two honest, reproducible, **pure-stdlib** evaluations of the transaction
 enricher — the part of the pipeline that turns a raw Arabic bank/wallet narration
 into `{merchant, category, txn_type}` and reconciles cross-account transfers.
-Together they answer the hackathon **data** criterion: *"how good is your model,
-and how do you know?"*
+Together they answer one question: *how good is the model, and how do we know?*
 
 ```
 cd app

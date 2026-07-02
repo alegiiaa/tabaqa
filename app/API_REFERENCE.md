@@ -210,7 +210,7 @@ Standard HTTP status codes; the body is `{"detail": "..."}`.
 
 ---
 
-## How the model is validated (the data story)
+## How the model is validated
 
 Tabaqa's numbers are measured, not asserted — see `app/eval/`:
 
@@ -222,4 +222,4 @@ Tabaqa's numbers are measured, not asserted — see `app/eval/`:
   reproducible via `python3 eval/berka_train.py`).
 
 Grounded in standard tooling (`optbinning` scorecards, Plaid PFC taxonomy, SAMA
-responsible-lending caps) and validated against open data — see `README.md` / `PROOF.md`.
+responsible-lending caps) and validated against open data — see `ALGORITHM.md` and `eval/`.
