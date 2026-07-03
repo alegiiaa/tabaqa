@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { QRCodeSVG } from 'qrcode.react'
+import { StyledQR } from './StyledQR'
 import { api, type ScoreResult, type AffordabilityResult, type StatementInput } from '../lib/api'
 import { decodeStatement, encodeFacts, shortHash } from '../lib/reportlink'
 
@@ -176,9 +176,9 @@ export function CreditReport() {
               </div>
               <div className="rpt-foot-row">
                 <div className="rpt-qr">
-                  {/* guard: never let an over-capacity value crash the whole report */}
-                  {verifyUrl.length <= 1800
-                    ? <QRCodeSVG value={verifyUrl} size={68} bgColor="#ffffff" fgColor="#0b1c46" level="M" />
+                  {/* guard: never let an over-capacity value crash the report (level H caps below M) */}
+                  {verifyUrl.length <= 1200
+                    ? <StyledQR value={verifyUrl} size={84} fg="#000000" actions fileName={`${ref}.png`} />
                     : <span className="mono" style={{ fontSize: 10, color: '#8593ad' }}>{ref}</span>}
                   <span>SCAN TO VERIFY</span>
                 </div>
