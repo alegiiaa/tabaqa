@@ -178,7 +178,7 @@ export function CreditReport() {
                 <div className="rpt-qr">
                   {/* guard: never let an over-capacity value crash the report (level H caps below M) */}
                   {verifyUrl.length <= 1200
-                    ? <StyledQR value={verifyUrl} size={84} fg="#000000" actions fileName={`${ref}.png`} />
+                    ? <StyledQR value={verifyUrl} size={84} fg="#0b1c46" actions fileName={`${ref}.png`} />
                     : <span className="mono" style={{ fontSize: 10, color: '#8593ad' }}>{ref}</span>}
                   <span>SCAN TO VERIFY</span>
                 </div>
