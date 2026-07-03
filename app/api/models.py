@@ -156,6 +156,25 @@ class ReasonCodeModel(BaseModel):
     label: str
     points: int
     polarity: str
+    feature: str = ""                 # the cash-flow feature this bin reads
+    iv: float | None = None           # validated Information Value (Berka fit), if known
+
+
+class ValidationModel(BaseModel):
+    """Provenance stamped onto every score: the real-data fit backing the card.
+
+    The demo scorecard's weights are direction-locked to a logistic model fit on
+    Berka default outcomes (see scoring/model_params.json); this reports its
+    out-of-sample metrics so the credibility travels with the score.
+    """
+    validated: bool = True
+    auc: float | None = Field(None, examples=[0.89])
+    ks: float | None = Field(None, examples=[0.683])
+    cv_auc: float | None = Field(None, examples=[0.858])
+    dataset: str | None = Field(None, examples=["Berka / PKDD'99"])
+    accounts: int | None = Field(None, examples=[682])
+    bad_rate: float | None = Field(None, examples=[0.1114])
+    note: str | None = None
 
 
 class IncomeComponentModel(BaseModel):
@@ -249,6 +268,8 @@ class ScoreResponse(BaseModel):
     reasons: list[str] = Field(..., examples=[["regular_income", "wallet_income_verified", "zero_nsf"]])
     income: IncomeModel
     reason_codes: list[ReasonCodeModel]
+    # real-data provenance: the Berka fit (AUC 0.890) the weights are locked to
+    validation: ValidationModel | None = None
     applicant: dict
     # full picture so one /v1/score call powers all four dashboard screens
     features: FeaturesModel | None = None

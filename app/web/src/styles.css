@@ -566,6 +566,14 @@ footer{border-top:1px solid var(--line);padding:60px 0 44px;color:var(--muted);f
 .risk-pill.warn{color:#9a6700;background:#fff7e0;border:1px solid #f0d488}
 .risk-pill.bad{color:#b42318;background:#fdf0f0;border:1px solid #f6cccc}
 .pts-pos{color:var(--ok)}.pts-neg{color:#b42318}
+/* score provenance strip — the real-data fit the weights are locked to */
+.score-validation{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;
+  margin-top:2px;padding:12px 16px;background:var(--ok-soft);border:1px solid rgba(15,157,99,.28);
+  border-radius:12px;font-size:13px}
+.score-validation .sv-badge{font-weight:600;color:var(--ok)}
+.score-validation .sv-metrics{font-family:var(--mono);color:var(--text)}
+.score-validation .sv-metrics b{color:var(--text)}
+.score-validation .sv-note{flex-basis:100%}
 
 /* ③ ledger */
 .ledger-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}

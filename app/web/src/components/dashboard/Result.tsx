@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTx } from '../../lib/tx'
-import { api, type ScoreResult, type AffordabilityResult, type Transaction } from '../../lib/api'
+import { api, type ScoreResult, type AffordabilityResult, type Transaction, type Validation } from '../../lib/api'
 import { resolveMerchant, CATEGORY_LABELS } from '../../lib/merchants'
 import { sourceLabel } from '../../lib/institutions'
 import { MerchantLogo } from './MerchantLogo'
@@ -212,6 +212,31 @@ export function ScoreScreen({ result }: { result: ScoreResult }) {
           ))}
         </div>
       </div>
+      <ValidationStrip validation={result.validation} />
+    </div>
+  )
+}
+
+// ── score provenance: the real-data fit the weights are locked to ────────────
+function ValidationStrip({ validation }: { validation?: Validation | null }) {
+  const { tx } = useTx()
+  if (!validation?.validated || validation.auc == null) return null
+  const accts = validation.accounts?.toLocaleString('en-US')
+  const badRate = validation.bad_rate != null ? `${(validation.bad_rate * 100).toFixed(0)}%` : null
+  return (
+    <div className="score-validation" title={validation.note ?? undefined}>
+      <span className="sv-badge">✓ {tx('Validated on real defaults', 'مُتحقَّق على تعثّرات حقيقية')}</span>
+      <span className="sv-metrics">
+        <b>AUC {validation.auc.toFixed(3)}</b>
+        {validation.ks != null && <> · KS {validation.ks.toFixed(3)}</>}
+        {' · '}
+        {validation.dataset}{accts ? ` · ${accts} ${tx('accounts', 'حساب')}` : ''}
+        {badRate ? ` · ${badRate} ${tx('bad rate', 'نسبة التعثّر')}` : ''}
+      </span>
+      <span className="sv-note faint small">
+        {tx('This score’s weights are direction-locked to that fit.',
+            'أوزان هذه الدرجة مقيّدة باتجاه هذا النموذج.')}
+      </span>
     </div>
   )
 }
