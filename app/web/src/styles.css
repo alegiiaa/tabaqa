@@ -1423,17 +1423,12 @@ table.ledger tr:last-child td{border-bottom:0}
 .rpt-foot-statement strong{display:block;font-size:12.5px;color:#3c4c6e;font-weight:600}
 .rpt-bless{margin-top:9px;font-family:'Traditional Arabic','IBM Plex Sans Arabic',serif;font-size:19px;font-weight:700;color:#0e7f54}
 .rpt-foot-row{display:flex;justify-content:flex-end;align-items:flex-end;direction:ltr;margin-top:2px}
-.rpt-qr{display:flex;flex-direction:column;align-items:center;gap:5px}
+/* Watheeq-style QR placeholder — the QR sits in a quiet white rounded card, no chrome */
+.rpt-qr{display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:#fff;border:1px solid #e4e9f3;border-radius:10px;padding:10px 12px 8px;
+  box-shadow:0 1px 5px rgba(11,28,70,.07)}
+.rpt-qr svg{display:block}
 .rpt-qr span{font-size:7.5px;color:#9aa6bd;font-weight:600;letter-spacing:.22em;text-align:center;font-family:var(--mono)}
-/* branded styled QR + its on-screen download/share/copy actions (hidden in print) */
-.sqr{display:flex;flex-direction:column;align-items:center;gap:6px}
-.sqr-svg{display:block}
-.sqr-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.sqr-btn{appearance:none;cursor:pointer;font:inherit;font-size:10px;font-weight:600;
-  padding:4px 9px;border-radius:8px;border:1px solid var(--line,#dfe4ee);background:#fff;color:#0b1c46;
-  font-family:var(--mono);letter-spacing:.02em;transition:.15s}
-.sqr-btn:hover{background:#f3f6fc;border-color:#c3ccdd}
-.sqr-btn:disabled{opacity:.5;cursor:default}
 .rpt-seal{position:absolute;right:60px;top:56%;width:88px;height:88px;z-index:1;opacity:.92}
 .rpt-seal-arc{font-size:7.4px;letter-spacing:.08em;fill:#1f3bff;font-weight:700;font-family:var(--mono)}
 .rpt-seal-score{font-size:30px;font-weight:800;fill:#0b1c46;font-family:var(--mono)}
