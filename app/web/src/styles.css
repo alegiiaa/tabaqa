@@ -1425,6 +1425,15 @@ table.ledger tr:last-child td{border-bottom:0}
 .rpt-foot-row{display:flex;justify-content:flex-end;align-items:flex-end;direction:ltr;margin-top:2px}
 .rpt-qr{display:flex;flex-direction:column;align-items:center;gap:5px}
 .rpt-qr span{font-size:7.5px;color:#9aa6bd;font-weight:600;letter-spacing:.22em;text-align:center;font-family:var(--mono)}
+/* branded styled QR + its on-screen download/share/copy actions (hidden in print) */
+.sqr{display:flex;flex-direction:column;align-items:center;gap:6px}
+.sqr-svg{display:block}
+.sqr-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.sqr-btn{appearance:none;cursor:pointer;font:inherit;font-size:10px;font-weight:600;
+  padding:4px 9px;border-radius:8px;border:1px solid var(--line,#dfe4ee);background:#fff;color:#0b1c46;
+  font-family:var(--mono);letter-spacing:.02em;transition:.15s}
+.sqr-btn:hover{background:#f3f6fc;border-color:#c3ccdd}
+.sqr-btn:disabled{opacity:.5;cursor:default}
 .rpt-seal{position:absolute;right:60px;top:56%;width:88px;height:88px;z-index:1;opacity:.92}
 .rpt-seal-arc{font-size:7.4px;letter-spacing:.08em;fill:#1f3bff;font-weight:700;font-family:var(--mono)}
 .rpt-seal-score{font-size:30px;font-weight:800;fill:#0b1c46;font-family:var(--mono)}
@@ -1460,6 +1469,7 @@ table.ledger tr:last-child td{border-bottom:0}
 /* ── print ── */
 @media print{
   .rpt-toolbar{display:none}
+  .no-print{display:none!important}
   .rpt-wrap{background:#fff;padding:0}
   .rpt-page{box-shadow:none;width:100%;min-height:0;height:297mm;overflow:hidden}  /* exactly one A4 */
   body{background:#fff}
