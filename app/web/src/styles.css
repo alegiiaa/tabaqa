@@ -617,6 +617,15 @@ table.ledger tr:last-child td{border-bottom:0}
 .field-wrap input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
 .field-suffix{position:absolute;inset-inline-end:13px;font-size:12px;color:var(--faint);pointer-events:none}
 .afford-err{background:#fdf0f0;border:1px solid #f6cccc;color:#b42318;border-radius:11px;padding:11px 14px;font-size:13.5px}
+/* shared failure surfaces (see ErrorState.tsx) */
+.err-state{text-align:center;padding:56px 24px;background:#fff;border:1px dashed #f0c9c4;border-radius:18px}
+.err-state-icon{font-size:34px;color:#b42318;opacity:.85}
+.err-state-title{font-family:var(--mono);font-size:18px;margin:10px 0 6px;color:var(--text)}
+.err-state-body{max-width:44ch;margin:0 auto 18px;font-size:14px;color:var(--muted)}
+.err-inline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;
+  background:#fdf0f0;border:1px solid #f6cccc;border-radius:11px;padding:11px 14px}
+.err-inline-msg{font-size:13.5px;color:#b42318}
+.err-inline-retry{flex:none}
 .afford-out{display:flex;flex-direction:column;gap:16px}
 .decision-banner{font-family:var(--mono);font-size:22px;letter-spacing:.02em;text-align:center;padding:18px;border-radius:14px}
 .decision-banner.ok{color:var(--ok);background:var(--ok-soft);border:1px solid rgba(15,157,99,.3)}

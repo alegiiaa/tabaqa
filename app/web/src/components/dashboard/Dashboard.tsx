@@ -8,6 +8,7 @@ import { MyMoney } from './MyMoney'
 import { Applicants } from './Applicants'
 import { RevealScreen, ScoreScreen, LedgerScreen, AffordScreen } from './Result'
 import { ModelCardPanel } from './ModelCardPanel'
+import { ErrorState } from './ErrorState'
 
 const MY_CONNECTION = 'con_8842' // the signed-in user's own accounts (demo protagonist)
 const DEFAULT_PICKS: Picks = { bank: 'alinma', wallet: 'barq' }
@@ -55,7 +56,8 @@ export function Dashboard() {
   const [input, setInput] = useState<StatementInput | null>(initial.input)
   const [section, setSection] = useState<Section>('home')
   const [my, setMy] = useState<ScoreResult | null>(null)
-  const [err, setErr] = useState<string | null>(null)
+  const [err, setErr] = useState<unknown>(null)
+  const [loadNonce, setLoadNonce] = useState(0) // bump to retry a failed load
 
   // If we land already-connected (e.g. a page refresh), reload the profile fresh:
   // demo → re-score the canonical connection; own-data → re-score the saved
@@ -63,18 +65,21 @@ export function Dashboard() {
   useEffect(() => {
     if (!connected || my) return
     let on = true
+    setErr(null)
     if (picks.mode === 'own_data') {
       if (!input) { setConnected(false); return }
       api.scoreStatement(input)
         .then((r) => on && setMy(r))
-        .catch((e) => on && setErr(e.message ?? String(e)))
+        .catch((e) => on && setErr(e))
     } else {
       api.scoreConnection(MY_CONNECTION)
         .then((r) => on && setMy(r))
-        .catch((e) => on && setErr(e.message ?? String(e)))
+        .catch((e) => on && setErr(e))
     }
     return () => { on = false }
-  }, [connected, my, picks.mode, input])
+  }, [connected, my, picks.mode, input, loadNonce])
+
+  const retryLoad = () => { setErr(null); setLoadNonce((n) => n + 1) }
 
   // Own-data sources are already correct (branded via bank_name/wallet_name on
   // ingest), so skip the demo retheme; only the demo profile needs re-branding.
@@ -142,7 +147,7 @@ export function Dashboard() {
       ) : section === 'model' ? (
         <ModelCardPanel />
       ) : needsMine && !themed ? (
-        err ? <div className="afford-err">{err}</div> : <LoadingScreen />
+        err ? <ErrorState error={err} onRetry={retryLoad} /> : <LoadingScreen />
       ) : themed ? (
         <SectionBody section={section} result={themed} onNavigate={setSection} conn={insightsConn} />
       ) : null}

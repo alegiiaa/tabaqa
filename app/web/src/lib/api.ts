@@ -244,11 +244,45 @@ export interface AssistantAction { type: 'navigate' | 'open' | 'none'; section?:
 export interface AssistantReply { reply: string; suggestions: string[]; source: string; action?: AssistantAction | null }
 
 // ── transport ──────────────────────────────────────────────────────────────
+// One classified error type so the UI can show a friendly, bilingual message
+// (and a Retry) instead of the browser's raw "Failed to fetch". `kind` tells the
+// difference between "your wifi blinked", "the lambda is cold-starting", and
+// "the server genuinely errored".
+export type ApiErrorKind = 'network' | 'timeout' | 'server' | 'client'
+export class ApiError extends Error {
+  kind: ApiErrorKind
+  status?: number
+  constructor(kind: ApiErrorKind, message: string, status?: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.kind = kind
+    this.status = status
+  }
+}
+
+// Generous ceiling: longer than the API lambda could ever run (so we never abort
+// a slow-but-working score), short enough to end a genuine hang.
+const REQUEST_TIMEOUT_MS = 30_000
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...init,
-  })
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      headers: { 'Content-Type': 'application/json' },
+      ...init,
+      signal: ctrl.signal,
+    })
+  } catch (e: unknown) {
+    // fetch() rejects on network failure or on our abort (timeout).
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new ApiError('timeout', `Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`)
+    }
+    throw new ApiError('network', e instanceof Error ? e.message : 'Network request failed')
+  } finally {
+    clearTimeout(timer)
+  }
   if (!res.ok) {
     let detail = `Request failed (${res.status})`
     try {
@@ -257,7 +291,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* non-JSON error body */
     }
-    throw new Error(detail)
+    throw new ApiError(res.status >= 500 ? 'server' : 'client', detail, res.status)
   }
   return res.json() as Promise<T>
 }
