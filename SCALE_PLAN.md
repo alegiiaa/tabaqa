@@ -41,6 +41,20 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 > **"transparency has no accuracy cost"**: a transparent additive scorecard (AUC 0.750) vs a gradient-
 > boosted black box (0.772) on the same in-distribution data — within 2 pts, rank agreement ρ 0.86.
 > D1–D5 on the ② score screen + Model-validation page; D6/D7 on the Model-validation page.
+>
+> **HARDENED 2026-07-04 EOD (the devil's-advocate pass — see [`DATA_DEFENSE.md`](./DATA_DEFENSE.md)):**
+> the claim is now **mechanism-transfer, not coefficient-transfer** — an `external_validity`
+> population-transfer panel (Berka → UCI → Saudi-target, with an explicit NOT-validated row),
+> a **performance ledger** (one headline AUC 0.864, every other number tagged), the UCI
+> **attenuation disclosed first** (+0.203→+0.131 and why), lineage reworded to
+> **direction-locked, not magnitude-locked**, PSI relabelled a **demonstration**, TSTR scoped
+> to synthesizer fidelity, and recourse guarded to **real risk-lowering levers only** (no
+> spoofable coaching). **Later same day:** verified live-fetch research landed real Saudi priors
+> (GASTAT deciles · GOSI wage bands · SAMA 13a · Findex → `app/data/saudi_priors/` + `SOURCES.md`)
+> and `eval/saudi_anchor.py` shipped the **Saudi-anchored demonstration population** (SAR scale via
+> ONE cited factor, shape disclosed, `no_accuracy_claim: true`, D5 ruler unit-fix koruna→SAR) —
+> defense now **7/7**. Bonus: **AlfaBattle 2.0** identified as the Berka-at-scale third replication
+> (963k labeled apps, ungated); **Home Credit/Amex ruled OUT** (competition-use-only, verified).
 
 **Current state (verified):** genuinely strong and *on-screen*. `ModelCardPanel` shows the wallet-layer ablation (AUC 0.66→0.86, **+0.203** with bootstrap CI), thin-file lift, swap-set (rescued/rejected with realized default), calibration curve, per-feature IV, monotonic score bands, the **1M-account synthetic corpus + TSTR 0.870 (96% retention)**, and a lineage strip. This already beats most teams outright.
 
@@ -54,7 +68,7 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 |---|------|-----------------------------------|----------|------|--------|
 | D1 | **Exact Score Waterfall** — a cascading force-plot from base 20 → final 82, every feature's ± contribution as a bar | Because our model is **truly additive**, this is *exact attribution*, not a SHAP estimate on a black box. "Glass-box, not explained-box." No approximation error to defend. | `reason_codes[].points` + `BASE_POINTS` (already in payload) | Data+UX+Feas | **S** |
 | D2 | **Path-to-Approval** — the *minimum* change that flips DECLINE→APPROVE: "verified-income share 62%→75% (+7 pts) crosses 65 → APPROVE" | **Actionable counterfactual / recourse** — cutting-edge responsible-AI, and an *inclusion* tool (a decline becomes coaching). Computable because bins+points+cutoff are known. Nobody in a hackathon ships this. | scorecard bins + approval cutoff | Data+UX+Feas | **M** |
-| D3 | **Confidence band on the score** — "82 ± 4 (90 days, 92% verified)" vs thin-file "58 ± 12 (30 days, 40% verified)" | Ties score **reliability to data sufficiency** — an honesty signal MRM teams live by. Uncertainty ≠ weakness; hiding it is. | `months_observed`, `verified_income_share` | Data+Feas | **M** |
+| D3 | **Data-sufficiency band on the score** (not a statistical CI — labelled as such) — "82 ± 4 (90 days, 92% verified)" vs thin-file "58 ± 12 (30 days, 40% verified)" | Ties score **reliability to data sufficiency** — an honesty signal MRM teams live by. Uncertainty ≠ weakness; hiding it is. | `months_observed`, `verified_income_share` | Data+Feas | **M** |
 | D4 | **Drift / PSI monitor** — Population Stability Index (training vs live/corpus) per feature, green/amber/red | Signals **SR 11-7 / SAMA model-governance** literacy — "how do you know it keeps working?" Almost no hackathon team shows monitoring. | corpus + training dist | Data+Feas | **M** |
 | D5 | **Percentile-vs-corpus** — "Fahd's balance-volatility is P30 of the gig+salary segment" | Turns the **1M corpus from a static stat into a live comparator** — the applicant is placed in a real distribution. | 1M corpus segments | Data+UX | **S** |
 | D6 | **Home Credit cross-check (make it real)** — the `cross_check` scaffold, filled with a 2nd real dataset | "**Replicated on a second real dataset**" is the single most credibility-buying line in the panel. Currently a stub. | `ModelCardPanel` cross-check block (built, empty) | Data | **M** ⚠️ needs Kaggle CSVs |
@@ -63,7 +77,7 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 ### Recommended Data bets
 1. **D1 Score Waterfall** (S, exact, visceral) — *do first.*
 2. **D2 Path-to-Approval** (M, genuinely novel, inclusion story).
-3. **D3 + D4 as a small "Model Risk" strip** (confidence band + PSI) — the MRM flex.
+3. **D3 + D4 as a small "Model Risk" strip** (data-sufficiency band + PSI demonstration) — the MRM flex.
 4. **D6 cross-check** when Kaggle data is available.
 
 ---

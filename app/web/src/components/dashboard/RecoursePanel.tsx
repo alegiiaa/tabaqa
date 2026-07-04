@@ -8,6 +8,11 @@ import type { Recourse, RecourseStep } from '../../lib/api'
  * and show them as recourse. A decline becomes a coaching tool, not a black-box no.
  * verified_income_share (connect another account) is Tabaqa's own lever, so it
  * leads whenever it helps.
+ *
+ * P7 guardrail (scoring/scorecard.py RECOURSE_ELIGIBLE): the API only ever coaches
+ * levers that lower TRUE risk — spoofable ones (income timing, balance smoothing)
+ * are never recommended, projections are labelled indicative, and the served
+ * `note` disclaimer is rendered below the steps.
  */
 
 type Tx = (en: string, ar: string) => string
@@ -106,10 +111,15 @@ export function RecoursePanel({ recourse }: { recourse?: Recourse | null }) {
 
       <p className={`rec-foot${reachable ? '' : ' rec-foot-warn'}`}>
         {reachable
-          ? tx(`Do the above → projected score ${projected_score} · clears ${dWord}.`,
-              `بتطبيق ما سبق → الدرجة المتوقعة ${projected_score} · تتجاوز حدّ ${dWord}.`)
-          : tx(`Even at best practice on all of these, this profile reaches only ${projected_score} — still short of the ${target_score} needed. It needs more than incremental change.`,
-              `حتى بأفضل الممارسات في كل ما سبق، يصل هذا الملف إلى ${projected_score} فقط — دون ${target_score} المطلوبة. يحتاج أكثر من تحسين تدريجي.`)}
+          ? tx(`Do the above → indicative score ≈ ${projected_score} · clears ${dWord}.`,
+              `بتطبيق ما سبق → درجة استرشادية ≈ ${projected_score} · تتجاوز حدّ ${dWord}.`)
+          : tx(`Even at best practice on all of these, this profile reaches only ≈ ${projected_score} — still short of the ${target_score} needed. It needs more than incremental change.`,
+              `حتى بأفضل الممارسات في كل ما سبق، يصل هذا الملف إلى ≈ ${projected_score} فقط — دون ${target_score} المطلوبة. يحتاج أكثر من تحسين تدريجي.`)}
+      </p>
+
+      <p className="faint val-note">
+        {tx('Indicative, not a promise — every suggestion is a real risk-lowering behaviour (never a cosmetic tweak), and the decision is re-scored on verified data.',
+          'استرشادي وليس وعدًا — كل اقتراح سلوك حقيقي يخفّض المخاطر (لا تجميل للأرقام)، ويُعاد احتساب القرار على بيانات موثّقة.')}
       </p>
     </div>
   )

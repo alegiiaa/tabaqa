@@ -1,15 +1,18 @@
-"""Model-intelligence artifacts for the dashboard (D4 · D5 · D7).
+"""Model-intelligence artifacts for the dashboard (D4 · D5).
 
 Reads the 1M-account synthetic corpus + the validated Berka fit and writes:
 
   • D5  scoring/corpus_quantiles.json  — per-feature percentile grid, so the API can
         place any applicant in the 1M-account distribution ("balance volatility = P30").
-  • D4  model_card.json["psi"]         — Population Stability Index per borrower cohort
-        vs the overall book (the drift-monitor surface).
-  • D7  model_card.json["lineage_weights"] — the deployed expert-card weights vs the
-        fitted logistic |coef|, with rank correlation (scale-free lineage check).
+  • D4  model_card.json["psi"]         — a Population Stability Index drift-monitor
+        DEMONSTRATION: an injected covariate shift on the synthetic corpus (there is
+        no live applicant stream yet, and the card says so — see harden_card.py).
 
-Run:  python3 eval/model_intel.py
+(D7 lineage_weights was dropped: the expert card's point magnitudes don't track the
+fit's |coef| — the card is direction-locked, not magnitude-locked, and that is now
+disclosed in model_card.json["lineage"] rather than papered over with a chart.)
+
+Run:  python3 eval/model_intel.py  (then eval/harden_card.py to restamp wording)
 """
 from __future__ import annotations
 
@@ -96,13 +99,16 @@ def build_psi(df: pd.DataFrame) -> dict:
     stress["income_regularity"] = (stress["income_regularity"] - 0.03).clip(0, 1)
 
     return {
-        "reference": "300k-account reference draw from the 1M scoring corpus",
+        "reference": ("300k-account reference draw from the 1M synthetic scoring corpus "
+                      "(demonstration — no live stream yet)"),
         "method": "PSI on the reference deciles · <0.1 stable · 0.1–0.25 shift · >0.25 significant",
-        "note": ("A calibrated Population Stability monitor. In-control = an independent random "
-                 "draw (no false alarm — reads flat). Economic-stress = a simulated downturn shift "
-                 "in the incoming population (thinner buffers, more volatile balances, heavier "
-                 "obligations). This is the same PSI a production monitor runs on the live applicant "
-                 "stream vs the training distribution, catching silent drift before it degrades the score."),
+        "note": ("A drift-monitor DEMONSTRATION on the synthetic scoring corpus — no live applicant "
+                 "stream exists yet, and this panel does not pretend one does. In-control = an "
+                 "independent draw from the same corpus (no false alarm — reads flat). "
+                 "Economic-stress = a known covariate shift injected into that draw (thinner "
+                 "buffers, more volatile balances, heavier obligations) to prove the monitor fires. "
+                 "In production the identical PSI runs on live applicants vs the training "
+                 "distribution; this demonstrates the monitor, not live drift."),
         "scenarios": [
             _scenario(ref, in_ctrl, "in_control", "In-control",
                       "an independent random draw from the same population"),

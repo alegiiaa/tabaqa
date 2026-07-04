@@ -5,21 +5,29 @@ produces (binned features → points → score), kept dependency-free so the dem
 runs anywhere. Every point of the score is attributable to a feature bin, which
 is exactly what a SAMA-minded reviewer wants: no black box.
 
-Validated, not just asserted
-----------------------------
-This card is **pinned to a real-data fit**. ``scoring/train.py`` fits the same six
-cash-flow features on Berka default outcomes (out-of-sample **AUC 0.890 / KS 0.683**)
-and writes ``scoring/model_params.json``. At import we load that artifact and
-``_verify_lineage`` machine-checks that **every weight here points the same way the
-fit found** — a feature the model says lowers risk must earn points here, and vice
-versa. The one exception (``income_expense_ratio``) is a documented monotonic
-override, mirroring ``optbinning``'s ``monotonic_trend`` (see model_params.json).
-Each score then carries its provenance: the validation metrics plus each reason
-code's Information Value. Offline (no artifact) the card still scores — it simply
+Direction-locked, not magnitude-locked
+--------------------------------------
+This is an **expert policy card pinned to a real-data fit at the level the fit
+actually supports: direction.** ``scoring/train.py`` fits the same six cash-flow
+features on Berka default outcomes (6-feature fit: 30% holdout AUC 0.890 /
+5-fold CV 0.858 — a sub-metric; the headline is the full-model CV AUC 0.864 in
+``eval/model_card.json`` → ``performance_ledger``) and writes
+``scoring/model_params.json``. At import ``_verify_lineage`` machine-checks that
+**every weight here points the same way the fit found** — a feature the model
+says lowers risk must earn points here, and vice versa. The one exception
+(``income_expense_ratio``) is a documented monotonic override, mirroring
+``optbinning``'s ``monotonic_trend`` (see model_params.json). Each score then
+carries its provenance: the validation metrics plus each reason code's
+Information Value. Offline (no artifact) the card still scores — it simply
 omits the provenance.
 
-The demo score is therefore not "expert weights we hope generalise": it is a
-scorecard locked to a model that ranks real defaults at AUC 0.890.
+What we do NOT claim: that these point *magnitudes* equal the fitted
+coefficients (they are policy weights; the fit's |coef| ranking differs — a
+fact disclosed in the model card, not hidden), nor that a Czech-1990s fit
+transfers numerically to Saudi wallets. At deployment the same pipeline
+re-fits magnitudes on the licensee's own book (``train.py`` is the path); the
+direction lock keeps the served card from ever *contradicting* the validated
+fit in the meantime.
 """
 from __future__ import annotations
 
@@ -106,7 +114,10 @@ def _validation_block() -> dict | None:
         "dataset": src.get("dataset"),
         "accounts": s.get("accounts"),
         "bad_rate": s.get("bad_rate"),
-        "note": "Weights direction-locked to this fit; see scoring/model_params.json.",
+        "basis": "6 cash-flow features · logistic · 30% holdout (direction-lock fit)",
+        "note": ("Expert policy card direction-locked to this fit (sign, not magnitude); "
+                 "magnitudes re-fit on the licensee's book at deployment. "
+                 "See model_card.json performance_ledger."),
     }
 
 
@@ -278,6 +289,21 @@ _ACTIONABILITY = {
     "balance_volatility": 5, "income_regularity": 6,
 }
 
+# Anti-gaming guardrail: recourse only coaches levers that lower TRUE risk — behaviours
+# that require real money movement (reveal income via Masdr, avoid overdrafts, hold a
+# real buffer, pay down obligations, spend under income). income_regularity and
+# balance_volatility are deliberately EXCLUDED from coaching: both can be spoofed with
+# self-transfer patterns without changing underlying risk, so recommending them would
+# invite gaming (they still score — we just never *advise* optimizing them).
+RECOURSE_ELIGIBLE = frozenset({
+    "verified_income_share", "nsf_count", "min_balance",
+    "recurring_obligation_load", "income_expense_ratio",
+})
+
+RECOURSE_NOTE = ("Indicative path, not a promise: point gains are the policy card's "
+                 "weights (direction-validated against the fit), and the decision is "
+                 "always re-scored on verified data.")
+
 MAX_SCORE = BASE_POINTS + sum(FEATURE_MAX_POINTS.values())  # the reachable ceiling (82)
 
 
@@ -316,6 +342,7 @@ class Recourse:
     projected_score: int     # score after applying the steps
     already_prime: bool
     steps: list = field(default_factory=list)  # list[RecourseStep]
+    note: str = RECOURSE_NOTE                  # anti-overclaim disclaimer, always served
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -338,6 +365,8 @@ def recommend_recourse(result: ScoreResult, features: CashFlowFeatures) -> Recou
     fvals = features.to_dict()
     candidates: list[RecourseStep] = []
     for feat, maxp in FEATURE_MAX_POINTS.items():
+        if feat not in RECOURSE_ELIGIBLE:
+            continue  # never coach a spoofable lever (see RECOURSE_ELIGIBLE)
         cur = cur_pts.get(feat, 0)
         gain = maxp - cur
         if gain <= 0:

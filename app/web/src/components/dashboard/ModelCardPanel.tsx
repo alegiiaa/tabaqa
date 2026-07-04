@@ -37,6 +37,37 @@ interface ModelCard {
   champion_challenger?: ChampionChallenger | null
   lineage?: Lineage
   psi?: Psi
+  performance_ledger?: PerformanceLedger
+  external_validity?: ExternalValidity
+  demonstration_population?: DemoPopulation
+}
+
+// ── P1 Build 2 · Saudi-anchored demonstration population (NO accuracy claims) ─
+interface DemoPopulation {
+  name: string; no_accuracy_claim: boolean; n_accounts: number
+  method: string; scale_factor: number
+  priors_used: { prior: string; source: string }[]
+  income_deciles_sar: { decile: number; sar_month: number }[]
+  gosi_wage_bands: { band_sar: string; contributors: number; share: number }[]
+  expense_shares: { category: string; share: number }[]
+  segments_sar: { segment: string; n: number; bad_rate: number; median_min_balance_sar: number; median_avg_balance_sar: number }[]
+  caveats: string[]
+}
+
+// ── P3 · one performance ledger — every AUC tagged, exactly one headline ────
+interface LedgerRow {
+  value: number; metric: string; headline: boolean
+  dataset: string; features: string; model: string; split: string; role: string
+}
+interface PerformanceLedger { note: string; rows: LedgerRow[] }
+
+// ── P1 · external validity — what was validated where, and what transfers ───
+interface EvPopulation { key: string; label: string; n: string; role: string; finding: string }
+interface ExternalValidity {
+  claim: string
+  populations: EvPopulation[]
+  transfers: string
+  deployment_plan: string[]
 }
 
 // ── D7 · transparent scorecard vs a black box, on real in-distribution data ──
@@ -73,6 +104,7 @@ interface CrossCheck {
   baseline: { auc: number; ks: number }; full: { auc: number; ks: number }
   lift: { auc: number; ci_low: number; ci_high: number; p_gt_0: number }
   feature_mapping: { tabaqa: string; homecredit: string }[]; caveats: string[]
+  attenuation_note?: string      // P4 — the +0.20→+0.13 shrinkage, disclosed first
 }
 interface Lineage { tiers: { tier: string; source: string; claim: string }[]; live_scorer: string }
 
@@ -243,6 +275,8 @@ export function ModelCardPanel() {
 
         {c.corpus && <ScaleSection corpus={c.corpus} />}
 
+        {c.demonstration_population && <DemoPopulationSection dp={c.demonstration_population} />}
+
         {c.psi && <DriftSection psi={c.psi} />}
 
         {/* ── THIN-FILE: bureau's blind spot ───────────────────────────── */}
@@ -344,7 +378,11 @@ export function ModelCardPanel() {
 
         {c.cross_check && <CrossCheck cc={c.cross_check} />}
 
+        {c.external_validity && <ExternalValiditySection ev={c.external_validity} />}
+
         {c.champion_challenger && <ChampionChallengerBlock cc={c.champion_challenger} />}
+
+        {c.performance_ledger && <PerformanceLedgerBlock ledger={c.performance_ledger} />}
 
         {/* trust footnotes */}
         <div className="val-foot">
@@ -393,17 +431,21 @@ function Foot({ icon, title, body }: { icon: string; title: string; body: string
 function LineageStrip({ lineage }: { lineage: Lineage }) {
   const { tx } = useTx()
   return (
-    <div className="mc-lineage">
-      {lineage.tiers.map((t) => {
-        const [en, ar] = TIER_LABEL[t.tier] ?? [t.tier, t.tier]
-        return (
-          <div className="mc-lin" key={t.tier}>
-            <span className="mc-lin-t">{tx(en, ar)}</span>
-            <span className="mc-lin-c">{t.claim}</span>
-          </div>
-        )
-      })}
-    </div>
+    <>
+      <div className="mc-lineage">
+        {lineage.tiers.map((t) => {
+          const [en, ar] = TIER_LABEL[t.tier] ?? [t.tier, t.tier]
+          return (
+            <div className="mc-lin" key={t.tier}>
+              <span className="mc-lin-t">{tx(en, ar)}</span>
+              <span className="mc-lin-c">{t.claim}</span>
+            </div>
+          )
+        })}
+      </div>
+      {/* P2 — direction-locked, not magnitude-locked: stated, not discovered */}
+      <p className="val-caveat faint">{tx(lineage.live_scorer, lineage.live_scorer)}</p>
+    </>
   )
 }
 
@@ -482,7 +524,7 @@ function ChampionChallengerBlock({ cc }: { cc: ChampionChallenger }) {
         <div className="cc-bar-row">
           <span className="cc-bar-label">
             {tx('Transparent scorecard', 'بطاقة تسجيل شفافة')}{' '}
-            <span className="faint">{tx('(what Tabaqa deploys)', '(ما تنشره Tabaqa)')}</span>
+            <span className="faint">{tx('(the family Tabaqa deploys — re-fit here)', '(العائلة التي تنشرها Tabaqa — أعيد تدريبها هنا)')}</span>
           </span>
           <span className="cc-bar"><span className="cc-fill champ" style={{ width: w(cc.champion.auc) }} /></span>
           <span className="cc-bar-v" dir="ltr">{cc.champion.auc.toFixed(3)}</span>
@@ -512,7 +554,7 @@ function DriftSection({ psi }: { psi: Psi }) {
   return (
     <div className="mc-block mc-drift">
       <div className="val-block-h">
-        <span className="ins-cap">{tx('Population stability — the drift monitor', 'استقرار التوزيع — مراقب الانزياح')}</span>
+        <span className="ins-cap">{tx('Population stability — drift-monitor demonstration', 'استقرار التوزيع — عرض مراقب الانزياح')}</span>
         <span className="faint val-note">{psi.method}</span>
       </div>
       <div className="drift-grid" style={{ gridTemplateColumns: `1.4fr repeat(${psi.scenarios.length}, 1fr)` }}>
@@ -559,7 +601,147 @@ function CrossCheck({ cc }: { cc: CrossCheck }) {
         />
         <span className="mc-swap-cap">+{cc.lift.auc.toFixed(2)} AUC · {cc.n_accounts.toLocaleString('en-US')} {tx('real labeled applications', 'طلب حقيقي موسوم')}</span>
       </div>
+      {/* P4 — the attenuation vs Berka, disclosed before anyone asks */}
+      {cc.attenuation_note && <p className="val-caveat">{tx(cc.attenuation_note, cc.attenuation_note)}</p>}
       {cc.caveats?.[0] && <p className="val-caveat faint">{cc.caveats[0]}</p>}
+    </div>
+  )
+}
+
+// ── P1 · External validity — the population-transfer table. The one question a
+//    model-risk reviewer asks first ("what population did you validate on?"),
+//    answered before it's asked: mechanism-transfer, two replications, and an
+//    explicit NOT-validated row for the Saudi target + the calibrate-on-deploy plan. ─
+function ExternalValiditySection({ ev }: { ev: ExternalValidity }) {
+  const { tx } = useTx()
+  const ROLE_AR: Record<string, string> = {
+    berka: 'التحقق الأساسي', uci: 'تكرار مستقل', saudi: 'فئة النشر — لم يُتحقق عليها هنا',
+  }
+  return (
+    <div className="mc-block">
+      <div className="val-block-h">
+        <span className="ins-cap">{tx('External validity — stated, not discovered', 'الصلاحية الخارجية — نُصرّح بها قبل أن تُكتشف')}</span>
+        <span className="faint val-note">{tx('what transfers, what is re-fit locally', 'ما ينتقل وما يُعاد تدريبه محليًا')}</span>
+      </div>
+
+      <p className="mc-read">{tx(ev.claim, ev.claim)}</p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+        {ev.populations.map((p) => (
+          <div className={`mc-swap-card${p.key === 'saudi' ? '' : ' good'}`} key={p.key}>
+            <span className="mc-swap-t">{p.label}</span>
+            <span className="mc-swap-r">{tx(p.role, ROLE_AR[p.key] ?? p.role)}</span>
+            <span className="mc-swap-x faint">{p.n}</span>
+            <span className="mc-swap-x">{p.finding}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="val-caveat">{tx(ev.transfers, ev.transfers)}</p>
+
+      <div className="ins-rows">
+        {ev.deployment_plan.map((step, i) => (
+          <div className="ins-row" key={i}>
+            <span className="ins-row-l val-feat" dir="ltr">{i + 1}.</span>
+            <span className="ins-row-v" style={{ textAlign: 'start', flex: 1 }}>{step}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── P1 Build 2 · Saudi demonstration population — SAR scale from cited GASTAT/
+//    GOSI/SAMA priors; shape stays the validated Berka copula (disclosed). Hard
+//    rule: this section may NEVER show an accuracy number. ─────────────────────
+function DemoPopulationSection({ dp }: { dp: DemoPopulation }) {
+  const { tx } = useTx()
+  const maxDecile = Math.max(...dp.income_deciles_sar.map((d) => d.sar_month))
+  const sar = (v: number) => `${tx('SAR', 'ر.س')} ${Math.round(v).toLocaleString('en-US')}`
+  return (
+    <div className="mc-block">
+      <div className="val-block-h">
+        <span className="ins-cap">{tx('Saudi demonstration population — scale anchored, shape disclosed', 'عيّنة العرض السعودية — المقياس مُثبّت والشكل مُفصح عنه')}</span>
+        <span className="faint val-note">
+          {intFmt(dp.n_accounts)} {tx('accounts · SAR · no accuracy claims', 'حساب · ريال · دون ادعاءات دقة')}
+        </span>
+      </div>
+
+      <p className="mc-read">{tx(
+        `The 1M-account corpus, re-anchored to Saudi money scale with ONE cited factor (×${dp.scale_factor}): the corpus median district salary is pinned to GASTAT's median household disposable income (SAR 7,362, HIES 2023). Every rank, ratio and correlation of the validated source is preserved — and this population never produces an accuracy number.`,
+        `عيّنة المليون حساب، معاد تثبيتها على المقياس المالي السعودي بمعامل واحد مُوثّق (×${dp.scale_factor}): وسيط رواتب المناطق في العيّنة مُثبّت على وسيط الدخل المتاح للأسرة من الهيئة العامة للإحصاء (٧٬٣٦٢ ر.س، مسح ٢٠٢٣). كل الرتب والنسب والارتباطات محفوظة — وهذه العيّنة لا تُنتج أي رقم دقة أبدًا.`,
+      )}</p>
+
+      {/* GASTAT income deciles — the real Saudi income distribution, cited */}
+      <div className="val-block-h" style={{ marginTop: 8 }}>
+        <span className="ins-cap">{tx('Saudi income deciles', 'أعشار الدخل السعودية')}</span>
+        <span className="faint val-note">{tx('GASTAT HIES cube 2024 · SAR/month', 'الهيئة العامة للإحصاء ٢٠٢٤ · ر.س/شهر')}</span>
+      </div>
+      <div className="val-bands">
+        {dp.income_deciles_sar.map((d) => (
+          <div className="val-band" key={d.decile}>
+            <span className="val-band-v" dir="ltr">{d.sar_month >= 10000 ? `${Math.round(d.sar_month / 1000)}k` : Math.round(d.sar_month).toLocaleString('en-US')}</span>
+            <span className="val-bar-wrap">
+              <span className={`val-bar${d.decile === 10 ? ' good' : ''}`}
+                style={{ height: `${Math.max(2, (d.sar_month / maxDecile) * 100)}%` }} />
+            </span>
+            <span className="val-band-l">D{d.decile}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* segments at SAR scale */}
+      <div className="mc-seg">
+        {dp.segments_sar.map((s) => {
+          const [en, ar] = SEG_LABEL[s.segment] ?? [s.segment, s.segment]
+          return (
+            <div className="mc-seg-row" key={s.segment}>
+              <span className="mc-seg-l">{tx(en, ar)}</span>
+              <span className="mc-seg-v" dir="ltr">{sar(s.median_avg_balance_sar)}</span>
+              <span className="mc-seg-n faint">{tx('median balance', 'وسيط الرصيد')} · {intFmt(s.n)}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* the cited priors */}
+      <div className="ins-rows">
+        {dp.priors_used.map((p, i) => (
+          <div className="ins-row" key={i}>
+            <span className="ins-row-l val-feat">{p.prior}</span>
+            <span className="ins-row-v faint" style={{ textAlign: 'start', flex: 1, whiteSpace: 'normal' }}>{p.source}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="val-caveat faint">{dp.caveats[0]}</p>
+    </div>
+  )
+}
+
+// ── P3 · One performance ledger — every AUC tagged with {dataset · features ·
+//    model · split}; exactly ONE headline. Kills the "number soup" objection. ──
+function PerformanceLedgerBlock({ ledger }: { ledger: PerformanceLedger }) {
+  const { tx } = useTx()
+  return (
+    <div className="mc-block">
+      <div className="val-block-h">
+        <span className="ins-cap">{tx('Performance ledger — one headline, every number tagged', 'سجل الأداء — رقم رئيسي واحد، وكل رقم موسوم')}</span>
+        <span className="faint val-note">{tx('no number soup', 'لا حساء أرقام')}</span>
+      </div>
+      <div className="ins-rows">
+        {ledger.rows.map((r, i) => (
+          <div className="ins-row" key={i} style={r.headline ? { fontWeight: 700 } : undefined}>
+            <span className="ins-row-l val-feat" dir="ltr">
+              {r.headline ? '★ ' : ''}{r.metric} {r.value.toFixed(3)}
+            </span>
+            <span className="ins-row-v faint" style={{ textAlign: 'start', flex: 1, whiteSpace: 'normal' }}>
+              {r.dataset} · {r.features} · {r.model} · {r.split} — {r.role}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="val-caveat faint">{tx(ledger.note, ledger.note)}</p>
     </div>
   )
 }

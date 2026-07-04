@@ -16,3 +16,6 @@ data/homecredit/
 
 # raw demo-video footage (hundreds of MB — never push to GitHub; web/public/video IS committed)
 /video/
+data/external/
+data/saudi_priors/findex2025.csv
+data/synthetic/corpus_saudi/

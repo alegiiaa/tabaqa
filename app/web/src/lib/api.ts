@@ -52,6 +52,7 @@ export interface Recourse {
   projected_score: number
   already_prime: boolean
   steps: RecourseStep[]
+  note?: string                    // anti-overclaim disclaimer (P7 guardrail)
 }
 
 // D3 · data-sufficiency confidence band (not a statistical CI).

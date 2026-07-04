@@ -279,6 +279,7 @@ class RecourseModel(BaseModel):
     projected_score: int
     already_prime: bool
     steps: list[RecourseStepModel] = Field(default_factory=list)
+    note: str = ""                       # anti-overclaim disclaimer (P7 guardrail)
 
 
 class ScoreConfidenceModel(BaseModel):
