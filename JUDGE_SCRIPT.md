@@ -87,6 +87,11 @@
 
 **EN:** The most conservative institutions already crossed this bridge: Fannie Mae and Freddie Mac underwrite no-score borrowers on bank cash flow — even rent paid via digital wallets. All five US banking regulators jointly endorsed cash-flow data. The BIS measured it: transaction models beat bureau scores 0.76 vs 0.64. Apple didn't debate the thesis — it bought Credit Kudos and renamed it Apple Payments Services. And in Saudi: 79% of adults are banked, barely 57% have a credit file — and SAMA built the rail and issued its first licences this year. We're not asking for a leap; we're bringing a proven playbook to the market that just built the rail. *(All sources verified — see `EVIDENCE.md`, including the landmine list of numbers NOT to cite.)*
 
+### س٧ · «وش يفرقكم عن تمارا/تمام؟ هم يقيّمون بالتدفق النقدي من زمان» ⚠️ الأرجح أن يُسأل
+> «صحيح — وهذا أفضل دليل على السوق: تمارا رفعت موافقاتها ٣٢٪ بربط الحساب البنكي، عبر Lean. لكن انظروا ماذا يحصل للمرفوض عندهم: تمام نفسها تقول في أسئلتها الشائعة إن الرفض "بحسب سياسة المنتج" — بلا سبب، بلا طريق. كل تطبيق في المملكة **صندوق أسود داخل دفتر مقرضٍ واحد**، وولا واحد منهم يدمج المحفظة الرقمية مع البنك — حتى من يملكون محافظ. طبقة هي الطبقة المستقلة المعاكسة: نوجّه الدرجة نحو المتقدّم — لماذا، وماذا يغيّر القرار، وكم تكفي بياناته — ونبيعها لأي مقرض. هم أثبتوا أن الآلية تربح؛ نحن بنينا ما لم يبنه أحد فوقها.»
+
+**EN:** Correct — and that's our best market proof: Tamara lifted approvals 32% by linking bank accounts, via Lean. But look what happens to the declined customer: Tamam's own FAQ says rejections are "based on the product policy" — no reason, no path. Every KSA implementation is a black box inside one lender's book, and none fuses wallet + bank — even the ones that own wallets. Tabaqa is the independent, inverted layer: we turn the score toward the applicant — the why, the what-changes-it, the how-much-data-suffices — and sell it to any lender. They proved the mechanism wins; we built what nobody built on top of it. *(Full verified landscape + dead-claims list: `COMPETITION.md`.)*
+
 ---
 
 ## قواعد الإلقاء | Delivery rules
