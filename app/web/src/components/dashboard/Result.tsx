@@ -7,6 +7,7 @@ import { MerchantLogo } from './MerchantLogo'
 import { AccountCard } from './AccountCard'
 import { ScoreWaterfall } from './ScoreWaterfall'
 import { RecoursePanel } from './RecoursePanel'
+import { ConfidenceBadge, BenchmarkPanel } from './ScoreExtras'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
@@ -345,11 +346,13 @@ export function ScoreScreen({ result }: { result: ScoreResult }) {
         <div className={`risk-pill ${riskCls}`}>
           {riskLabel} · PD {pct(result.pd)}
         </div>
+        <ConfidenceBadge confidence={result.confidence} />
       </div>
 
       <div className="score-right">
         <ScoreWaterfall result={result} />
         <RecoursePanel recourse={result.recourse} />
+        <BenchmarkPanel benchmark={result.benchmark} />
       </div>
       <ValidationStrip validation={result.validation} />
     </div>

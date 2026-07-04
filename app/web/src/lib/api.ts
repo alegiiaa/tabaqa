@@ -54,6 +54,30 @@ export interface Recourse {
   steps: RecourseStep[]
 }
 
+// D3 · data-sufficiency confidence band (not a statistical CI).
+export interface ScoreConfidence {
+  level: 'high' | 'medium' | 'low' | string
+  band: number
+  low: number
+  high: number
+  sufficiency: number
+  months_observed: number
+  verified_income_share: number
+}
+
+// D5 · where the applicant sits in the 1M-account corpus.
+export interface FeaturePercentile {
+  feature: string
+  value: number
+  percentile: number
+  better_than: number
+}
+export interface Benchmark {
+  available: boolean
+  n: number
+  features: FeaturePercentile[]
+}
+
 // Real-data provenance stamped on every score: the Berka fit the weights are locked to.
 export interface Validation {
   validated: boolean
@@ -162,6 +186,8 @@ export interface ScoreResult {
   income: Income
   reason_codes: ReasonCode[]
   recourse?: Recourse | null       // D2 — path to the next risk band
+  confidence?: ScoreConfidence | null   // D3 — data-sufficiency band
+  benchmark?: Benchmark | null          // D5 — percentile vs the 1M corpus
   validation?: Validation | null   // real-data provenance (Berka fit, AUC 0.890)
   applicant: Record<string, any>
   features?: Features | null

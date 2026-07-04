@@ -368,6 +368,108 @@ def recommend_recourse(result: ScoreResult, features: CashFlowFeatures) -> Recou
                     gap, reachable, projected, False, chosen)
 
 
+# ── D3 · score confidence (data-sufficiency band) ─────────────────────────────
+# The point score is only as trustworthy as the data behind it. A score built on
+# 6 months of mostly-verified income is far more reliable than one built on 30 days
+# of mostly-inferred income. We surface that honestly as a ± band whose width grows
+# as history shortens and verification drops. This is a DATA-SUFFICIENCY signal —
+# not a statistical confidence interval — and is labelled as such in the UI.
+_CONF_FULL_MONTHS = 6.0     # ≥ 6 months earns full history credit
+_CONF_BAND_MIN = 2          # ± at full sufficiency
+_CONF_BAND_SPAN = 10        # extra ± at zero sufficiency (→ max ±12)
+
+
+@dataclass
+class ScoreConfidence:
+    level: str               # high | medium | low
+    band: int                # ± half-width on the 1–99 scale
+    low: int                 # score − band (clamped to 1..99)
+    high: int                # score + band (clamped to 1..99)
+    sufficiency: float       # 0..1 — how much data backs the score
+    months_observed: int
+    verified_income_share: float
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+# ── D5 · percentile vs the 1M-account corpus (turns the corpus into a live ruler) ─
+_QUANTILES_PATH = Path(__file__).resolve().parent / "corpus_quantiles.json"
+
+
+def _load_quantiles() -> dict | None:
+    try:
+        return json.loads(_QUANTILES_PATH.read_text(encoding="utf-8"))
+    except (FileNotFoundError, ValueError):
+        return None
+
+
+CORPUS_QUANTILES = _load_quantiles()
+
+
+@dataclass
+class FeaturePercentile:
+    feature: str
+    value: float
+    percentile: int          # position in the corpus (0..100)
+    better_than: int         # % of the book this applicant beats (direction-aware)
+
+
+@dataclass
+class Benchmark:
+    available: bool
+    n: int = 0               # corpus size the percentiles are drawn from
+    features: list = field(default_factory=list)  # list[FeaturePercentile]
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def _percentile(value: float, grid: list) -> int:
+    # grid is 101 ascending quantile points (0th..100th pct); find where value lands
+    lo, hi = 0, len(grid) - 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if grid[mid] < value:
+            lo = mid + 1
+        else:
+            hi = mid
+    return max(0, min(100, lo))
+
+
+def benchmark_features(features: CashFlowFeatures) -> Benchmark:
+    q = CORPUS_QUANTILES
+    if not q:
+        return Benchmark(available=False)
+    fvals = features.to_dict()
+    hib = q.get("higher_is_better", {})
+    rows: list[FeaturePercentile] = []
+    for feat, grid in q.get("features", {}).items():
+        v = fvals.get(feat)
+        if v is None:
+            continue
+        p = _percentile(float(v), grid)
+        better = p if hib.get(feat, True) else 100 - p
+        rows.append(FeaturePercentile(feature=feat, value=round(float(v), 3),
+                                      percentile=p, better_than=better))
+    return Benchmark(available=True, n=int(q.get("n", 0)), features=rows)
+
+
+def score_confidence(features: CashFlowFeatures, score: int) -> ScoreConfidence:
+    m = min(max(features.months_observed, 0) / _CONF_FULL_MONTHS, 1.0)
+    v = min(max(features.verified_income_share, 0.0), 1.0)
+    sufficiency = round(0.55 * m + 0.45 * v, 3)           # history weighs slightly more
+    band = round(_CONF_BAND_MIN + (1 - sufficiency) * _CONF_BAND_SPAN)
+    level = "high" if sufficiency >= 0.75 else "medium" if sufficiency >= 0.45 else "low"
+    return ScoreConfidence(
+        level=level, band=band,
+        low=max(1, score - band), high=min(99, score + band),
+        sufficiency=sufficiency,
+        months_observed=int(features.months_observed),
+        verified_income_share=round(v, 3),
+    )
+
+
 def _verify_recourse_max() -> None:
     """Guard: the recourse top-bin table must match what score_profile actually awards."""
     ideal = CashFlowFeatures(

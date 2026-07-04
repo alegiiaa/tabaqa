@@ -35,7 +35,13 @@ interface ModelCard {
   corpus?: Corpus
   cross_check?: CrossCheck | null
   lineage?: Lineage
+  psi?: Psi
 }
+
+// ── D4 · population-stability (drift) monitor ────────────────────────────────
+interface PsiFeature { feature: string; psi: number; status: string }
+interface PsiScenario { key: string; label: string; desc: string; max_psi: number; status: string; per_feature: PsiFeature[] }
+interface Psi { reference: string; method: string; note: string; scenarios: PsiScenario[] }
 
 // ── additive scale / cross-check / lineage blocks (optional — the card degrades
 //    gracefully if eval/build_model_card.py hasn't run) ──────────────────────
@@ -224,6 +230,8 @@ export function ModelCardPanel() {
         )}</p>
 
         {c.corpus && <ScaleSection corpus={c.corpus} />}
+
+        {c.psi && <DriftSection psi={c.psi} />}
 
         {/* ── THIN-FILE: bureau's blind spot ───────────────────────────── */}
         <div className="mc-block">
@@ -441,6 +449,46 @@ function ScaleSection({ corpus }: { corpus: Corpus }) {
       </div>
 
       <p className="val-caveat faint">{tx(corpus.methodology, corpus.methodology)}</p>
+    </div>
+  )
+}
+
+// ── D4 · Population Stability (drift) monitor — calibrated: flat in-control, flags a shift ─
+function DriftSection({ psi }: { psi: Psi }) {
+  const { tx } = useTx()
+  const feats = psi.scenarios[0]?.per_feature.map((f) => f.feature) ?? []
+  const cell = (s: PsiScenario, feat: string) => s.per_feature.find((f) => f.feature === feat)
+  const ragLabel = (st: string) =>
+    st === 'stable' ? tx('stable', 'مستقر') : st === 'shift' ? tx('shift', 'انزياح') : tx('significant', 'كبير')
+  return (
+    <div className="mc-block mc-drift">
+      <div className="val-block-h">
+        <span className="ins-cap">{tx('Population stability — the drift monitor', 'استقرار التوزيع — مراقب الانزياح')}</span>
+        <span className="faint val-note">{psi.method}</span>
+      </div>
+      <div className="drift-grid" style={{ gridTemplateColumns: `1.4fr repeat(${psi.scenarios.length}, 1fr)` }}>
+        <span className="drift-h" />
+        {psi.scenarios.map((s) => (
+          <span className="drift-h" key={s.key}>{tx(s.label, s.label)}<span className="drift-h-desc faint">{s.desc}</span></span>
+        ))}
+        {feats.map((feat) => {
+          const [en, ar] = FEATURE_LABEL[feat] ?? [feat, feat]
+          return (
+            <div className="drift-line" key={feat} style={{ display: 'contents' }}>
+              <span className="drift-feat">{tx(en, ar)}</span>
+              {psi.scenarios.map((s) => {
+                const c2 = cell(s, feat)
+                return (
+                  <span className={`drift-cell rag-${c2?.status ?? 'stable'}`} key={s.key}>
+                    <b>{c2?.psi.toFixed(2)}</b><span className="drift-rag">{ragLabel(c2?.status ?? 'stable')}</span>
+                  </span>
+                )
+              })}
+            </div>
+          )
+        })}
+      </div>
+      <p className="val-caveat faint">{tx(psi.note, psi.note)}</p>
     </div>
   )
 }

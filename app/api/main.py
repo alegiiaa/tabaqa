@@ -27,7 +27,9 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pipeline import run_pipeline, ProfileResult, synthesize_fixture  # noqa: E402
 from pipeline.ingest_csv import build_fixture_from_statement  # noqa: E402
 from pipeline.insights import build_insights  # noqa: E402
-from scoring import score_profile, recommend_recourse  # noqa: E402
+from scoring import (  # noqa: E402
+    score_profile, recommend_recourse, score_confidence, benchmark_features,
+)
 from affordability import affordability  # noqa: E402
 import sama  # noqa: E402
 
@@ -50,6 +52,8 @@ from .models import (  # noqa: E402
     ProfileResponse,
     ReasonCodeModel,
     RecourseModel,
+    ScoreConfidenceModel,
+    BenchmarkModel,
     ScoreRequest,
     ScoreResponse,
     TransactionModel,
@@ -256,6 +260,8 @@ def score(req: ScoreRequest, ctx: KeyCtx = Depends(api_key)) -> ScoreResponse:
         raise HTTPException(status_code=422, detail=f"Could not process the input: {e}")
     sr = score_profile(result.features, result.income)
     rec = recommend_recourse(sr, result.features)
+    conf = score_confidence(result.features, sr.tabaqa_score)
+    bench = benchmark_features(result.features)
     return ScoreResponse(
         tabaqa_score=sr.tabaqa_score,
         base_points=sr.base_points,
@@ -266,6 +272,8 @@ def score(req: ScoreRequest, ctx: KeyCtx = Depends(api_key)) -> ScoreResponse:
         income=_income_model(result),
         reason_codes=[ReasonCodeModel(**rc.__dict__) for rc in sr.reason_codes],
         recourse=RecourseModel(**rec.to_dict()),
+        confidence=ScoreConfidenceModel(**conf.to_dict()),
+        benchmark=BenchmarkModel(**bench.to_dict()),
         validation=sr.validation,
         applicant=result.applicant,
         features=FeaturesModel(**result.features.to_dict()),

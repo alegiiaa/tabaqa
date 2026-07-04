@@ -281,6 +281,31 @@ class RecourseModel(BaseModel):
     steps: list[RecourseStepModel] = Field(default_factory=list)
 
 
+class ScoreConfidenceModel(BaseModel):
+    """D3 — a data-sufficiency band on the score (not a statistical CI)."""
+    level: str                           # high | medium | low
+    band: int
+    low: int
+    high: int
+    sufficiency: float
+    months_observed: int
+    verified_income_share: float
+
+
+class FeaturePercentileModel(BaseModel):
+    feature: str
+    value: float
+    percentile: int
+    better_than: int
+
+
+class BenchmarkModel(BaseModel):
+    """D5 — where the applicant sits in the 1M-account corpus."""
+    available: bool
+    n: int = 0
+    features: list[FeaturePercentileModel] = Field(default_factory=list)
+
+
 # ── responses ─────────────────────────────────────────────────────────────
 class ScoreResponse(BaseModel):
     tabaqa_score: int = Field(..., examples=[82])
@@ -297,6 +322,9 @@ class ScoreResponse(BaseModel):
     reason_codes: list[ReasonCodeModel]
     # actionable recourse — the fewest changes that lift the score into the next band
     recourse: RecourseModel | None = None
+    # D3 data-sufficiency confidence band + D5 percentile vs the 1M-account corpus
+    confidence: ScoreConfidenceModel | None = None
+    benchmark: BenchmarkModel | None = None
     # real-data provenance: the Berka fit (AUC 0.890) the weights are locked to
     validation: ValidationModel | None = None
     applicant: dict
