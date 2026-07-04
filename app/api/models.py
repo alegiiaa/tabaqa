@@ -260,6 +260,9 @@ class InsightsModel(BaseModel):
 # ── responses ─────────────────────────────────────────────────────────────
 class ScoreResponse(BaseModel):
     tabaqa_score: int = Field(..., examples=[82])
+    # the additive scorecard's starting points — score = base_points + Σ reason_codes.points
+    # (then clamped to 1..99). Exposed so a client can render the exact decomposition.
+    base_points: int = Field(20, examples=[20])
     pd: float = Field(..., examples=[0.041])
     risk_flag: str = Field(..., examples=["low"])
     verified_income: float = Field(

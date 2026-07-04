@@ -131,6 +131,7 @@ export interface Insights {
 
 export interface ScoreResult {
   tabaqa_score: number
+  base_points?: number             // additive-scorecard base; score = base + Σ reason_codes.points
   pd: number
   risk_flag: 'low' | 'medium' | 'high' | string
   verified_income: number

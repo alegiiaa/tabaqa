@@ -1,0 +1,151 @@
+# طبقة · Tabaqa — Scaling the Criteria: an engineering brainstorm
+
+> **Purpose:** not a checklist — a design brainstorm. For the three criteria we're
+> pushing now (**Data · UX · Feasibility**), each section is: *honest current state
+> (verified against live code)* → *the design principle* → *a menu of ideas with the
+> insight behind each* → *recommended flagship bets*. Companion to
+> [`WIN_PLAN.md`](./WIN_PLAN.md) (which maps all 5 criteria → tasks); this doc goes
+> deeper on 3.
+>
+> **Scope now:** ③ تحليل البيانات (Data) · ④ تجربة المستخدم (UX) · ⑤ قابلية التنفيذ (Feasibility).
+> **Parked for later:** ① الابتكار (Innovation) · ② التطبيق التقني (Technical) — both near-maxed
+> in-product; their remaining upside is pitch/positioning.
+>
+> **The bar (per the ask):** *unique, engineering-grade* features — each one must
+> earn its place with an **insight**, be **built on Tabaqa's actual engine/data**
+> (cited), and ideally hit **more than one criterion**. No generic "add polish."
+
+---
+
+## 0. The engine facts every idea is built on (verified 2026-07-04)
+
+These are the load-bearing truths — the ideas below are buildable *because* of them:
+
+- **The scorecard is genuinely additive.** `scoring/scorecard.py`: `raw = BASE_POINTS(20) + Σ rc.points`. Each `ReasonCode` carries a **signed integer `points`**, a `code`, a `label`, and the `feature` it came from. → An *exact* score decomposition already exists in every `/v1/score` response. We don't approximate the model; the decomposition **is** the model.
+- **Feature bins are explicit thresholds.** Points come from first-match `(predicate, points, code, label)` bins per feature. → We can compute, for any applicant, the *next-better bin* per feature and its point gain → **counterfactuals are computable**.
+- **Direction-locked to a real fit.** `_verify_lineage` asserts every served weight points the same way the Berka fit found (AUC 0.890). → Every claim traces to validated data.
+- **3-tier verification is on every income component.** `amount_verified` (Masdr) / `source_verified` / `inferred`. → Data-provenance and confidence signals are already in the payload.
+- **Live, validated model in the path.** `/v1/score` returns a `validation` block (AUC 0.890 / KS 0.683 / Berka 682). Ablation, 1M-corpus TSTR (0.870), swap-set, calibration all render in `ModelCardPanel`.
+- **SAMA DBR is codified.** `sama.py`: 33.33%/25% binding caps, 45/55/65% total-obligation bands, configurable `dbr_cap`. `/v1/affordability` returns policy + citation.
+
+---
+
+## ③ تحليل البيانات — Data Analysis
+
+**Current state (verified):** genuinely strong and *on-screen*. `ModelCardPanel` shows the wallet-layer ablation (AUC 0.66→0.86, **+0.203** with bootstrap CI), thin-file lift, swap-set (rescued/rejected with realized default), calibration curve, per-feature IV, monotonic score bands, the **1M-account synthetic corpus + TSTR 0.870 (96% retention)**, and a lineage strip. This already beats most teams outright.
+
+**Where it's thin:** it's all **population-level** ("the model is good"). A credit officer's next three questions are *applicant-level* and *governance-level*: **"why THIS score?"**, **"what would change it?"**, **"will it keep working?"** — none are answered yet. That's the gap to attack.
+
+**Design principle:** move from *"we validated a model"* → *"we do data science a bank's Model Risk team would respect, live on the applicant."*
+
+### Idea menu
+
+| # | Idea | The insight (why it's not generic) | Built on | Hits | Effort |
+|---|------|-----------------------------------|----------|------|--------|
+| D1 | **Exact Score Waterfall** — a cascading force-plot from base 20 → final 82, every feature's ± contribution as a bar | Because our model is **truly additive**, this is *exact attribution*, not a SHAP estimate on a black box. "Glass-box, not explained-box." No approximation error to defend. | `reason_codes[].points` + `BASE_POINTS` (already in payload) | Data+UX+Feas | **S** |
+| D2 | **Path-to-Approval** — the *minimum* change that flips DECLINE→APPROVE: "verified-income share 62%→75% (+7 pts) crosses 65 → APPROVE" | **Actionable counterfactual / recourse** — cutting-edge responsible-AI, and an *inclusion* tool (a decline becomes coaching). Computable because bins+points+cutoff are known. Nobody in a hackathon ships this. | scorecard bins + approval cutoff | Data+UX+Feas | **M** |
+| D3 | **Confidence band on the score** — "82 ± 4 (90 days, 92% verified)" vs thin-file "58 ± 12 (30 days, 40% verified)" | Ties score **reliability to data sufficiency** — an honesty signal MRM teams live by. Uncertainty ≠ weakness; hiding it is. | `months_observed`, `verified_income_share` | Data+Feas | **M** |
+| D4 | **Drift / PSI monitor** — Population Stability Index (training vs live/corpus) per feature, green/amber/red | Signals **SR 11-7 / SAMA model-governance** literacy — "how do you know it keeps working?" Almost no hackathon team shows monitoring. | corpus + training dist | Data+Feas | **M** |
+| D5 | **Percentile-vs-corpus** — "Fahd's balance-volatility is P30 of the gig+salary segment" | Turns the **1M corpus from a static stat into a live comparator** — the applicant is placed in a real distribution. | 1M corpus segments | Data+UX | **S** |
+| D6 | **Home Credit cross-check (make it real)** — the `cross_check` scaffold, filled with a 2nd real dataset | "**Replicated on a second real dataset**" is the single most credibility-buying line in the panel. Currently a stub. | `ModelCardPanel` cross-check block (built, empty) | Data | **M** ⚠️ needs Kaggle CSVs |
+| D7 | **Champion/Challenger** — expert additive card (live) vs Berka WOE scorecard, same applicant, side by side | Proves the demo score's **lineage to the validated model** — "the score *is* the fit, not weights we hope generalize." | both scorecards exist | Data+Tech | **M** |
+
+### Recommended Data bets
+1. **D1 Score Waterfall** (S, exact, visceral) — *do first.*
+2. **D2 Path-to-Approval** (M, genuinely novel, inclusion story).
+3. **D3 + D4 as a small "Model Risk" strip** (confidence band + PSI) — the MRM flex.
+4. **D6 cross-check** when Kaggle data is available.
+
+---
+
+## ④ تجربة المستخدم — User Experience
+
+**Current state (verified):** animated reveal (bank DECLINE→wallet→APPROVE, count-up, replayable, spoiler-gated); branded bank/wallet cards with real merchant logos; bilingual EN/AR RTL; and (shipped today) a **typed, bilingual error layer with Retry** so a cold-start/network failure never shows a raw "Failed to fetch." Applicants list has a real empty state.
+
+**Where it's thin:** this is the **weakest axis** and the most-felt by Saudi judges. Two structural gaps: (1) **Arabic is translated, not native** — no Arabic-Indic numerals, no Hijri dates, layouts mirrored rather than designed RTL-first; (2) the dashboard is **tabbed fragments**, not a single product-grade decision surface a lender would actually use.
+
+**Design principle:** a Saudi judge opens it and it feels **built for them**, and a lender sees a **decision, not a dashboard**.
+
+### Idea menu
+
+| # | Idea | The insight | Built on | Hits | Effort |
+|---|------|-------------|----------|------|--------|
+| U1 | **Arabic-first mode** — default AR for Saudi judges; Arabic-Indic numerals (٨٢، ٤٬٠٠٠) toggle; **Hijri dates** on the ledger; RTL-native (not mirrored) layouts; Naskh polish | The single most-felt thing by a Saudi judge. "First-class Arabic" is *felt in seconds* and most teams don't do it. The report already ships Traditional-Arabic Naskh — extend that care to the app. | existing i18n + RTL + report fonts | UX | **M** |
+| U2 | **Decision Cockpit** — one screen: reveal delta → score gauge → decision → affordability → top reasons, scannable/screenshot-ready | A credit officer wants **one view they could paste into a credit memo**, not 4 tabs. Turns "dashboard" into "product." | all screens exist; recompose | UX+Feas | **M** |
+| U3 | **Tap-to-explain everywhere** — every dense number (PD, IV, DBR, verified share) has a plain-AR/EN tooltip | Makes a dense analyst UI **self-teaching** — a judge is never confused in live review. Removes the "what is this?" friction. | static copy map | UX | **S** |
+| U4 | **Judge guided-tour** — subtle skippable walkthrough: "① reveal → ② score → ③ lend against it" | Kills "what do I click" in a live, timed review. Frictionless entry is already our `/demo` theme. | one overlay component | UX | **S** |
+| U5 | **Comprehensive skeleton/empty/loading** + branded shimmer (navy) across *every* screen | The error layer is done; the *loading/empty* half isn't uniform. A prototype that never flickers "broken" reads as shipped. | extend `LoadingScreen` pattern | UX+Tech | **S** |
+| U6 | **A11y + dual-theme pass** — keyboard nav, focus rings, ARIA, AA contrast in light+dark | "Bank-grade" = accessible. Cheap credibility; also protects the artifact/report look. | existing components | UX | **M** |
+| U7 | **Reveal micro-polish** — "✓ Masdr-verified" stamp animation on verified rows; count-up tick | The reveal is the money shot; small verified-stamp motion sells the 3-tier honesty viscerally. | `RevealScreen` (done, extend) | UX+Innov | **S** |
+
+### Recommended UX bets
+1. **U1 Arabic-first** (M) — *the headline UX bet for Saudi judges.*
+2. **U2 Decision Cockpit** (M) — product-grade single-screen decision.
+3. **U3 tap-to-explain + U5 uniform loading/empty** (S each) — never-confusing, never-broken.
+
+---
+
+## ⑤ قابلية التنفيذ الفعلي — Real-world Feasibility in Finance
+
+**Current state (verified):** regulator-accurate (SAMA 33.33/25 + 45/55/65 bands in `sama.py`, Nova Credit $45M, refuted claims swept — `PROOF.md`); `/v1/affordability` enforces a **configurable** DBR with policy label + citation; data-processor-on-consent route, Alinma GTM, per-decision pricing, print-ready credit report + QR verify page. The serving layer (API keys/metering/playground) is **built and deployed** — but `keyed:false`, so key issuance is still fail-open demo mode.
+
+**Where it's thin:** the feasibility story is largely **told in docs**, not **experienced in the product**. A judge can't yet *feel* "a bank integrates this in 5 lines" or "a compliance officer could file this decision."
+
+**Design principle:** make deployability **tangible and clickable**, not claimed.
+
+### Idea menu
+
+| # | Idea | The insight | Built on | Hits | Effort |
+|---|------|-------------|----------|------|--------|
+| F1 | **Compliance Receipt** — per decision: DBR ≤ cap ✓, income verified ✓, adverse-action reasons available ✓, consent on file ✓, no payment initiation (no PIS) ✓ — exportable, QR-verifiable | A **regulatory artifact a compliance officer could file.** Turns scattered compliance claims into one signed receipt. Feasibility made *tangible*. Pairs with D1 (the reasons) + the existing QR verify page. | affordability policy + reason codes + verify page | Feas+Data+UX | **M** |
+| F2 | **Live curlable API + real sandbox key** — make the `/developers` playground issue a working key so a judge integrates live | "A bank ships this in 5 lines" — **experienced, not slideware.** The playground exists; only keystore is offline. | serving layer (built) | Feas+Tech | **S** ⚠️ needs live-Supabase greenlight |
+| F3 | **Consent & data-processor flow, visualized** — show the SAMA open-banking consent screen, the read-only scopes, and "processor inside the licensee — no new license" diagram, in-app | Shows the **legal/consent rail**, not just claims it. Answers "is this even allowed?" before it's asked. | new screen | Feas | **M** |
+| F4 | **Lender Policy Engine** — a lender sets cutoff score, max tenor, risk appetite; the decision reflects it | "Tabaqa fits **YOUR** policy" — proves it's a deployable product, not a fixed toy. DBR is already configurable; extend to full policy. | `sama.py` config + affordability | Feas+Tech | **M** |
+| F5 | **Bank ROI calculator** — "at 10k decisions/mo, the swap-set cuts approved-pool default 43% → X SAR saved vs Tabaqa's per-decision cost" | **Feasibility quantified from our own data** — ties the swap-set (Data) to a CFO's language (money). | swap-set numbers (exist) | Feas+Data | **S** |
+| F6 | **FSDP inclusion meter** — "N% of this segment is bureau-unscorable; Tabaqa scores them → moves the FSDP 20%-SME-by-2030 KPI" | National-impact framing **in-product**, not just a pitch line. | corpus segments + thin-file lift | Feas | **S** |
+| F7 | **Fraud/AML overlay** — simple SAMA counter-fraud signals: too-smooth income (synthetic), circular transfers, velocity | A licensee needs **fraud controls**; surfacing basic ones shows production-awareness. | transaction stream | Feas+Data | **M** |
+
+### Recommended Feasibility bets
+1. **F1 Compliance Receipt** (M) — *the flagship feasibility artifact; cross-cuts Data+UX.*
+2. **F5 ROI calculator + F6 inclusion meter** (S each) — feasibility in the buyer's language, from our own numbers.
+3. **F2 live API key** (S) — *high impact, but needs your green light on live Supabase.*
+
+---
+
+## ★ Cross-cutting flagships (hit 3 criteria at once — highest ROI)
+
+These are the ones to lead with. Each is novel, engineering-grade, and scores on multiple axes:
+
+1. **Exact Score Waterfall + auto Adverse-Action reasons (D1)** → Data (exact attribution) · Feasibility (regulator-grade explainability) · UX (visceral). *Cheapest flagship; data already in the payload.*
+2. **Path-to-Approval counterfactual (D2)** → Data (recourse) · UX (interactive) · Feasibility (inclusion). *Most novel single feature we could ship.*
+3. **Compliance Receipt (F1)** → Feasibility (filable artifact) · Data (the checks) · UX (clean export). *Ties the reasons, the DBR, and the QR page into one deliverable.*
+4. **Model-Risk strip: confidence band + PSI drift (D3+D4)** → Data · Feasibility. *The MRM flex that finance-literate judges reward and rookies never show.*
+5. **Arabic-first (U1)** → UX. *Not cross-cutting, but the highest-felt single UX bet for this specific audience.*
+
+---
+
+## Suggested sequence
+
+**Wave 1 — cheap, high-impact, zero external dependency (do now):**
+- D1 Score Waterfall · U3 tap-to-explain · U5 uniform loading/empty · F5 ROI · F6 inclusion meter
+
+**Wave 2 — the novel flagships:**
+- D2 Path-to-Approval · F1 Compliance Receipt · U2 Decision Cockpit
+
+**Wave 3 — the MRM + Arabic-first depth:**
+- D3+D4 Model-Risk strip · U1 Arabic-first · U6 a11y/dual-theme
+
+**Blocked on a decision from you:**
+- D6 Home Credit cross-check → **Kaggle CSVs**
+- F2 live API sandbox key → **green light on applying the migration to live Supabase**
+
+---
+
+## Decisions I need from you
+
+1. **Which flagships?** My pick to lead: **D1 (Waterfall) → D2 (Path-to-Approval) → F1 (Compliance Receipt)**. Agree, or reprioritize?
+2. **Live Supabase** for the curlable-API key (F2) — yes/later?
+3. **Kaggle CSVs** for the real cross-check (D6) — can you drop them, or synthesize a defensible proxy?
+4. **Arabic-first default** (U1) — flip the app default to AR (with an EN toggle), or keep EN default and just deepen AR quality?
+
+*Created 2026-07-04. Focus: criteria ③④⑤. Companion: [`WIN_PLAN.md`](./WIN_PLAN.md) · [`PROOF.md`](./PROOF.md) · [`eval/DATA_REPORT.md`](./app/eval/DATA_REPORT.md).*

@@ -5,6 +5,7 @@ import { resolveMerchant, CATEGORY_LABELS } from '../../lib/merchants'
 import { sourceLabel } from '../../lib/institutions'
 import { MerchantLogo } from './MerchantLogo'
 import { AccountCard } from './AccountCard'
+import { ScoreWaterfall } from './ScoreWaterfall'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
@@ -318,9 +319,6 @@ export function ScoreScreen({ result }: { result: ScoreResult }) {
   const riskCls =
     result.risk_flag === 'low' ? 'ok' : result.risk_flag === 'medium' ? 'warn' : 'bad'
 
-  const pos = result.reason_codes.filter((r) => r.polarity === 'positive')
-  const neg = result.reason_codes.filter((r) => r.polarity === 'negative')
-
   return (
     <div className="screen score-screen">
       <div className="score-left">
@@ -349,24 +347,7 @@ export function ScoreScreen({ result }: { result: ScoreResult }) {
       </div>
 
       <div className="score-right">
-        <div className="rc">
-          <div className="h">{tx('Why — positive', 'الأسباب — إيجابية')}</div>
-          {pos.length === 0 && <div className="faint small">{tx('none', 'لا يوجد')}</div>}
-          {pos.map((r, i) => (
-            <div className="row2" key={i}>
-              <span>{r.label}</span>
-              <b className="pts-pos">+{r.points}</b>
-            </div>
-          ))}
-          <div className="h" style={{ marginTop: 12 }}>{tx('Why — negative', 'الأسباب — سلبية')}</div>
-          {neg.length === 0 && <div className="faint small">{tx('none', 'لا يوجد')}</div>}
-          {neg.map((r, i) => (
-            <div className="row2" key={i}>
-              <span>{r.label}</span>
-              <b className="pts-neg">{r.points}</b>
-            </div>
-          ))}
-        </div>
+        <ScoreWaterfall result={result} />
       </div>
       <ValidationStrip validation={result.validation} />
     </div>

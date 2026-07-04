@@ -586,6 +586,35 @@ footer{border-top:1px solid var(--line);padding:60px 0 44px;color:var(--muted);f
 .risk-pill.warn{color:#9a6700;background:#fff7e0;border:1px solid #f0d488}
 .risk-pill.bad{color:#b42318;background:#fdf0f0;border:1px solid #f6cccc}
 .pts-pos{color:var(--ok)}.pts-neg{color:#b42318}
+/* exact score decomposition — the additive waterfall (ScoreWaterfall.tsx) */
+.wf{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.wf-head{display:flex;flex-direction:column;gap:3px;margin-bottom:16px}
+.wf-rows{display:flex;flex-direction:column;gap:7px}
+.wf-row{display:grid;grid-template-columns:minmax(110px,1fr) minmax(90px,1.7fr) 42px;align-items:center;gap:12px;
+  animation:wfIn .5s cubic-bezier(.22,.7,.3,1) both}
+@keyframes wfIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.wf-row{animation:none}}
+.wf-label{font-size:13px;color:var(--text);display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;min-width:0}
+.wf-val{font-family:var(--mono);font-size:11.5px}
+.wf-iv{font-family:var(--mono);font-size:10px;color:var(--faint);border:1px solid var(--line);
+  border-radius:5px;padding:0 4px;letter-spacing:.02em}
+.wf-track{position:relative;height:20px;border-radius:6px;background:rgba(12,18,38,.045)}
+.wf-bar{position:absolute;inset-block:3px;border-radius:5px;min-width:3px}
+.wf-base .wf-bar{background:linear-gradient(180deg,#9aa5b8,#7c8798)}
+.wf-pos .wf-bar{background:linear-gradient(180deg,#2fbe83,var(--ok))}
+.wf-neg .wf-bar{background:linear-gradient(180deg,#e2645a,#b42318)}
+.wf-clamp .wf-bar{background:repeating-linear-gradient(45deg,#f0d488,#f0d488 4px,#fbe9b0 4px,#fbe9b0 8px)}
+.wf-final .wf-bar{inset-block:1px;background:linear-gradient(180deg,var(--blue-2),var(--blue-deep))}
+.wf-tick{position:absolute;inset-block:-2px;width:1.5px;background:rgba(12,18,38,.28);transform:translateX(-.75px)}
+.wf-num{font-family:var(--mono);font-size:13.5px;text-align:end;font-weight:600}
+.wf-pos .wf-num{color:var(--ok)}
+.wf-neg .wf-num,.wf-clamp .wf-num{color:#b42318}
+.wf-base .wf-num{color:var(--muted)}
+.wf-final{margin-top:5px;padding-top:11px;border-top:1px solid var(--line)}
+.wf-final .wf-label{font-weight:600}
+.wf-final .wf-num{font-size:17px;color:var(--blue-deep)}
+.wf-final .wf-track{height:24px}
+.wf-foot{margin-top:14px;font-size:12px;line-height:1.5}
 /* score provenance strip — the real-data fit the weights are locked to */
 .score-validation{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;
   margin-top:2px;padding:12px 16px;background:var(--ok-soft);border:1px solid rgba(15,157,99,.28);

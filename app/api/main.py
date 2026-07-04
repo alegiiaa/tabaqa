@@ -256,6 +256,7 @@ def score(req: ScoreRequest, ctx: KeyCtx = Depends(api_key)) -> ScoreResponse:
     sr = score_profile(result.features, result.income)
     return ScoreResponse(
         tabaqa_score=sr.tabaqa_score,
+        base_points=sr.base_points,
         pd=sr.pd,
         risk_flag=sr.risk_flag,
         verified_income=result.income.total_income,
