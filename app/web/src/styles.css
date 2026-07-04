@@ -1807,3 +1807,9 @@ html[dir="rtl"] .mvt-num{text-align:right}
 /* expander caret points into the reading direction */
 html[dir="rtl"] .mv-details summary::before{content:'◂'}
 html[dir="rtl"] .mv-details[open] summary::before{transform:rotate(-90deg)}
+
+/* ── mv2 · the 30-second lede + evidence teaser ── */
+.mv-lede{margin:14px 0 2px;padding:13px 16px;border:1px solid rgba(37,99,235,.28);
+  border-radius:13px;background:var(--blue-soft)}
+.mv-lede p{margin:0;font-size:13.5px;line-height:1.65;color:var(--blue-deep);font-weight:500;max-width:78ch}
+.score-validation .mm-link{font-size:12.5px}

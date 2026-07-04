@@ -159,14 +159,14 @@ function SectionBody({
   section, result, onNavigate, conn,
 }: { section: Section; result: ScoreResult; onNavigate: (s: Section) => void; conn: { connectionId?: string; statement?: StatementInput } }) {
   if (section === 'home') return <MyMoney result={result} onNavigate={onNavigate} conn={conn} />
-  if (section === 'income') return <IncomeScreen result={result} />
+  if (section === 'income') return <IncomeScreen result={result} onOpenModel={() => onNavigate('model')} />
   if (section === 'ledger') return <LedgerScreen txns={result.transactions} />
   return <AffordScreen result={result} />
 }
 
 // Holds the score section back until the reveal has played — no spoilers
 // under the DECLINE chip.
-function IncomeScreen({ result }: { result: ScoreResult }) {
+function IncomeScreen({ result, onOpenModel }: { result: ScoreResult; onOpenModel?: () => void }) {
   const { tx } = useTx()
   const [revealed, setRevealed] = useState(false)
   return (
@@ -176,7 +176,7 @@ function IncomeScreen({ result }: { result: ScoreResult }) {
         <>
           <div style={{ height: 22 }} />
           <div className="section-head"><h1>{tx('The score', 'الدرجة')}</h1><p>{tx('Every point is explainable — no black box.', 'كل نقطة قابلة للتفسير — دون صندوق أسود.')}</p></div>
-          <ScoreScreen result={result} />
+          <ScoreScreen result={result} onOpenModel={onOpenModel} />
         </>
       )}
     </div>

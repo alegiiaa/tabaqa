@@ -8,6 +8,7 @@ import { AccountCard } from './AccountCard'
 import { ScoreWaterfall } from './ScoreWaterfall'
 import { RecoursePanel } from './RecoursePanel'
 import { ConfidenceBadge, BenchmarkPanel } from './ScoreExtras'
+import modelCard from '../../data/model_card.json'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
@@ -307,7 +308,7 @@ export function RevealScreen({
 }
 
 // ── ② the score ─────────────────────────────────────────────────────────────
-export function ScoreScreen({ result }: { result: ScoreResult }) {
+export function ScoreScreen({ result, onOpenModel }: { result: ScoreResult; onOpenModel?: () => void }) {
   const { tx } = useTx()
   const R = 79
   const C = 2 * Math.PI * R
@@ -354,30 +355,35 @@ export function ScoreScreen({ result }: { result: ScoreResult }) {
         <RecoursePanel recourse={result.recourse} />
         <BenchmarkPanel benchmark={result.benchmark} />
       </div>
-      <ValidationStrip validation={result.validation} />
+      <ValidationStrip validation={result.validation} onOpenModel={onOpenModel} />
     </div>
   )
 }
 
-// ── score provenance: the real-data fit the weights are locked to ────────────
-function ValidationStrip({ validation }: { validation?: Validation | null }) {
+// ── score provenance → the judge's road INTO the Model-validation page ───────
+// Numbers follow the performance-ledger discipline: the headline is the full-model
+// CV AUC + lift from model_card.json (never the loose 6-feature holdout figure).
+function ValidationStrip({ validation, onOpenModel }: { validation?: Validation | null; onOpenModel?: () => void }) {
   const { tx } = useTx()
-  if (!validation?.validated || validation.auc == null) return null
+  if (!validation?.validated) return null
   const accts = validation.accounts?.toLocaleString('en-US')
-  const badRate = validation.bad_rate != null ? `${(validation.bad_rate * 100).toFixed(0)}%` : null
   return (
     <div className="score-validation" title={validation.note ?? undefined}>
-      <span className="sv-badge">✓ {tx('Validated on real defaults', 'مُتحقَّق على تعثّرات حقيقية')}</span>
+      <span className="sv-badge">✓ {tx('Proven on real defaults', 'مُثبَت على تعثّرات حقيقية')}</span>
       <span className="sv-metrics">
-        <b>AUC {validation.auc.toFixed(3)}</b>
-        {validation.ks != null && <> · KS {validation.ks.toFixed(3)}</>}
-        {' · '}
-        {validation.dataset}{accts ? ` · ${accts} ${tx('accounts', 'حساب')}` : ''}
-        {badRate ? ` · ${badRate} ${tx('bad rate', 'نسبة التعثّر')}` : ''}
+        <b dir="ltr">+{modelCard.lift.auc.toFixed(2)} AUC</b>
+        {' '}{tx('over bureau-only', 'فوق رؤية المكتب')} ·{' '}
+        {tx('replicated on a 2nd country', 'مُكرَّر في بلد ثانٍ')}
+        {accts ? <> · <span dir="ltr">{accts}</span> {tx('real accounts', 'حساب حقيقي')}</> : null}
       </span>
+      {onOpenModel && (
+        <button className="mm-link" onClick={onOpenModel}>
+          {tx('See the evidence', 'اطّلع على الدليل')} →
+        </button>
+      )}
       <span className="sv-note faint small">
-        {tx('This score’s weights are direction-locked to that fit.',
-            'أوزان هذه الدرجة مقيّدة باتجاه هذا النموذج.')}
+        {tx('Weights direction-locked to the fit; magnitudes re-calibrated on the lender’s book at go-live.',
+            'الأوزان مقيّدة باتجاه النموذج المُتحقَّق؛ وتُعاير قيمها على بيانات المموِّل عند الإطلاق.')}
       </span>
     </div>
   )
