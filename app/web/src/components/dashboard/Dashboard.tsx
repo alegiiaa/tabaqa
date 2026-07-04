@@ -153,7 +153,6 @@ export function Dashboard() {
 function SectionBody({
   section, result, onNavigate, conn,
 }: { section: Section; result: ScoreResult; onNavigate: (s: Section) => void; conn: { connectionId?: string; statement?: StatementInput } }) {
-  const { tx } = useTx()
   if (section === 'home') return <MyMoney result={result} onNavigate={onNavigate} conn={conn} />
   if (section === 'income') return <IncomeScreen result={result} />
   if (section === 'ledger') return <LedgerScreen txns={result.transactions} />
