@@ -971,7 +971,9 @@ table.ledger tr:last-child td{border-bottom:0}
 
 /* ═══════════════════════  App shell — sidebar dashboard  ═══════════════════════ */
 .ds{display:flex;flex-direction:row;min-height:100vh;background:var(--bg-soft)}
-[dir=rtl] .ds{flex-direction:row-reverse}
+/* NOTE: no [dir=rtl] row-reverse here — the .ds element carries dir={dir} itself,
+   so its own RTL direction already flips the flex row (sidebar → right). Adding
+   row-reverse on top double-flips and pins the sidebar back to the left. */
 
 .ds-side{width:250px;flex:none;background:#fff;border-inline-end:1px solid var(--line);
   display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh;z-index:20}
