@@ -568,6 +568,9 @@ footer{border-top:1px solid var(--line);padding:60px 0 44px;color:var(--muted);f
 .reveal-verdict.ok{color:var(--ok);background:var(--ok-soft);border-color:rgba(15,157,99,.3)}
 .ghost-card{background:transparent;border:1.5px dashed var(--line-2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+/* the animation wrapper must size exactly like the paycard it wraps */
+.reveal-wallet-slot{flex:1 1 300px;max-width:370px;min-width:270px;display:flex}
+.reveal-wallet-slot .paycard{flex:1 1 auto;min-width:0;max-width:none}
 .reveal-cta{margin-top:10px}
 [dir="rtl"] .reveal-arrow{transform:scaleX(-1)}
 @keyframes revealPop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}

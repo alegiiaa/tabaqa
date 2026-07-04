@@ -217,7 +217,7 @@ export function RevealScreen({
             walletAccounts.map((a, i) => (
               <div
                 key={a.source}
-                className={animating ? 'reveal-pop' : undefined}
+                className={`reveal-wallet-slot${animating ? ' reveal-pop' : ''}`}
                 style={animating ? { animationDelay: `${0.15 + i * 0.12}s` } : undefined}
               >
                 <AccountCard account={a} holder={holder} />
