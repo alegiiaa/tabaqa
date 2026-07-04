@@ -27,6 +27,20 @@ export interface ReasonCode {
   label: string
   points: number
   polarity: 'positive' | 'negative'
+  feature?: string             // the cash-flow feature this bin reads
+  iv?: number | null           // validated Information Value (Berka fit), if known
+}
+
+// Real-data provenance stamped on every score: the Berka fit the weights are locked to.
+export interface Validation {
+  validated: boolean
+  auc?: number | null
+  ks?: number | null
+  cv_auc?: number | null
+  dataset?: string | null
+  accounts?: number | null
+  bad_rate?: number | null
+  note?: string | null
 }
 
 export interface Features {
@@ -123,6 +137,7 @@ export interface ScoreResult {
   reasons: string[]
   income: Income
   reason_codes: ReasonCode[]
+  validation?: Validation | null   // real-data provenance (Berka fit, AUC 0.890)
   applicant: Record<string, any>
   features?: Features | null
   transactions: Transaction[]

@@ -256,9 +256,13 @@ behaviour a SAMA-minded reviewer wants to see.
   in this data) — reported honestly: a feature that's strong on Saudi wallet/bank data simply
   carries no signal on this particular benchmark. `balance_volatility` is computed on
   **pre-loan** balances only, so its high IV is genuine signal, not leakage.
-- The **demo** score (`scoring/scorecard.py`) uses expert-set additive weights for full
-  explainability; this report shows those same features are predictive when *fitted*. The
-  production path swaps in a WOE-binned scorecard (same I/O contract).
+- The **demo** score (`scoring/scorecard.py`) is now **pinned to this fit**:
+  `scoring/train.py` exports the fitted coefficients + Information Values to
+  `scoring/model_params.json`, and the served card **machine-verifies at import** that every
+  weight points the direction the fit found (one documented monotonic override,
+  `income_expense_ratio`) and **stamps these metrics onto every score** it returns. The points
+  stay explainable additive weights, so the number is still fully attributable; production can
+  swap in a WOE-binned `optbinning` scorecard on the lender's own history (same I/O contract).
 """)
 
 

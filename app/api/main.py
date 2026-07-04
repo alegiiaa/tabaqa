@@ -262,6 +262,7 @@ def score(req: ScoreRequest, ctx: KeyCtx = Depends(api_key)) -> ScoreResponse:
         reasons=sr.reasons,
         income=_income_model(result),
         reason_codes=[ReasonCodeModel(**rc.__dict__) for rc in sr.reason_codes],
+        validation=sr.validation,
         applicant=result.applicant,
         features=FeaturesModel(**result.features.to_dict()),
         transactions=_transaction_models(result),

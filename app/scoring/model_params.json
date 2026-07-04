@@ -1,0 +1,121 @@
+{
+  "generated_utc": "2026-07-03T17:04:26Z",
+  "model": "logistic_regression(class_weight=balanced) on 6 standardized cash-flow features",
+  "source": {
+    "dataset": "Berka / PKDD'99",
+    "db": "relational.fel.cvut.cz:3306/financial",
+    "url": "https://relational.fel.cvut.cz/dataset/Financial"
+  },
+  "sample": {
+    "accounts": 682,
+    "defaults": 76,
+    "bad_rate": 0.1114
+  },
+  "metrics": {
+    "holdout_auc": 0.89,
+    "holdout_ks": 0.683,
+    "cv_auc": 0.858,
+    "cv_ks": 0.562
+  },
+  "intercept_bad": -0.5215,
+  "features": {
+    "income_regularity": {
+      "coef_bad": -0.2214,
+      "abs_coef": 0.2214,
+      "iv": 0.442,
+      "risk_direction": "lowers",
+      "safer_when": "higher",
+      "scaler_mean": 0.4538,
+      "scaler_std": 0.2957
+    },
+    "income_expense_ratio": {
+      "coef_bad": 0.4968,
+      "abs_coef": 0.4968,
+      "iv": 0.3,
+      "risk_direction": "raises",
+      "safer_when": "lower",
+      "scaler_mean": 1.4971,
+      "scaler_std": 3.2829
+    },
+    "avg_balance": {
+      "coef_bad": -0.2718,
+      "abs_coef": 0.2718,
+      "iv": 0.244,
+      "risk_direction": "lowers",
+      "safer_when": "higher",
+      "scaler_mean": 43606.8333,
+      "scaler_std": 13471.9732
+    },
+    "min_balance": {
+      "coef_bad": -0.6481,
+      "abs_coef": 0.6481,
+      "iv": 0.317,
+      "risk_direction": "lowers",
+      "safer_when": "higher",
+      "scaler_mean": 656.1466,
+      "scaler_std": 1844.5526
+    },
+    "nsf_count": {
+      "coef_bad": 2.2336,
+      "abs_coef": 2.2336,
+      "iv": 0.0,
+      "risk_direction": "raises",
+      "safer_when": "lower",
+      "scaler_mean": 0.1994,
+      "scaler_std": 1.5397
+    },
+    "recurring_obligation_load": {
+      "coef_bad": 0.5566,
+      "abs_coef": 0.5566,
+      "iv": 0.318,
+      "risk_direction": "raises",
+      "safer_when": "lower",
+      "scaler_mean": 0.1874,
+      "scaler_std": 0.1717
+    },
+    "balance_volatility": {
+      "coef_bad": 0.9639,
+      "abs_coef": 0.9639,
+      "iv": 1.295,
+      "risk_direction": "raises",
+      "safer_when": "lower",
+      "scaler_mean": 0.4159,
+      "scaler_std": 0.1262
+    }
+  },
+  "score_band_default_rates": [
+    {
+      "band": "1 (worst)",
+      "accounts": 137,
+      "defaults": 53,
+      "default_rate": 0.3869
+    },
+    {
+      "band": "2",
+      "accounts": 136,
+      "defaults": 14,
+      "default_rate": 0.1029
+    },
+    {
+      "band": "3",
+      "accounts": 136,
+      "defaults": 4,
+      "default_rate": 0.0294
+    },
+    {
+      "band": "4",
+      "accounts": 136,
+      "defaults": 5,
+      "default_rate": 0.0368
+    },
+    {
+      "band": "5 (best)",
+      "accounts": 137,
+      "defaults": 0,
+      "default_rate": 0.0
+    }
+  ],
+  "direction_overrides": {
+    "income_expense_ratio": "Multivariate coefficient flips positive under multicollinearity + a capped extreme-ratio tail (dormant accounts). Univariate default rate falls 21.7%->5.1% across the operating range; served card uses the credit-sensible monotonic direction (higher = safer), per optbinning monotonic_trend practice."
+  }
+}
