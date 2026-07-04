@@ -996,5 +996,90 @@
       }
     ],
     "live_scorer": "Live score = transparent expert scorecard (glass-box; every point \u2192 a reason code). The fitted optbinning scorecard \u2014 Berka AUC 0.86, TSTR-validated on the corpus \u2014 is the drop-in production swap (identical I/O contract)."
+  },
+  "psi": {
+    "reference": "300k-account reference draw from the 1M scoring corpus",
+    "method": "PSI on the reference deciles \u00b7 <0.1 stable \u00b7 0.1\u20130.25 shift \u00b7 >0.25 significant",
+    "note": "A calibrated Population Stability monitor. In-control = an independent random draw (no false alarm \u2014 reads flat). Economic-stress = a simulated downturn shift in the incoming population (thinner buffers, more volatile balances, heavier obligations). This is the same PSI a production monitor runs on the live applicant stream vs the training distribution, catching silent drift before it degrades the score.",
+    "scenarios": [
+      {
+        "key": "in_control",
+        "label": "In-control",
+        "desc": "an independent random draw from the same population",
+        "max_psi": 0.0,
+        "status": "stable",
+        "per_feature": [
+          {
+            "feature": "income_regularity",
+            "psi": 0.0,
+            "status": "stable"
+          },
+          {
+            "feature": "income_expense_ratio",
+            "psi": 0.0,
+            "status": "stable"
+          },
+          {
+            "feature": "min_balance",
+            "psi": 0.0,
+            "status": "stable"
+          },
+          {
+            "feature": "nsf_count",
+            "psi": 0.0,
+            "status": "stable"
+          },
+          {
+            "feature": "recurring_obligation_load",
+            "psi": 0.0,
+            "status": "stable"
+          },
+          {
+            "feature": "balance_volatility",
+            "psi": 0.0,
+            "status": "stable"
+          }
+        ]
+      },
+      {
+        "key": "stress",
+        "label": "Economic-stress shift (simulated)",
+        "desc": "thinner buffers \u00b7 more volatile balances \u00b7 heavier obligations",
+        "max_psi": 0.347,
+        "status": "significant",
+        "per_feature": [
+          {
+            "feature": "balance_volatility",
+            "psi": 0.347,
+            "status": "significant"
+          },
+          {
+            "feature": "recurring_obligation_load",
+            "psi": 0.199,
+            "status": "shift"
+          },
+          {
+            "feature": "income_regularity",
+            "psi": 0.118,
+            "status": "shift"
+          },
+          {
+            "feature": "income_expense_ratio",
+            "psi": 0.0,
+            "status": "stable"
+          },
+          {
+            "feature": "min_balance",
+            "psi": 0.0,
+            "status": "stable"
+          },
+          {
+            "feature": "nsf_count",
+            "psi": 0.0,
+            "status": "stable"
+          }
+        ]
+      }
+    ]
   }
 }
