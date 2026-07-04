@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTx } from '../../lib/tx'
 import { api, type ScoreResult, type AffordabilityResult, type Transaction, type Validation } from '../../lib/api'
 import { resolveMerchant, CATEGORY_LABELS } from '../../lib/merchants'
@@ -80,7 +80,38 @@ export function useTierTag() {
 }
 
 // ── ① the reveal ────────────────────────────────────────────────────────────
-export function RevealScreen({ result }: { result: ScoreResult }) {
+// Remembers which results already played the reveal theatre, so tab-switching
+// doesn't replay it — only the explicit replay button does.
+const playedReveals = new WeakSet<object>()
+
+// rAF count-up with ease-out; when not running it just pins to the target.
+function useCountUp(target: number, from: number, run: boolean, ms = 1400) {
+  const [v, setV] = useState(run ? from : target)
+  useEffect(() => {
+    if (!run) { setV(target); return }
+    let raf = 0
+    const t0 = performance.now()
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / ms)
+      const e = 1 - Math.pow(1 - p, 3)
+      setV(from + (target - from) * e)
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, from, run, ms])
+  return v
+}
+
+export function RevealScreen({
+  result,
+  onRevealed,
+}: {
+  result: ScoreResult
+  /** Fires with true at the verdict-flip moment (and false on replay) — lets
+   *  the parent hold back spoilers (e.g. the score section) until the reveal. */
+  onRevealed?: (revealed: boolean) => void
+}) {
   const { tx } = useTx()
   const tierTag = useTierTag()
   const inc = result.income
@@ -89,13 +120,109 @@ export function RevealScreen({ result }: { result: ScoreResult }) {
   const accounts = result.accounts ?? []
   const holder = (result.applicant?.name as string) || tx('Card holder', 'حامل البطاقة')
 
+  // The theatre only makes sense when there IS a hidden layer to reveal.
+  const hasHiddenLayer = inc.reveal_delta > 0
+  const reduced =
+    typeof window !== 'undefined' &&
+    !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const skipTheatre = !hasHiddenLayer || reduced
+
+  const [stage, setStage] = useState<'bank' | 'revealed'>(() =>
+    skipTheatre || playedReveals.has(result) ? 'revealed' : 'bank',
+  )
+  const [animating, setAnimating] = useState(false)
+  const [flipped, setFlipped] = useState(stage === 'revealed')
+  const flipTimer = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(flipTimer.current), [])
+  useEffect(() => { onRevealed?.(flipped) }, [flipped, onRevealed])
+
+  // Real decision contrast for the verdict flip — same engine as the ④ tab.
+  const [verdict, setVerdict] = useState<AffordabilityResult | null>(null)
+  useEffect(() => {
+    if (!hasHiddenLayer) return
+    let on = true
+    const obligations = result.features
+      ? Math.round(result.features.recurring_obligation_load * inc.true_monthly_income)
+      : 0
+    api
+      .affordability({
+        verified_income: inc.true_monthly_income,
+        bank_only_income: inc.bank_only_income,
+        risk_flag: result.risk_flag,
+        amount: 60000,
+        tenor_months: 48,
+        annual_rate: 0.1,
+        existing_obligations: obligations,
+        customer_type: 'employee',
+      })
+      .then((r) => { if (on) setVerdict(r) })
+      .catch(() => { /* chip falls back to score copy */ })
+    return () => { on = false }
+  }, [result, hasHiddenLayer, inc.bank_only_income, inc.true_monthly_income])
+
+  const revealed = stage === 'revealed'
+  const shown = useCountUp(inc.true_monthly_income, inc.bank_only_income, animating)
+
+  const reveal = () => {
+    playedReveals.add(result)
+    setAnimating(true)
+    setStage('revealed')
+    flipTimer.current = window.setTimeout(() => setFlipped(true), 1500)
+  }
+  const replay = () => {
+    window.clearTimeout(flipTimer.current)
+    setAnimating(false)
+    setFlipped(false)
+    setStage('bank')
+  }
+
+  const decisionLabel = (d: string) =>
+    d === 'APPROVE' ? tx('APPROVE', 'موافقة') : d === 'REVIEW' ? tx('REVIEW', 'مراجعة') : tx('DECLINE', 'رفض')
+  const decisionCls = (d: string) =>
+    d === 'APPROVE' ? 'ok' : d === 'REVIEW' ? 'warn' : 'bad'
+
+  const bankChip = verdict?.bank_only
+    ? `${decisionLabel(verdict.bank_only.decision)} · ${tx('max financing', 'أقصى تمويل')} ${fmt(verdict.bank_only.max_financing)} ${SAR}`
+    : tx('Thin file — income invisible', 'ملف رقيق — دخل غير مرئي')
+  const tabaqaChip = verdict
+    ? `${decisionLabel(verdict.decision)} · ${tx('max financing', 'أقصى تمويل')} ${fmt(verdict.max_financing)} ${SAR}`
+    : `${tx('Tabaqa score', 'درجة Tabaqa')} ${result.tabaqa_score}`
+  const tabaqaChipCls = verdict ? decisionCls(verdict.decision) : 'ok'
+
+  const bankAccounts = accounts.filter((a) => a.kind !== 'wallet')
+  const walletAccounts = accounts.filter((a) => a.kind === 'wallet')
+
   return (
     <div className="screen">
+      {hasHiddenLayer && (
+        <div className="reveal-verdict-row">
+          <span className={`reveal-verdict ${flipped ? tabaqaChipCls : 'bad'}`}>
+            <span className="dot" />
+            {flipped ? tabaqaChip : bankChip}
+          </span>
+          {revealed && !skipTheatre && (
+            <button className="btn btn-ghost btn-sm reveal-replay" onClick={replay}>
+              {tx('↻ Replay the reveal', '↻ إعادة الكشف')}
+            </button>
+          )}
+        </div>
+      )}
+
       {accounts.length > 0 && (
         <div className="acct-strip">
-          {accounts.map((a) => (
+          {bankAccounts.map((a) => (
             <AccountCard key={a.source} account={a} holder={holder} />
           ))}
+          {revealed &&
+            walletAccounts.map((a, i) => (
+              <div
+                key={a.source}
+                className={animating ? 'reveal-pop' : undefined}
+                style={animating ? { animationDelay: `${0.15 + i * 0.12}s` } : undefined}
+              >
+                <AccountCard account={a} holder={holder} />
+              </div>
+            ))}
         </div>
       )}
 
@@ -106,42 +233,71 @@ export function RevealScreen({ result }: { result: ScoreResult }) {
           <div className="reveal-unit">{SAR} / {tx('mo', 'شهر')}</div>
         </div>
         <div className="reveal-arrow">→</div>
-        <div className="reveal-card hot-card">
-          <div className="reveal-cap">{tx('Tabaqa — true income', 'Tabaqa — الدخل الحقيقي')}</div>
-          <div className="reveal-big accent-num">{fmt(inc.true_monthly_income)}</div>
-          <div className="reveal-unit">{SAR} / {tx('mo', 'شهر')}</div>
-        </div>
+        {revealed ? (
+          <div
+            className={`reveal-card hot-card${animating ? ' reveal-pop' : ''}`}
+          >
+            <div className="reveal-cap">{tx('Tabaqa — true income', 'Tabaqa — الدخل الحقيقي')}</div>
+            <div className="reveal-big accent-num">{fmt(shown)}</div>
+            <div className="reveal-unit">{SAR} / {tx('mo', 'شهر')}</div>
+          </div>
+        ) : (
+          <div className="reveal-card ghost-card">
+            <div className="reveal-cap">{tx('The hidden layer', 'الطبقة المخفية')}</div>
+            <div className="reveal-big faint">؟</div>
+            <button className="btn btn-primary reveal-cta" onClick={reveal}>
+              {tx('Reveal the wallet layer', 'اكشف طبقة المحفظة')}
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="reveal-delta">
-        <span className="dot" />
-        {tx('Revealed', 'مكشوف')}: <b>+{fmt(inc.reveal_delta)} {SAR}</b> ·{' '}
-        {tx('verified share', 'النسبة الموثّقة')} <b>{pct(inc.verified_share)}</b>
-      </div>
+      {revealed && (
+        <>
+          <div
+            className={`reveal-delta${animating ? ' reveal-pop' : ''}`}
+            style={animating ? { animationDelay: '1.05s' } : undefined}
+          >
+            <span className="dot" />
+            {tx('Revealed', 'مكشوف')}: <b>+{fmt(inc.reveal_delta)} {SAR}</b> ·{' '}
+            {tx('verified share', 'النسبة الموثّقة')} <b>{pct(inc.verified_share)}</b>
+          </div>
 
-      <div className="rc" style={{ marginTop: 18 }}>
-        <div className="h">{tx('Income breakdown · 3-tier verification', 'تفصيل الدخل · تحقّق ثلاثي')}</div>
-        {inc.components.map((c, i) => {
-          const tag = tierTag(c.verification)
-          return (
-            <div className="row2" key={i}>
-              <span>{c.label}</span>
-              <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <b>{fmt(c.monthly_amount)}</b>
-                <span className={`tag ${tag.cls}`}>{tag.label}</span>
-              </span>
+          <div
+            className={`rc${animating ? ' reveal-pop' : ''}`}
+            style={{ marginTop: 18, ...(animating ? { animationDelay: '.45s' } : {}) }}
+          >
+            <div className="h">{tx('Income breakdown · 3-tier verification', 'تفصيل الدخل · تحقّق ثلاثي')}</div>
+            {inc.components.map((c, i) => {
+              const tag = tierTag(c.verification)
+              return (
+                <div
+                  className={`row2${animating ? ' reveal-pop' : ''}`}
+                  style={animating ? { animationDelay: `${0.6 + i * 0.14}s` } : undefined}
+                  key={i}
+                >
+                  <span>{c.label}</span>
+                  <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <b>{fmt(c.monthly_amount)}</b>
+                    <span className={`tag ${tag.cls}`}>{tag.label}</span>
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+
+          {reconciled && (
+            <div
+              className={`note-line${animating ? ' reveal-pop' : ''}`}
+              style={animating ? { animationDelay: '1.25s' } : undefined}
+            >
+              {tx(
+                'Bank ↔ wallet transfer detected and marked internal — not double-counted.',
+                'تم رصد تحويل بين البنك والمحفظة ووسمه داخليًا — دون احتساب مزدوج.',
+              )}
             </div>
-          )
-        })}
-      </div>
-
-      {reconciled && (
-        <div className="note-line">
-          {tx(
-            'Bank ↔ wallet transfer detected and marked internal — not double-counted.',
-            'تم رصد تحويل بين البنك والمحفظة ووسمه داخليًا — دون احتساب مزدوج.',
           )}
-        </div>
+        </>
       )}
     </div>
   )

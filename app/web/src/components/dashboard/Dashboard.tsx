@@ -155,18 +155,28 @@ function SectionBody({
 }: { section: Section; result: ScoreResult; onNavigate: (s: Section) => void; conn: { connectionId?: string; statement?: StatementInput } }) {
   const { tx } = useTx()
   if (section === 'home') return <MyMoney result={result} onNavigate={onNavigate} conn={conn} />
-  if (section === 'income') {
-    return (
-      <div className="screen">
-        <RevealScreen result={result} />
-        <div style={{ height: 22 }} />
-        <div className="section-head"><h1>{tx('The score', 'الدرجة')}</h1><p>{tx('Every point is explainable — no black box.', 'كل نقطة قابلة للتفسير — دون صندوق أسود.')}</p></div>
-        <ScoreScreen result={result} />
-      </div>
-    )
-  }
+  if (section === 'income') return <IncomeScreen result={result} />
   if (section === 'ledger') return <LedgerScreen txns={result.transactions} />
   return <AffordScreen result={result} />
+}
+
+// Holds the score section back until the reveal has played — no spoilers
+// under the DECLINE chip.
+function IncomeScreen({ result }: { result: ScoreResult }) {
+  const { tx } = useTx()
+  const [revealed, setRevealed] = useState(false)
+  return (
+    <div className="screen">
+      <RevealScreen result={result} onRevealed={setRevealed} />
+      {revealed && (
+        <>
+          <div style={{ height: 22 }} />
+          <div className="section-head"><h1>{tx('The score', 'الدرجة')}</h1><p>{tx('Every point is explainable — no black box.', 'كل نقطة قابلة للتفسير — دون صندوق أسود.')}</p></div>
+          <ScoreScreen result={result} />
+        </>
+      )}
+    </div>
+  )
 }
 
 function LoadingScreen() {

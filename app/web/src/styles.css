@@ -557,6 +557,23 @@ footer{border-top:1px solid var(--line);padding:60px 0 44px;color:var(--muted);f
 .note-line{margin-top:16px;font-size:13px;color:var(--muted);background:#fff;border:1px dashed var(--line-2);
   border-radius:10px;padding:11px 14px}
 
+/* ① reveal — the animated theatre */
+.reveal-verdict-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.reveal-verdict{display:inline-flex;align-items:center;gap:9px;padding:8px 16px;border-radius:100px;
+  font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.02em;border:1px solid transparent;
+  transition:background .45s ease,color .45s ease,border-color .45s ease}
+.reveal-verdict .dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.reveal-verdict.bad{color:#b42318;background:#fdf0f0;border-color:#f6cccc}
+.reveal-verdict.warn{color:#9a6700;background:#fff7e0;border-color:#f0d488}
+.reveal-verdict.ok{color:var(--ok);background:var(--ok-soft);border-color:rgba(15,157,99,.3)}
+.ghost-card{background:transparent;border:1.5px dashed var(--line-2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.reveal-cta{margin-top:10px}
+[dir="rtl"] .reveal-arrow{transform:scaleX(-1)}
+@keyframes revealPop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.reveal-pop{animation:revealPop .55s cubic-bezier(.22,.7,.3,1) both}
+@media (prefers-reduced-motion:reduce){.reveal-pop{animation:none}}
+
 /* ② score */
 .score-screen{display:grid;grid-template-columns:260px 1fr;gap:26px;align-items:start}
 .score-left{display:flex;flex-direction:column;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);
@@ -723,7 +740,7 @@ table.ledger tr:last-child td{border-bottom:0}
   .score-screen,.afford,.mode-grid{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
   .dash-email{display:none}
-  .reveal-arrow{transform:rotate(90deg)}
+  .reveal-arrow,[dir="rtl"] .reveal-arrow{transform:rotate(90deg)}
   .paycard{max-width:none}
 }
 
