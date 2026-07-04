@@ -99,7 +99,7 @@ export function InsightsPanel({
               trend.direction === 'growing' ? 'Growing' : trend.direction === 'declining' ? 'Declining' : 'Stable',
               trend.direction === 'growing' ? 'متزايد' : trend.direction === 'declining' ? 'متراجع' : 'مستقر',
             )}</span>
-            {trend.pct_change !== 0 && <span className={`ins-delta ${tcls}`}>{trend.pct_change > 0 ? '+' : ''}{pct(trend.pct_change)}</span>}
+            {trend.pct_change !== 0 && <span className={`ins-delta ${tcls}`} dir="ltr">{trend.pct_change > 0 ? '+' : ''}{pct(trend.pct_change)}</span>}
           </div>
           <div className="ins-spark-bars" aria-hidden>
             {trend.monthly.map((m, i) => (
@@ -113,7 +113,7 @@ export function InsightsPanel({
           <span className="ins-cap">{tx('Cushion', 'الاحتياطي')}</span>
           <div className="ins-twin">
             <div>
-              <span className="ins-big">{pct(data.savings_rate)}</span>
+              <span className="ins-big" dir="ltr">{pct(data.savings_rate)}</span>
               <span className="ins-cap2">{tx('saved / mo', 'ادخار شهري')}</span>
             </div>
             <div>
@@ -134,7 +134,7 @@ export function InsightsPanel({
               <div className="ins-row" key={i}>
                 <span className="ins-row-l">{s.label}</span>
                 <span className="ins-row-bar"><span style={{ width: `${Math.round(s.share * 100)}%` }} /></span>
-                <span className="ins-row-v">{pct(s.share)}</span>
+                <span className="ins-row-v" dir="ltr">{pct(s.share)}</span>
               </div>
             ))}
           </div>
@@ -142,7 +142,7 @@ export function InsightsPanel({
 
         {/* spending mix */}
         <div className="ins-card">
-          <span className="ins-cap">{tx('Where it goes', 'أين يُصرف')} · {fmt(data.spending.monthly_total)}/mo</span>
+          <span className="ins-cap">{tx('Where it goes', 'أين يُصرف')} · <span dir="ltr">{fmt(data.spending.monthly_total)}</span>{tx('/mo', '/شهر')}</span>
           <div className="ins-rows">
             {cats.map((c, i) => (
               <div className="ins-row" key={i}>

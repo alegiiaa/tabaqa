@@ -9,6 +9,7 @@ import { ScoreWaterfall } from './ScoreWaterfall'
 import { RecoursePanel } from './RecoursePanel'
 import { ConfidenceBadge, BenchmarkPanel } from './ScoreExtras'
 import modelCard from '../../data/model_card.json'
+import { dualDate } from '../../lib/dates'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
@@ -263,7 +264,7 @@ export function RevealScreen({
             style={animating ? { animationDelay: '1.05s' } : undefined}
           >
             <span className="dot" />
-            {tx('Revealed', 'مكشوف')}: <b>+{fmt(inc.reveal_delta)} {SAR}</b> ·{' '}
+            {tx('Revealed', 'مكشوف')}: <b><span dir="ltr">+{fmt(inc.reveal_delta)}</span> {SAR}</b> ·{' '}
             {tx('verified share', 'النسبة الموثّقة')} <b>{pct(inc.verified_share)}</b>
           </div>
 
@@ -345,7 +346,7 @@ export function ScoreScreen({ result, onOpenModel }: { result: ScoreResult; onOp
           </div>
         </div>
         <div className={`risk-pill ${riskCls}`}>
-          {riskLabel} · PD {pct(result.pd)}
+          {riskLabel} · <span dir="ltr">PD {pct(result.pd)}</span>
         </div>
         <ConfidenceBadge confidence={result.confidence} />
       </div>
@@ -378,7 +379,7 @@ function ValidationStrip({ validation, onOpenModel }: { validation?: Validation 
       </span>
       {onOpenModel && (
         <button className="mm-link" onClick={onOpenModel}>
-          {tx('See the evidence', 'اطّلع على الدليل')} →
+          {tx('See the evidence', 'اطّلع على الدليل')} <span className="fwd">→</span>
         </button>
       )}
       <span className="sv-note faint small">
@@ -398,7 +399,8 @@ const pfcLabel = (p: string) =>
   p.split('_').map((w) => w[0] + w.slice(1).toLowerCase()).join(' ').replace(/\bAnd\b/g, '&')
 
 export function LedgerScreen({ txns }: { txns: Transaction[] }) {
-  const { tx } = useTx()
+  const { tx, dir } = useTx()
+  const arabic = dir === 'rtl'
   const tierTag = useTierTag()
   const sorted = txns.slice().sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
 
@@ -442,13 +444,13 @@ export function LedgerScreen({ txns }: { txns: Transaction[] }) {
                       </span>
                     </div>
                     <div className="feed-sub faint">
-                      {cat ? tx(cat[0], cat[1]) : t.txn_type} · {t.timestamp.slice(0, 10)}
+                      {cat ? tx(cat[0], cat[1]) : t.txn_type} · <FeedDate iso={t.timestamp} arabic={arabic} />
                       {t.pfc_primary && <span className="pfc-chip" title={t.pfc_detailed ?? ''}>{pfcLabel(t.pfc_primary)}</span>}
                     </div>
                   </div>
                   <div className="feed-right">
                     <div className={`feed-amt ${inflow ? 'pos' : 'neg'}`}>
-                      {inflow ? '+' : '−'}{fmt(t.amount)} <small>{tx('SAR', 'ر.س')}</small>
+                      <span dir="ltr">{inflow ? '+' : '−'}{fmt(t.amount)}</span> <small>{tx('SAR', 'ر.س')}</small>
                     </div>
                     {tag && <span className={`tag ${tag.cls}`}>{tag.label}</span>}
                   </div>
@@ -459,6 +461,17 @@ export function LedgerScreen({ txns }: { txns: Transaction[] }) {
         ))}
       </div>
     </div>
+  )
+}
+
+// Gregorian + Hijri (Umm al-Qura) — the way a real Saudi statement reads.
+export function FeedDate({ iso, arabic }: { iso: string; arabic: boolean }) {
+  const d = dualDate(iso, arabic)
+  return (
+    <>
+      <span dir="ltr">{d.greg}</span>
+      {d.hijri && <span className="hijri-chip">{d.hijri}</span>}
+    </>
   )
 }
 

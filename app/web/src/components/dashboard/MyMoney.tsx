@@ -5,7 +5,7 @@ import { sourceLabel } from '../../lib/institutions'
 import { MerchantLogo } from './MerchantLogo'
 import { AccountCard } from './AccountCard'
 import { InsightsPanel } from './InsightsPanel'
-import { useTierTag } from './Result'
+import { useTierTag, FeedDate } from './Result'
 import { reportHref } from '../../lib/reportlink'
 import type { Section } from './DashboardLayout'
 
@@ -27,7 +27,8 @@ function monthlyIncome(txns: Transaction[]): number[] {
 }
 
 export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onNavigate: (s: Section) => void; conn: InsightsConn }) {
-  const { tx } = useTx()
+  const { tx, dir } = useTx()
+  const arabic = dir === 'rtl'
   const tierTag = useTierTag()
   const inc = result.income
   const SAR = tx('SAR', 'ر.س')
@@ -106,8 +107,8 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
             <span className="mm-kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" /></svg></span>
             {tx('Tabaqa score', 'درجة Tabaqa')}
           </span>
-          <span className="mm-kpi-val">{result.tabaqa_score} <small>/ 99</small></span>
-          <div className={`mm-kpi-foot ${riskCls === 'ok' ? 'pos' : ''}`}>{riskLabel} · PD {(result.pd * 100).toFixed(1)}%</div>
+          <span className="mm-kpi-val"><span dir="ltr">{result.tabaqa_score} <small>/ 99</small></span></span>
+          <div className={`mm-kpi-foot ${riskCls === 'ok' ? 'pos' : ''}`}>{riskLabel} · <span dir="ltr">PD {(result.pd * 100).toFixed(1)}%</span></div>
         </div>
 
         <div className="mm-kpi">
@@ -115,7 +116,7 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
             <span className="mm-kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7-7 7 7" /></svg></span>
             {tx('Revealed income', 'الدخل المكشوف')}
           </span>
-          <span className="mm-kpi-val">+{fmt(inc.reveal_delta)} <small>{SAR}</small></span>
+          <span className="mm-kpi-val"><span dir="ltr">+{fmt(inc.reveal_delta)}</span> <small>{SAR}</small></span>
           <div className="mm-kpi-foot pos">{tx('the bank could not see this', 'لم يكن البنك يرى هذا')}</div>
         </div>
 
@@ -124,7 +125,7 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
             <span className="mm-kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z" /><path d="M9 12l2 2 4-4" /></svg></span>
             {tx('Verified share', 'النسبة الموثّقة')}
           </span>
-          <span className="mm-kpi-val">{pct(inc.verified_share)}</span>
+          <span className="mm-kpi-val"><span dir="ltr">{pct(inc.verified_share)}</span></span>
           <div className="mm-kpi-foot">{tx('of income is proven', 'من الدخل مُثبت')}</div>
         </div>
       </div>
@@ -141,7 +142,7 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
         <div className="mm-panel">
           <div className="mm-panel-head">
             <span className="h">{tx('Income breakdown · 3-tier verification', 'تفصيل الدخل · تحقّق ثلاثي')}</span>
-            <button className="mm-link" onClick={() => onNavigate('income')}>{tx('Details', 'التفاصيل')} →</button>
+            <button className="mm-link" onClick={() => onNavigate('income')}>{tx('Details', 'التفاصيل')} <span className="fwd">→</span></button>
           </div>
           <div className="rc">
             {inc.components.map((c, i) => {
@@ -162,7 +163,7 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
         <div className="mm-panel">
           <div className="mm-panel-head">
             <span className="h">{tx('Why this score', 'لماذا هذه الدرجة')}</span>
-            <button className="mm-link" onClick={() => onNavigate('income')}>{tx('Full report', 'التقرير الكامل')} →</button>
+            <button className="mm-link" onClick={() => onNavigate('income')}>{tx('Full report', 'التقرير الكامل')} <span className="fwd">→</span></button>
           </div>
           <div className="mm-score-row">
             <div className="gauge">
@@ -177,7 +178,7 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
               {pos.map((r, i) => (
                 <div className="row2" key={i}>
                   <span>{r.label}</span>
-                  <b className="pts-pos">+{r.points}</b>
+                  <b className="pts-pos" dir="ltr">+{r.points}</b>
                 </div>
               ))}
             </div>
@@ -196,7 +197,7 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
       <div className="mm-panel" style={{ marginTop: 16, padding: 0, overflow: 'hidden' }}>
         <div className="mm-panel-head" style={{ padding: '18px 20px 0' }}>
           <span className="h">{tx('Recent activity · bank + wallet', 'أحدث العمليات · البنك + المحفظة')}</span>
-          <button className="mm-link" onClick={() => onNavigate('ledger')}>{tx('View all', 'عرض الكل')} →</button>
+          <button className="mm-link" onClick={() => onNavigate('ledger')}>{tx('View all', 'عرض الكل')} <span className="fwd">→</span></button>
         </div>
         <div className="mm-mini-feed">
           {recent.map((t, i) => {
@@ -212,9 +213,9 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
                     {r.title}
                     <span className={`feed-src ${isWallet ? 'w' : 'b'}`}>{sourceLabel(t.source, tx)}</span>
                   </div>
-                  <div className="feed-sub faint">{cat ? tx(cat[0], cat[1]) : t.txn_type} · {t.timestamp.slice(0, 10)}</div>
+                  <div className="feed-sub faint">{cat ? tx(cat[0], cat[1]) : t.txn_type} · <FeedDate iso={t.timestamp} arabic={arabic} /></div>
                 </div>
-                <div className={`feed-amt ${inflow ? 'pos' : 'neg'}`}>{inflow ? '+' : '−'}{fmt(t.amount)} <small>{SAR}</small></div>
+                <div className={`feed-amt ${inflow ? 'pos' : 'neg'}`}><span dir="ltr">{inflow ? '+' : '−'}{fmt(t.amount)}</span> <small>{SAR}</small></div>
               </div>
             )
           })}

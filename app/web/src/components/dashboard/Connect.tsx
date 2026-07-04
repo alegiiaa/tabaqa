@@ -233,7 +233,7 @@ export function Connect({
             </div>
             <div className="connect-reveal-delta">
               <span className="dot" />
-              {tx('Revealed', 'مكشوف')} <b>+{fmt(inc.reveal_delta)} {SAR}</b> {tx('/ month', '/ شهريًا')}
+              {tx('Revealed', 'مكشوف')} <b><span dir="ltr">+{fmt(inc.reveal_delta)}</span> {SAR}</b> {tx('/ month', '/ شهريًا')}
             </div>
             <p className="lead2" style={{ marginTop: 16 }}>
               {tx(
@@ -247,7 +247,7 @@ export function Connect({
                 { bank: pickedBank!.id, wallet: pickedWallet!.id, mode },
                 mode === 'own_data' ? ownInput! : undefined,
               )}>
-              {tx('Go to my dashboard →', 'إلى لوحتي →')}
+              {tx('Go to my dashboard →', 'إلى لوحتي ←')}
             </button>
           </div>
         )}

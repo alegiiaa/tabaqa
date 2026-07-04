@@ -74,7 +74,7 @@ export function ReportVerify() {
             <div className="vfy-bless">والله ولي التوفيق</div>
           </>
         )}
-        <Link to="/app" className="btn btn-primary" style={{ marginTop: 20 }}>افتح طبقة →</Link>
+        <Link to="/app" className="btn btn-primary" style={{ marginTop: 20 }}>افتح طبقة ←</Link>
       </div>
     </div>
   )

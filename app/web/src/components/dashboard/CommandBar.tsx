@@ -64,8 +64,8 @@ export function CommandBar({
     applicants: tx('Applicants', 'المتقدمون'),
   }
   function actingText(a: AssistantAction): string {
-    if (a.type === 'navigate' && a.section) return `${tx('Opening', 'فتح')} ${SECTION_LABEL[a.section] ?? a.section} →`
-    if (a.type === 'open' && a.target === 'developers') return `${tx('Opening Developer docs', 'فتح وثائق المطوّرين')} →`
+    if (a.type === 'navigate' && a.section) return `${tx('Opening', 'فتح')} ${SECTION_LABEL[a.section] ?? a.section}…`
+    if (a.type === 'open' && a.target === 'developers') return `${tx('Opening Developer docs', 'فتح وثائق المطوّرين')}…`
     return ''
   }
 

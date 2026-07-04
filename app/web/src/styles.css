@@ -1175,7 +1175,8 @@ table.ledger tr:last-child td{border-bottom:0}
 .ins-badge.ai{color:var(--blue);background:var(--blue-soft);border-color:rgba(37,99,235,.22)}
 .ins-summary{font-size:15.5px;font-weight:600;line-height:1.5;color:var(--text);margin:0 0 8px}
 .ins-narrative{font-size:14px;line-height:1.62;color:var(--muted);margin:0 0 16px}
-[dir=rtl] .ins-summary,[dir=rtl] .ins-narrative{direction:ltr;text-align:right}
+/* AI narrative can be Arabic (ALLaM) or English — render each in its natural direction */
+[dir=rtl] .ins-summary,[dir=rtl] .ins-narrative{unicode-bidi:plaintext;text-align:start}
 
 .ins-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:680px){.ins-cols{grid-template-columns:1fr}}
@@ -1813,3 +1814,22 @@ html[dir="rtl"] .mv-details[open] summary::before{transform:rotate(-90deg)}
   border-radius:13px;background:var(--blue-soft)}
 .mv-lede p{margin:0;font-size:13.5px;line-height:1.65;color:var(--blue-deep);font-weight:500;max-width:78ch}
 .score-validation .mm-link{font-size:12.5px}
+
+/* ── U1 · Hijri date chip on the ledger (dual-calendar, Saudi-statement style) ── */
+.hijri-chip{display:inline-block;margin-inline-start:7px;padding:1px 7px;border-radius:999px;
+  border:1px solid var(--line);background:var(--bg-soft);color:var(--muted);
+  font-size:10px;font-weight:600;white-space:nowrap;vertical-align:middle}
+
+/* ── U1 · RTL audit fixes (Wave B) ── */
+/* forward-arrow utility: flips with reading direction (use on "label →" links) */
+.fwd{display:inline-block}
+html[dir=rtl] .fwd{transform:scaleX(-1)}
+/* reveal-flow arrows: row visually reverses in RTL, so the glyph must too */
+html[dir=rtl] .mm-rev-arrow,html[dir=rtl] .connect-reveal-arrow{display:inline-block;transform:scaleX(-1)}
+html[dir=rtl] .acard-reveal .arr,html[dir=rtl] .persona-reveal .arr{display:inline-block;transform:scaleX(-1)}
+/* guard the latent assistant double-flip (user rows carry no avatar today) */
+html[dir=rtl] .asst-msg.user{flex-direction:row}
+/* hero photo focal point follows the mirror */
+html[dir=rtl] .mm-hero{background-position:center left}
+/* physical→logical */
+.ins-big small{margin-left:0;margin-inline-start:2px}

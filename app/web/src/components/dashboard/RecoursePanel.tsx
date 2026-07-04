@@ -112,7 +112,7 @@ export function RecoursePanel({ recourse }: { recourse?: Recourse | null }) {
       <p className={`rec-foot${reachable ? '' : ' rec-foot-warn'}`}>
         {reachable
           ? tx(`Do the above → indicative score ≈ ${projected_score} · clears ${dWord}.`,
-              `بتطبيق ما سبق → درجة استرشادية ≈ ${projected_score} · تتجاوز حدّ ${dWord}.`)
+              `بتطبيق ما سبق ← درجة استرشادية ≈ ${projected_score} · تتجاوز حدّ ${dWord}.`)
           : tx(`Even at best practice on all of these, this profile reaches only ≈ ${projected_score} — still short of the ${target_score} needed. It needs more than incremental change.`,
               `حتى بأفضل الممارسات في كل ما سبق، يصل هذا الملف إلى ≈ ${projected_score} فقط — دون ${target_score} المطلوبة. يحتاج أكثر من تحسين تدريجي.`)}
       </p>

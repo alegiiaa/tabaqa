@@ -86,7 +86,7 @@ export function BenchmarkPanel({ benchmark }: { benchmark?: Benchmark | null }) 
               <span className="bench-fill" style={{ width: `${f.better_than}%` }} />
               <span className="bench-dot" style={{ insetInlineStart: `${f.better_than}%` }} />
             </span>
-            <span className="bench-pct" dir="ltr">{tx('beats', 'يتفوّق على')} {f.better_than}%</span>
+            <span className="bench-pct">{tx('beats', 'يتفوّق على')} <span dir="ltr">{f.better_than}%</span></span>
           </div>
         ))}
       </div>

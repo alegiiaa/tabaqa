@@ -105,7 +105,7 @@ export function ScoreWaterfall({ result }: { result: ScoreResult }) {
             >
               <span className="wf-label">
                 {label}
-                {val != null && <span className="wf-val faint"> {val}</span>}
+                {val != null && <span className="wf-val faint" dir="ltr"> {val}</span>}
                 {iv != null && iv > 0 && <span className="wf-iv" title="Information Value (Berka fit)">IV {iv.toFixed(2)}</span>}
               </span>
               <span className="wf-track">
