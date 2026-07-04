@@ -6,6 +6,7 @@ import { sourceLabel } from '../../lib/institutions'
 import { MerchantLogo } from './MerchantLogo'
 import { AccountCard } from './AccountCard'
 import { ScoreWaterfall } from './ScoreWaterfall'
+import { RecoursePanel } from './RecoursePanel'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
@@ -348,6 +349,7 @@ export function ScoreScreen({ result }: { result: ScoreResult }) {
 
       <div className="score-right">
         <ScoreWaterfall result={result} />
+        <RecoursePanel recourse={result.recourse} />
       </div>
       <ValidationStrip validation={result.validation} />
     </div>

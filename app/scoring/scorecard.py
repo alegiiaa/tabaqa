@@ -238,3 +238,153 @@ def score_profile(features: CashFlowFeatures, income: IncomeProfile | None = Non
         reason_codes=ranked,
         validation=_validation_block(),
     )
+
+
+# ── D2 · actionable recourse: the smallest change that moves the decision ──────
+# The score maps to a risk band → a decision: high(≤66)=DECLINE, medium(67–78)=REVIEW,
+# low(≥79)=APPROVE (bands derived from the PD curve, so they can't drift from risk_flag).
+# For a not-yet-approved profile we compute the fewest feature improvements that lift
+# the score into the next band — a counterfactual / recourse, not a black-box "no".
+#
+# We only need each feature's TOP-bin points + threshold (not the whole ladder). These
+# mirror score_profile's bins and are asserted against it at import (_verify_recourse_max),
+# so they can't silently drift. verified_income_share leads: it's the wallet-reveal lever
+# and the most actionable — "verify more of your income" is Tabaqa's whole point.
+FEATURE_MAX_POINTS = {
+    "income_regularity": 18,
+    "verified_income_share": 14,
+    "nsf_count": 12,
+    "income_expense_ratio": 8,
+    "min_balance": 6,
+    "balance_volatility": 4,
+    "recurring_obligation_load": 0,
+}
+
+# (comparator, target value) — the threshold of each feature's best bin, for display.
+FEATURE_TARGET = {
+    "income_regularity": (">=", 0.8),
+    "verified_income_share": (">=", 0.7),
+    "nsf_count": ("<=", 0),
+    "income_expense_ratio": (">=", 1.4),
+    "min_balance": (">=", 1000),
+    "balance_volatility": ("<=", 0.4),
+    "recurring_obligation_load": ("<=", 0.3),
+}
+
+# lower = suggested earlier (more actionable / more on-brand). Tie-breaker only.
+_ACTIONABILITY = {
+    "verified_income_share": 0, "nsf_count": 1, "min_balance": 2,
+    "recurring_obligation_load": 3, "income_expense_ratio": 4,
+    "balance_volatility": 5, "income_regularity": 6,
+}
+
+MAX_SCORE = BASE_POINTS + sum(FEATURE_MAX_POINTS.values())  # the reachable ceiling (82)
+
+
+def _band_from_score(score: int) -> str:
+    pd = max(0.002, min(0.99, round(1.39 * (1 - score / 99) ** 2, 3)))
+    return "low" if pd < 0.06 else "medium" if pd < 0.15 else "high"
+
+
+def _min_score_for_band(band: str) -> int:
+    for s in range(1, 100):
+        if _band_from_score(s) == band:
+            return s
+    return 99
+
+
+@dataclass
+class RecourseStep:
+    feature: str
+    from_points: int
+    to_points: int
+    gain: int
+    comparator: str          # ">=" | "<="
+    target_value: float      # the level to reach for the top bin
+    current_value: float | None = None
+
+
+@dataclass
+class Recourse:
+    current_score: int
+    current_band: str        # low | medium | high
+    target_band: str         # the next band up
+    target_score: int        # minimum score for that band
+    target_decision: str     # REVIEW | APPROVE — what the band unlocks
+    gap: int                 # points needed
+    reachable: bool          # can incremental improvement close it?
+    projected_score: int     # score after applying the steps
+    already_prime: bool
+    steps: list = field(default_factory=list)  # list[RecourseStep]
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def recommend_recourse(result: ScoreResult, features: CashFlowFeatures) -> Recourse:
+    """The minimal set of feature improvements that lifts the score into the next band."""
+    score = result.tabaqa_score
+    band = _band_from_score(score)
+    cur_pts = {rc.feature: rc.points for rc in result.reason_codes if rc.feature}
+
+    if band == "low":  # already approvable — no recourse needed
+        return Recourse(score, band, "low", score, "APPROVE", 0, True, score, True, [])
+
+    target_band = "medium" if band == "high" else "low"
+    target_decision = "REVIEW" if target_band == "medium" else "APPROVE"
+    target_score = _min_score_for_band(target_band)
+    gap = max(0, target_score - score)
+
+    fvals = features.to_dict()
+    candidates: list[RecourseStep] = []
+    for feat, maxp in FEATURE_MAX_POINTS.items():
+        cur = cur_pts.get(feat, 0)
+        gain = maxp - cur
+        if gain <= 0:
+            continue
+        comp, tval = FEATURE_TARGET[feat]
+        candidates.append(RecourseStep(
+            feature=feat, from_points=cur, to_points=maxp, gain=gain,
+            comparator=comp, target_value=tval, current_value=fvals.get(feat),
+        ))
+    # fewest steps → biggest gains first; ties broken toward the more actionable lever
+    candidates.sort(key=lambda s: (-s.gain, _ACTIONABILITY.get(s.feature, 9)))
+
+    total_available = sum(c.gain for c in candidates)
+    reachable = total_available >= gap
+    if reachable:
+        chosen, acc = [], 0
+        for s in candidates:
+            if acc >= gap:
+                break
+            chosen.append(s)
+            acc += s.gain
+        projected = min(MAX_SCORE, score + acc)
+    else:
+        chosen = candidates  # best effort — everything, still short of the target
+        projected = min(MAX_SCORE, score + total_available)
+
+    return Recourse(score, band, target_band, target_score, target_decision,
+                    gap, reachable, projected, False, chosen)
+
+
+def _verify_recourse_max() -> None:
+    """Guard: the recourse top-bin table must match what score_profile actually awards."""
+    ideal = CashFlowFeatures(
+        income_regularity=1.0, income_expense_ratio=2.0, avg_balance=5000.0,
+        min_balance=5000.0, nsf_count=0, recurring_obligation_load=0.0,
+        balance_volatility=0.1, months_observed=6, verified_income_share=1.0,
+    )
+    sr = score_profile(ideal)
+    got = {rc.feature: rc.points for rc in sr.reason_codes if rc.feature}
+    for feat, maxp in FEATURE_MAX_POINTS.items():
+        if maxp != 0 and got.get(feat, 0) != maxp:
+            raise AssertionError(
+                f"recourse FEATURE_MAX_POINTS[{feat}]={maxp} contradicts score_profile "
+                f"(awards {got.get(feat, 0)} at best). Re-sync with the bins above."
+            )
+    if sr.tabaqa_score != min(99, MAX_SCORE):
+        raise AssertionError(f"recourse ceiling {MAX_SCORE} != score_profile max {sr.tabaqa_score}")
+
+
+_verify_recourse_max()

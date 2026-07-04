@@ -257,6 +257,30 @@ class InsightsModel(BaseModel):
     flags: list[str] = Field(default_factory=list)
 
 
+class RecourseStepModel(BaseModel):
+    feature: str
+    from_points: int
+    to_points: int
+    gain: int
+    comparator: str                      # ">=" | "<="
+    target_value: float
+    current_value: float | None = None
+
+
+class RecourseModel(BaseModel):
+    """Actionable path from this score into the next risk band (D2)."""
+    current_score: int
+    current_band: str                    # low | medium | high
+    target_band: str
+    target_score: int
+    target_decision: str                 # REVIEW | APPROVE
+    gap: int
+    reachable: bool
+    projected_score: int
+    already_prime: bool
+    steps: list[RecourseStepModel] = Field(default_factory=list)
+
+
 # ── responses ─────────────────────────────────────────────────────────────
 class ScoreResponse(BaseModel):
     tabaqa_score: int = Field(..., examples=[82])
@@ -271,6 +295,8 @@ class ScoreResponse(BaseModel):
     reasons: list[str] = Field(..., examples=[["regular_income", "wallet_income_verified", "zero_nsf"]])
     income: IncomeModel
     reason_codes: list[ReasonCodeModel]
+    # actionable recourse — the fewest changes that lift the score into the next band
+    recourse: RecourseModel | None = None
     # real-data provenance: the Berka fit (AUC 0.890) the weights are locked to
     validation: ValidationModel | None = None
     applicant: dict

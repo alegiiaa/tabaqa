@@ -31,6 +31,29 @@ export interface ReasonCode {
   iv?: number | null           // validated Information Value (Berka fit), if known
 }
 
+// D2 · actionable recourse — the fewest changes that lift the score into the next band.
+export interface RecourseStep {
+  feature: string
+  from_points: number
+  to_points: number
+  gain: number
+  comparator: '>=' | '<=' | string
+  target_value: number
+  current_value?: number | null
+}
+export interface Recourse {
+  current_score: number
+  current_band: 'low' | 'medium' | 'high' | string
+  target_band: string
+  target_score: number
+  target_decision: 'REVIEW' | 'APPROVE' | string
+  gap: number
+  reachable: boolean
+  projected_score: number
+  already_prime: boolean
+  steps: RecourseStep[]
+}
+
 // Real-data provenance stamped on every score: the Berka fit the weights are locked to.
 export interface Validation {
   validated: boolean
@@ -138,6 +161,7 @@ export interface ScoreResult {
   reasons: string[]
   income: Income
   reason_codes: ReasonCode[]
+  recourse?: Recourse | null       // D2 — path to the next risk band
   validation?: Validation | null   // real-data provenance (Berka fit, AUC 0.890)
   applicant: Record<string, any>
   features?: Features | null
