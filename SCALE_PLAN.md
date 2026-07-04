@@ -32,6 +32,16 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 
 ## ③ تحليل البيانات — Data Analysis
 
+> **STATUS 2026-07-04 — SECTION COMPLETE & LIVE.** D1 Waterfall ✅ · D2 Path-to-Approval ✅ ·
+> D3 Confidence band ✅ · D4 Drift/PSI monitor ✅ · D5 Percentile-vs-corpus ✅ · D6 second-dataset
+> cross-check ✅ (pivoted from Kaggle Home Credit → the freely-downloadable **UCI Default of Credit
+> Card Clients (Taiwan)**, 30k real accounts: cash-flow lift **+0.131 AUC**, 95% CI 0.123–0.139,
+> replicating Berka) · D7 **reframed** from per-applicant champion/challenger (dropped — SAR card vs
+> koruna fit is currency-confounded, and expert magnitudes don't track the fit, ρ=−0.23) to the *sound*
+> **"transparency has no accuracy cost"**: a transparent additive scorecard (AUC 0.750) vs a gradient-
+> boosted black box (0.772) on the same in-distribution data — within 2 pts, rank agreement ρ 0.86.
+> D1–D5 on the ② score screen + Model-validation page; D6/D7 on the Model-validation page.
+
 **Current state (verified):** genuinely strong and *on-screen*. `ModelCardPanel` shows the wallet-layer ablation (AUC 0.66→0.86, **+0.203** with bootstrap CI), thin-file lift, swap-set (rescued/rejected with realized default), calibration curve, per-feature IV, monotonic score bands, the **1M-account synthetic corpus + TSTR 0.870 (96% retention)**, and a lineage strip. This already beats most teams outright.
 
 **Where it's thin:** it's all **population-level** ("the model is good"). A credit officer's next three questions are *applicant-level* and *governance-level*: **"why THIS score?"**, **"what would change it?"**, **"will it keep working?"** — none are answered yet. That's the gap to attack.

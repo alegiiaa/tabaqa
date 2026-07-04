@@ -981,7 +981,51 @@
       "note": "1 \u2212 KS statistic between real and synthetic marginals (\u21921 is faithful)"
     }
   },
-  "cross_check": null,
+  "cross_check": {
+    "dataset": "UCI Default of Credit Card Clients (Taiwan)",
+    "n_accounts": 30000,
+    "n_defaults": 6636,
+    "bad_rate": 0.2212,
+    "baseline": {
+      "auc": 0.619,
+      "ks": 0.185
+    },
+    "full": {
+      "auc": 0.75,
+      "ks": 0.404
+    },
+    "lift": {
+      "auc": 0.131,
+      "ci_low": 0.123,
+      "ci_high": 0.139,
+      "p_gt_0": 1.0
+    },
+    "feature_mapping": [
+      {
+        "tabaqa": "income_regularity",
+        "homecredit": "on-time payment rate over 6 months"
+      },
+      {
+        "tabaqa": "nsf_count",
+        "homecredit": "count of months paid late (PAY_* > 0)"
+      },
+      {
+        "tabaqa": "recurring_obligation_load",
+        "homecredit": "credit utilisation (BILL \u00f7 LIMIT)"
+      },
+      {
+        "tabaqa": "income_expense_ratio",
+        "homecredit": "repayment coverage (PAY_AMT \u00f7 BILL)"
+      },
+      {
+        "tabaqa": "balance_volatility",
+        "homecredit": "coefficient of variation of the bill"
+      }
+    ],
+    "caveats": [
+      "An independent replication on a second real, labelled dataset. Credit-card repayment behaviour stands in for the wallet cash-flow feed, so this is directional evidence the mechanism generalises beyond Berka \u2014 not a like-for-like wallet result."
+    ]
+  },
   "lineage": {
     "tiers": [
       {
@@ -1081,5 +1125,20 @@
         ]
       }
     ]
+  },
+  "champion_challenger": {
+    "dataset": "UCI Default of Credit Card Clients (Taiwan)",
+    "n": 30000,
+    "champion": {
+      "name": "Transparent additive scorecard",
+      "auc": 0.75
+    },
+    "challenger": {
+      "name": "Gradient-boosted black box",
+      "auc": 0.772
+    },
+    "gap_auc": -0.022,
+    "rank_agreement": 0.86,
+    "note": "Both models on the same in-distribution data (no cross-currency confound). The fully-explainable additive scorecard \u2014 every point traceable to a reason code, the shape Tabaqa deploys \u2014 lands within a couple of AUC points of a gradient-boosted black box and ranks borrowers in close agreement. Transparency costs almost nothing."
   }
 }

@@ -42,3 +42,4 @@ app/COPILOT_FEATURE.md
 /gif/
 /assets/*
 !/assets/header.gif
+app/data/uci_credit/

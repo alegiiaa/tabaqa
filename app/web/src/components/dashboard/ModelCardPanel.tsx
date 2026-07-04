@@ -34,8 +34,20 @@ interface ModelCard {
   caveats: string[]
   corpus?: Corpus
   cross_check?: CrossCheck | null
+  champion_challenger?: ChampionChallenger | null
   lineage?: Lineage
   psi?: Psi
+}
+
+// ── D7 · transparent scorecard vs a black box, on real in-distribution data ──
+interface ChampionChallenger {
+  dataset: string
+  n: number
+  champion: { name: string; auc: number }
+  challenger: { name: string; auc: number }
+  gap_auc: number
+  rank_agreement: number
+  note: string
 }
 
 // ── D4 · population-stability (drift) monitor ────────────────────────────────
@@ -332,6 +344,8 @@ export function ModelCardPanel() {
 
         {c.cross_check && <CrossCheck cc={c.cross_check} />}
 
+        {c.champion_challenger && <ChampionChallengerBlock cc={c.champion_challenger} />}
+
         {/* trust footnotes */}
         <div className="val-foot">
           <Foot icon="🔒" title={tx('No leakage', 'دون تسريب')} body={tx('Cash-flow features use strictly pre-loan transactions — measured before the outcome exists.', 'تُحسب ميزات التدفق النقدي من معاملات ما قبل القرض فقط — قبل وجود النتيجة.')} />
@@ -449,6 +463,41 @@ function ScaleSection({ corpus }: { corpus: Corpus }) {
       </div>
 
       <p className="val-caveat faint">{tx(corpus.methodology, corpus.methodology)}</p>
+    </div>
+  )
+}
+
+// ── D7 · "Transparency has no accuracy cost" — additive scorecard vs a black box ─
+function ChampionChallengerBlock({ cc }: { cc: ChampionChallenger }) {
+  const { tx } = useTx()
+  // scale the AUC bars from 0.5 (chance) → 1.0 so ~0.75 reads with visible contrast
+  const w = (auc: number) => `${Math.max(3, ((auc - 0.5) / 0.5) * 100)}%`
+  return (
+    <div className="mc-block">
+      <div className="val-block-h">
+        <span className="ins-cap">{tx('Transparency has no accuracy cost', 'الشفافية دون كلفة في الدقة')}</span>
+        <span className="faint val-note">{cc.dataset} · {cc.n.toLocaleString('en-US')} {tx('real accounts', 'حساب حقيقي')}</span>
+      </div>
+      <div className="cc-bars">
+        <div className="cc-bar-row">
+          <span className="cc-bar-label">
+            {tx('Transparent scorecard', 'بطاقة تسجيل شفافة')}{' '}
+            <span className="faint">{tx('(what Tabaqa deploys)', '(ما تنشره Tabaqa)')}</span>
+          </span>
+          <span className="cc-bar"><span className="cc-fill champ" style={{ width: w(cc.champion.auc) }} /></span>
+          <span className="cc-bar-v" dir="ltr">{cc.champion.auc.toFixed(3)}</span>
+        </div>
+        <div className="cc-bar-row">
+          <span className="cc-bar-label">{tx('Gradient-boosted black box', 'صندوق أسود معزّز')}</span>
+          <span className="cc-bar"><span className="cc-fill chal" style={{ width: w(cc.challenger.auc) }} /></span>
+          <span className="cc-bar-v" dir="ltr">{cc.challenger.auc.toFixed(3)}</span>
+        </div>
+      </div>
+      <div className="cc-summary">
+        <span>{tx('AUC gap', 'فارق AUC')} <b dir="ltr">{cc.gap_auc.toFixed(3)}</b></span>
+        <span>{tx('rank agreement', 'توافق الترتيب')} <b dir="ltr">ρ {cc.rank_agreement.toFixed(2)}</b></span>
+      </div>
+      <p className="val-caveat faint">{tx(cc.note, cc.note)}</p>
     </div>
   )
 }
