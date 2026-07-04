@@ -1791,3 +1791,17 @@ table.ledger tr:last-child td{border-bottom:0}
 .mc .cc-fill.champ{background:var(--blue-2)}
 .mc .cc-fill.chal{background:#9aa5b8}
 @media (max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.kpi-grid.three{grid-template-columns:1fr}}
+
+/* ── mv2 · RTL fixes ── */
+/* charts are data-LTR always: fixes SVG axis-label clipping in Arabic */
+.roc{direction:ltr}
+/* the model-card panel obeys the color law — no purple/green accent strip */
+.mc .ins-panel::before{background:var(--blue)}
+/* dir="ltr" number spans become blockified flex/grid items → align them with the AR labels */
+html[dir="rtl"] .kpi-value{text-align:right}
+html[dir="rtl"] .mvt-num{text-align:right}
+/* EN research prose inside the AR layout: render each paragraph in its natural direction */
+.mv-claim,.mv-details-body,.mvt-main,.drift-h-desc,.ev-finding{unicode-bidi:plaintext;text-align:start}
+/* expander caret points into the reading direction */
+html[dir="rtl"] .mv-details summary::before{content:'◂'}
+html[dir="rtl"] .mv-details[open] summary::before{transform:rotate(-90deg)}

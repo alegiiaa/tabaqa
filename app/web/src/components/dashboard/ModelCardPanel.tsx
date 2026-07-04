@@ -241,7 +241,7 @@ export function ModelCardPanel() {
               )}</span>
             </div>
           </div>
-          <Chip variant="ok">{tx('Real data', 'بيانات حقيقية')} · Berka {intFmt(c.n_accounts)} · {pct1(c.bad_rate)} {tx('default', 'تعثّر')}</Chip>
+          <Chip variant="ok">{tx('Real data', 'بيانات حقيقية')} · <span dir="ltr">Berka {intFmt(c.n_accounts)} · {pct1(c.bad_rate)}</span> {tx('default', 'تعثّر')}</Chip>
         </div>
 
         {/* ── KPI row: the four numbers that matter, always visible ────── */}
@@ -249,7 +249,7 @@ export function ModelCardPanel() {
           <div className="kpi-card hot">
             <span className="kpi-label">{tx('Out-of-sample AUC', 'AUC خارج العينة')}</span>
             <span className="kpi-value" dir="ltr">{c.full.auc.toFixed(3)}</span>
-            <Chip variant="ok">+{c.lift.auc.toFixed(2)} {tx('vs bureau', 'مقابل المكتب')}</Chip>
+            <Chip variant="ok"><span dir="ltr">+{c.lift.auc.toFixed(2)}</span> {tx('vs bureau', 'مقابل المكتب')}</Chip>
             <span className="kpi-cap">{tx('5-fold CV · 95% CI excludes zero', 'تحقّق خماسي · فاصل الثقة لا يشمل الصفر')}</span>
           </div>
           <div className="kpi-card">
@@ -316,10 +316,10 @@ function PerformanceTab() {
             <span className="mc-auc-cap">AUC · {tx('out-of-sample', 'خارج العينة')}</span>
           </div>
           <div className={`mc-lift${walletOn ? ' show' : ''}`}>
-            <span className="mc-lift-v">+<Num value={c.lift.auc} /> AUC</span>
+            <span className="mc-lift-v" dir="ltr">+<Num value={c.lift.auc} /> AUC</span>
             <span className="mc-lift-sub">
-              {tx('95% CI', 'فاصل ثقة ٩٥٪')} +{c.lift.ci_low.toFixed(2)}…+{c.lift.ci_high.toFixed(2)} ·{' '}
-              {tx('significant in', 'دالّ في')} {pct0(c.lift.p_gt_0)} {tx('of bootstraps', 'من العيّنات')}
+              {tx('95% CI', 'فاصل ثقة ٩٥٪')} <span dir="ltr">+{c.lift.ci_low.toFixed(2)}…+{c.lift.ci_high.toFixed(2)}</span> ·{' '}
+              {tx('significant in', 'دالّ في')} <span dir="ltr">{pct0(c.lift.p_gt_0)}</span> {tx('of bootstraps', 'من العيّنات')}
             </span>
           </div>
           <div className="mc-submetrics">
@@ -331,8 +331,8 @@ function PerformanceTab() {
         <div className="mc-hero-r">
           <Roc baseline={c.baseline.roc} full={c.full.roc} showFull={walletOn} />
           <div className="mc-roc-legend">
-            <span><i className="dot base" /> {tx('Bureau', 'المكتب')} {c.baseline.auc.toFixed(2)}</span>
-            <span className={walletOn ? '' : 'off'}><i className="dot full" /> {tx('+ Wallet', '+ المحفظة')} {c.full.auc.toFixed(2)}</span>
+            <span><i className="dot base" /> {tx('Bureau', 'المكتب')} <span dir="ltr">{c.baseline.auc.toFixed(2)}</span></span>
+            <span className={walletOn ? '' : 'off'}><i className="dot full" /> {tx('+ Wallet', '+ المحفظة')} <span dir="ltr">{c.full.auc.toFixed(2)}</span></span>
           </div>
         </div>
       </div>
@@ -344,7 +344,7 @@ function PerformanceTab() {
       {/* thin-file */}
       <div className="mc-block">
         <SectionHead en="Thin-file borrowers — where the bureau is blind" ar="العملاء محدودو السجل — حيث يعجز المكتب"
-          note={<>{c.thin_file.n} {tx('accounts', 'حسابًا')} · {c.thin_file.definition}</>} />
+          note={<>{c.thin_file.n} {tx('accounts', 'حسابًا')} · <span dir="ltr">{c.thin_file.definition}</span></>} />
         <div className="mc-thin">
           <div className="mc-thin-nums">
             <StatDelta from={`${tx('Bureau', 'المكتب')} ${c.thin_file.baseline_auc.toFixed(3)}`} to={`+ ${tx('Wallet', 'المحفظة')} ${c.thin_file.full_auc.toFixed(3)}`} good />
@@ -363,7 +363,7 @@ function PerformanceTab() {
           note={<>{tx('at equal approval volume', 'عند نفس حجم الموافقات')} ({pct0(c.swap_set.approval_rate)})</>} />
         <div className="mc-swap-head">
           <StatDelta from={pct1(c.swap_set.baseline_approved_bad_rate)} to={pct1(c.swap_set.full_approved_bad_rate)} good />
-          <span className="mc-swap-cap">{tx('realized default rate in the approved pool', 'معدل التعثّر الفعلي في المقبولين')} · <b>−{pct0(reduction)}</b></span>
+          <span className="mc-swap-cap">{tx('realized default rate in the approved pool', 'معدل التعثّر الفعلي في المقبولين')} · <b dir="ltr">−{pct0(reduction)}</b></span>
         </div>
         <div className="mc-swap">
           <div className="mc-swap-card">
@@ -444,7 +444,7 @@ function ReplicationTab() {
           <SectionHead en="Replicated on a second real dataset" ar="مُكرَّر على مجموعة بيانات حقيقية ثانية" note={cc.dataset} />
           <div className="mc-swap-head">
             <StatDelta from={`${tx('Bureau', 'المكتب')} ${cc.baseline.auc.toFixed(3)}`} to={`+ ${tx('Cash-flow', 'التدفق النقدي')} ${cc.full.auc.toFixed(3)}`} good />
-            <span className="mc-swap-cap">+{cc.lift.auc.toFixed(2)} AUC · {intFmt(cc.n_accounts)} {tx('real labeled applications', 'طلب حقيقي موسوم')}</span>
+            <span className="mc-swap-cap"><span dir="ltr">+{cc.lift.auc.toFixed(2)} AUC · {intFmt(cc.n_accounts)}</span> {tx('real labeled applications', 'طلب حقيقي موسوم')}</span>
           </div>
           {/* P4 — the attenuation, stated before anyone asks (stays visible, never folded) */}
           {cc.attenuation_note && <p className="mv-claim">{cc.attenuation_note}</p>}
