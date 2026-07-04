@@ -1713,3 +1713,81 @@ table.ledger tr:last-child td{border-bottom:0}
 .mc-seg-bar>span.good{background:#059669}
 .mc-seg-v{font-size:12px;font-weight:800;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
 .mc-seg-n{font-size:10.5px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── mv2 · Model-validation restyle (shadcn-concept: white+blue, semantic color only) ── */
+/* chips — THE status idiom. ok=verified/pass · warn=warning · bad=risk/fail · default=fact */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;
+  border:1px solid var(--line-2);background:#fff;color:var(--muted);
+  font-size:11px;font-weight:600;line-height:1.4;white-space:nowrap;width:fit-content}
+.chip.ok{border-color:rgba(15,157,99,.35);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:rgba(154,103,0,.35);color:#9a6700;background:#fff7e0}
+.chip.bad{border-color:rgba(180,35,24,.32);color:#b42318;background:#fdf0f0}
+
+/* KPI stat cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 4px}
+.kpi-grid.three{grid-template-columns:repeat(3,1fr);margin:4px 0 12px}
+.kpi-card{display:flex;flex-direction:column;gap:6px;padding:14px 16px;
+  background:#fff;border:1px solid var(--line);border-radius:13px}
+.kpi-card.hot{border-color:rgba(37,99,235,.4)}
+.kpi-label{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.kpi-value{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:var(--text);
+  font-variant-numeric:tabular-nums}
+.kpi-card.hot .kpi-value{color:var(--blue-deep)}
+.kpi-cap{font-size:10.5px;color:var(--faint);line-height:1.4}
+
+/* tabs */
+.mv-tabs{display:flex;gap:4px;margin:16px 0 2px;padding:3px;border:1px solid var(--line);
+  border-radius:12px;background:var(--bg-soft);width:fit-content;max-width:100%;overflow-x:auto}
+.mv-tabs button{appearance:none;border:0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:600;
+  color:var(--muted);background:transparent;border-radius:9px;padding:7px 14px;white-space:nowrap;
+  transition:.15s ease}
+.mv-tabs button:hover{color:var(--blue-deep)}
+.mv-tabs button.on{color:var(--blue-deep);background:#fff;border:1px solid var(--line-2);
+  box-shadow:0 1px 2px rgba(12,18,38,.06)}
+.mv-tabs button:focus-visible{outline:2px solid var(--blue-2);outline-offset:1px}
+
+/* table idiom — uniform rows: number column + description */
+.mvt{display:flex;flex-direction:column;margin-top:6px}
+.mvt-row{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:baseline;
+  padding:9px 2px;border-bottom:1px solid var(--line);font-size:12.5px}
+.mvt-row:last-child{border-bottom:0}
+.mvt-row.headline .mvt-num,.mvt-row.headline .mvt-main{font-weight:800;color:var(--text)}
+.mvt-num{font-family:var(--mono);font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;
+  text-align:start;white-space:nowrap}
+.mvt-main{color:var(--muted);line-height:1.5}
+.mvt-main .block{display:block;font-size:11px;margin-top:1px}
+.mvt.tight .mvt-row{grid-template-columns:1fr;padding:7px 0}
+
+/* claim line (stays visible) + method expander (folds the prose) */
+.mv-claim{font-size:12.5px;line-height:1.6;color:var(--text);margin:10px 0 0;max-width:70ch}
+.mv-claim b{font-family:var(--mono)}
+.mv-details{margin-top:10px;border:1px solid var(--line);border-radius:11px;background:var(--bg-soft)}
+.mv-details summary{cursor:pointer;list-style:none;padding:8px 13px;font-size:11.5px;font-weight:600;
+  color:var(--blue);user-select:none;display:flex;align-items:center;gap:6px}
+.mv-details summary::before{content:'▸';font-size:10px;transition:transform .15s ease}
+.mv-details[open] summary::before{transform:rotate(90deg)}
+.mv-details summary::-webkit-details-marker{display:none}
+.mv-details-body{padding:2px 13px 12px;font-size:11.5px;line-height:1.65;color:var(--muted)}
+.mv-details-body p{margin:0 0 8px}.mv-details-body p:last-child{margin-bottom:0}
+.mv-plan{margin:8px 0 0;padding-inline-start:18px;display:flex;flex-direction:column;gap:5px}
+
+/* external-validity population cards — flat, chip-coded */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}
+.ev-card{display:flex;flex-direction:column;gap:7px;padding:14px 15px;background:#fff;
+  border:1px solid var(--line);border-radius:13px}
+.ev-title{font-size:12.5px;font-weight:700;color:var(--text)}
+.ev-n{font-size:11px}
+.ev-finding{font-size:11.5px;line-height:1.55;color:var(--muted)}
+
+/* misc restyle glue */
+.mv-chiprow{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 14px}
+.mc-block.first{border-top:0;margin-top:14px;padding-top:0}
+.val-bands.short{height:120px}
+.drift-cell.flat{background:transparent;border:0;padding:4px 0;font-family:var(--mono)}
+/* mv2 color law: kill legacy tints/gradients where the old classes still render */
+.mc .val-bar{background:var(--blue-2)}
+.mc .val-bar.good,.mc .val-bar.bad{background:var(--blue-2)}
+.mc .mc-swap-card{background:#fff;border-color:var(--line);gap:6px}
+.mc .cc-fill.champ{background:var(--blue-2)}
+.mc .cc-fill.chal{background:#9aa5b8}
+@media (max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.kpi-grid.three{grid-template-columns:1fr}}
