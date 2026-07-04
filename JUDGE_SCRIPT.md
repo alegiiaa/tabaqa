@@ -38,6 +38,7 @@
 
 ### ④ دقيقة الثقة — ثلاث أنفاس، رقم واحد لكل نفس (1:40–2:15)
 > «وهذه ليست فكرة على شرائح — النموذج **مُثبت على تعثّرات حقيقية**: إضافة طبقة المحفظة ترفع دقة التنبؤ **+0.20 AUC** على مقترضين حقيقيين تعثّروا فعلًا، والنتيجة **تكرّرت على بيانات بلد ثانٍ**. وعند الإطلاق يعيد البنك معايرة النموذج على محفظته — تمامًا كما يعمل مزوّدو النماذج العالميون.
+> **وهذا النهج نفسه اعتمدته أكثر المؤسسات تحفّظًا في العالم: فاني ماي — عملاق الرهن الأمريكي — تموّل اليوم من لا سجل ائتماني له بناءً على ١٢ شهرًا من التدفق النقدي البنكي.**
 > وحلّلنا السوق السعودي بأرقام رسمية: **أعشار الدخل من الهيئة العامة للإحصاء، وأجور ١٣ مليون مشترك من التأمينات، وسقوف ساما للإقراض** — مدمجة في كل قرار.»
 
 ### ⑤ الوثيقة — ورقة في يد المحكّم (2:15–2:45)
@@ -80,6 +81,11 @@
 > «ثلاث طبقات حوكمة، وكلها في المنتج الآن وليست وعودًا: **مراقب انحراف التوزيع (PSI)** يرصد تغيّر خصائص المتقدمين قبل أن تتأثر الدقة — وعرضناه يلتقط صدمة اقتصادية مُحاكاة؛ و**قيد الاتجاه** يمنع أي وزن من مخالفة النموذج المُتحقَّق برمجيًا عند كل تشغيل؛ و**إعادة المعايرة السنوية** على بيانات البنك وفق أعراف إدارة مخاطر النماذج. لوحة الحوكمة كاملة أمامكم في صفحة التحقق.»
 
 **EN:** Three governance layers, live in the product today: a PSI drift monitor that catches population shift before accuracy degrades (demonstrated on a simulated downturn), a direction-lock that programmatically blocks any weight from contradicting the validated fit at every boot, and annual recalibration on the bank's book per standard MRM practice. The governance panel is on the validation page.
+
+### س٦ · «هل هذا مجرّب عالميًا؟ وش الدليل أن السوق موجود؟»
+> «أكثر المؤسسات تحفّظًا في التمويل عبرت هذا الجسر قبلنا. **فاني ماي وفريدي ماك** — عملاقا الرهن الأمريكي — يموّلان اليوم من لا سجل له بناءً على التدفق النقدي البنكي، حتى مدفوعات الإيجار عبر المحافظ الرقمية. **الجهات الرقابية الأمريكية الخمس** أصدرت بيانًا مشتركًا يبارك بيانات التدفق النقدي. **بنك التسويات الدولية** قاسها: نماذج بيانات المعاملات تتفوق على درجات المكاتب 0.76 مقابل 0.64. و**آبل** لم تناقش الفكرة — اشترت شركة بريطانية تفعلها وأعادت تسميتها Apple Payments Services. وفي السعودية؟ **٧٩٪ من البالغين لديهم حساب بنكي، وبالكاد ٥٧٪ لديهم ملف ائتماني — وساما بنت السكّة وأصدرت أول التراخيص هذا العام.** لا نطلب قفزة — نجلب كتاب لعبٍ مُثبتًا إلى السوق الذي بُنيت سكّته للتو.»
+
+**EN:** The most conservative institutions already crossed this bridge: Fannie Mae and Freddie Mac underwrite no-score borrowers on bank cash flow — even rent paid via digital wallets. All five US banking regulators jointly endorsed cash-flow data. The BIS measured it: transaction models beat bureau scores 0.76 vs 0.64. Apple didn't debate the thesis — it bought Credit Kudos and renamed it Apple Payments Services. And in Saudi: 79% of adults are banked, barely 57% have a credit file — and SAMA built the rail and issued its first licences this year. We're not asking for a leap; we're bringing a proven playbook to the market that just built the rail. *(All sources verified — see `EVIDENCE.md`, including the landmine list of numbers NOT to cite.)*
 
 ---
 
