@@ -40,8 +40,11 @@ export function NewApplicant({
     setBusy(true); setErr(null)
     try {
       await fn()
-    } catch (e: any) {
-      setErr(e.message ?? String(e))
+    } catch {
+      setErr(tx(
+        'Scoring didn’t go through. Check your connection and try again.',
+        'لم يكتمل التقييم. تحقق من اتصالك وحاول مرة أخرى.',
+      ))
     } finally {
       setBusy(false)
     }
@@ -202,9 +205,13 @@ function PersonaMode({
     let on = true
     api.personas()
       .then((p) => on && setPersonas(p))
-      .catch((e) => on && setPickErr(e.message))
+      .catch(() => on && setPickErr(tx(
+        'Couldn’t load the sample personas. Check your connection and reopen this tab — or use Upload / Guided form instead.',
+        'تعذّر تحميل النماذج الجاهزة. تحقق من اتصالك وأعد فتح هذا التبويب — أو استخدم رفع الكشف / النموذج الموجّه.',
+      )))
       .finally(() => on && setLoading(false))
     return () => { on = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function pick(p: Persona) {
@@ -219,8 +226,20 @@ function PersonaMode({
     })
   }
 
-  if (loading) return <div className="faint" style={{ padding: 24 }}>{tx('Loading personas…', 'جارٍ تحميل النماذج…')}</div>
+  if (loading) return (
+    <div className="skel-wrap" aria-busy="true" style={{ marginTop: 14 }}>
+      <div className="skel" style={{ height: 110 }} />
+      <div className="skel" style={{ height: 110 }} />
+    </div>
+  )
   if (pickErr) return <div className="afford-err" style={{ marginTop: 14 }}>{pickErr}</div>
+  if (personas.length === 0) return (
+    <div className="empty" style={{ marginTop: 14 }}>
+      <div className="empty-icon">⬡</div>
+      <div className="empty-title">{tx('No sample personas available', 'لا توجد نماذج جاهزة متاحة')}</div>
+      <p className="faint">{tx('Use Upload statement or the Guided form to score an applicant.', 'استخدم رفع الكشف أو النموذج الموجّه لتقييم متقدم.')}</p>
+    </div>
+  )
 
   return (
     <div className="persona-grid">

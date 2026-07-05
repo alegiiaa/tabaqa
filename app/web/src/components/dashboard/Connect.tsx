@@ -76,10 +76,19 @@ export function Connect({
 
   // Prefetch the demo profile in the background as soon as the user starts
   // connecting. In own-data mode the result comes from submitOwnData instead.
+  // On failure: back to idle with a friendly banner — never a stuck spinner.
   useEffect(() => {
     if (mode !== 'demo' || stage !== 'pulling' || fetched.current) return
     fetched.current = true
-    api.scoreConnection(MY_CONNECTION).then(setResult).catch((e) => setErr(e.message ?? String(e)))
+    api.scoreConnection(MY_CONNECTION).then(setResult).catch(() => {
+      fetched.current = false
+      setErr(tx(
+        'We couldn’t reach the scoring service. Check your connection and try again.',
+        'تعذّر الوصول إلى خدمة التسجيل. تحقق من اتصالك وحاول مرة أخرى.',
+      ))
+      setStage('idle')
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, mode])
 
   useEffect(() => {
@@ -108,6 +117,7 @@ export function Connect({
 
   function start() {
     if (!canContinue) return
+    setErr(null)
     setStepIdx(0)
     setStage('pulling')
   }
@@ -122,8 +132,11 @@ export function Connect({
       const r = await api.scoreStatement(statement)
       setOwnInput(statement)
       setResult(r)
-    } catch (e: any) {
-      setErr(e.message ?? String(e))
+    } catch {
+      setErr(tx(
+        'We couldn’t score this statement. Check the file format and try again.',
+        'تعذّر تسجيل هذا الكشف. تحقق من صيغة الملف وحاول مرة أخرى.',
+      ))
       setStage('idle')
     }
   }
@@ -182,11 +195,14 @@ export function Connect({
                   {tx('Connecting', 'يتم ربط')}: <b>{bankName}</b> · <b>{walletName}</b>
                 </div>
 
+                {err && <div className="connect-own-err">{err}</div>}
                 <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 14 }}
                   disabled={!canContinue} onClick={start}>
-                  {canContinue
-                    ? tx('Reveal my real income', 'اكشف دخلي الحقيقي')
-                    : tx('Pick a bank and a wallet', 'اختر بنكًا ومحفظة')}
+                  {err
+                    ? tx('Try again', 'حاول مرة أخرى')
+                    : canContinue
+                      ? tx('Reveal my real income', 'اكشف دخلي الحقيقي')
+                      : tx('Pick a bank and a wallet', 'اختر بنكًا ومحفظة')}
                 </button>
               </>
             ) : canContinue ? (
@@ -219,7 +235,7 @@ export function Connect({
           <div className="connect-pulling">
             <div className="connect-spinner" />
             <h1>{tx('Building your money picture', 'نُجهّز صورتك المالية')}</h1>
-            <div className="connect-steps">{err ? err : tx(STEPS[stepIdx][0], STEPS[stepIdx][1])}</div>
+            <div className="connect-steps">{tx(STEPS[stepIdx][0], STEPS[stepIdx][1])}</div>
           </div>
         )}
 

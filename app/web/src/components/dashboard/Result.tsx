@@ -515,8 +515,11 @@ export function AffordScreen({ result }: { result: ScoreResult }) {
       })
       setOut(r)
       setSnap({ amount, tenor })
-    } catch (e: any) {
-      setErr(e.message)
+    } catch {
+      setErr(tx(
+        'The calculation didn’t go through. Check your connection and press Calculate again.',
+        'لم يكتمل الحساب. تحقق من اتصالك واضغط «احسب» مرة أخرى.',
+      ))
     } finally {
       setLoading(false)
     }

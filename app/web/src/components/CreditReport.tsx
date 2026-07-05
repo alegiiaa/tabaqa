@@ -66,14 +66,14 @@ export function CreditReport() {
           : api.affordability({ connection_id: conn, amount: 60000, tenor_months: 48, annual_rate: 0.10, customer_type: 'employee' })
         ).catch(() => null)
         if (on) setAfford(a)
-      } catch (e) { if (on) setErr(e instanceof Error ? e.message : String(e)) }
+      } catch { if (on) setErr('تعذّر الوصول إلى خدمة التسجيل. تحقق من اتصالك ثم أعد تحميل الصفحة.') }
     })()
     return () => { on = false }
     // statement / conn / decodeFailed all derive from c + dParam
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [c, dParam])
 
-  if (err) return <div className="rpt-load">تعذّر إنشاء التقرير: {err}</div>
+  if (err) return <div className="rpt-load">تعذّر إنشاء التقرير — {err}</div>
   if (!result) return <div className="rpt-load"><span className="rpt-spin" /> جارٍ إنشاء التقرير الموثّق…</div>
 
   const d = new Date()

@@ -37,6 +37,7 @@ export function StatementUpload({
   const [gigPlatforms, setGigPlatforms] = useState('')
   const [bankOpening, setBankOpening] = useState('')
   const [walletOpening, setWalletOpening] = useState('')
+  const [readErr, setReadErr] = useState<string | null>(null)
 
   // pasted CSV goes through the same universal adapter as picked files
   const pasted = useMemo(() => (csv.trim() ? detectStatement(csv) : null), [csv])
@@ -68,10 +69,16 @@ export function StatementUpload({
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = Array.from(e.target.files ?? [])
     e.target.value = '' // allow re-picking the same file
+    setReadErr(null)
     picked.forEach((file) => {
       const reader = new FileReader()
       reader.onload = () =>
         setFiles((prev) => [...prev, detectStatement(String(reader.result ?? ''), { fileName: file.name })])
+      reader.onerror = () =>
+        setReadErr(tx(
+          `Couldn’t read “${file.name}” — the file may be locked or corrupted. Try re-exporting it.`,
+          `تعذّرت قراءة «${file.name}» — قد يكون الملف مقفلًا أو تالفًا. جرّب تصديره من جديد.`,
+        ))
       reader.readAsText(file)
     })
   }
@@ -116,6 +123,8 @@ export function StatementUpload({
           </button>
           <button className="btn btn-ghost btn-sm" onClick={downloadSample}>{tx('Download template', 'تنزيل القالب')}</button>
         </div>
+
+        {readErr && <div className="connect-own-err" style={{ marginTop: 10 }}>{readErr}</div>}
 
         {files.length > 0 && (
           <div className="upl-files">

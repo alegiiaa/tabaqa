@@ -41,7 +41,10 @@ export function Applicants() {
           ),
         )
       } else {
-        setPersistMsg(e.message)
+        setPersistMsg(tx(
+          'Couldn’t load saved applicants — new scoring still works. Reopen this tab to retry.',
+          'تعذّر تحميل المتقدمين المحفوظين — التقييم الجديد يعمل. أعد فتح هذا التبويب للمحاولة مجددًا.',
+        ))
       }
     } finally {
       setLoading(false)
@@ -85,8 +88,11 @@ export function Applicants() {
         result = await api.scoreForm(a.input)
       }
       setView({ kind: 'result', result, name: a.name, source: tx('saved', 'محفوظ') })
-    } catch (e: any) {
-      setPersistMsg(e.message)
+    } catch {
+      setPersistMsg(tx(
+        'Couldn’t re-score this applicant right now. Check your connection and tap the card again.',
+        'تعذّر إعادة تقييم هذا المتقدم الآن. تحقق من اتصالك واضغط على البطاقة مجددًا.',
+      ))
     }
   }
 
@@ -95,8 +101,11 @@ export function Applicants() {
     try {
       await deleteApplicant(a.id)
       refresh()
-    } catch (err: any) {
-      setPersistMsg(err.message)
+    } catch {
+      setPersistMsg(tx(
+        'Couldn’t delete this applicant right now — try again in a moment.',
+        'تعذّر حذف هذا المتقدم الآن — حاول مجددًا بعد لحظات.',
+      ))
     }
   }
 
@@ -153,7 +162,11 @@ function ApplicantsList({
       </div>
 
       {loading ? (
-        <div className="faint" style={{ padding: 24 }}>{tx('Loading…', 'جارٍ التحميل…')}</div>
+        <div className="skel-wrap" aria-busy="true">
+          <div className="skel" style={{ height: 74 }} />
+          <div className="skel" style={{ height: 74 }} />
+          <div className="skel" style={{ height: 74 }} />
+        </div>
       ) : applicants.length === 0 ? (
         <div className="empty">
           <div className="empty-icon">⬡</div>
