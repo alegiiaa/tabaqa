@@ -36,7 +36,7 @@ Already done (for orientation, don't reopen): Berka ablation +0.203 · 1M corpus
 
 Done, don't reopen: animated reveal · bilingual EN/AR RTL + Hijri ledger dates · designed cards + merchant logos · 30-sec judging bridge + evidence teaser · `/demo` no-signup entry · error layer · print report + QR verify.
 
-- [ ] **U5 · Uniform loading/empty/skeleton states** (P0, S) — extend the `LoadingScreen` pattern to every screen; branded navy shimmer. A prototype that never flickers "broken" reads as shipped. *Do first.*
+- [x] **U5 · Uniform loading/empty/skeleton states** (P0, S) — extend the `LoadingScreen` pattern to every screen; branded navy shimmer. A prototype that never flickers "broken" reads as shipped. *Do first.* ✅ 2026-07-05 `f18113d` — full audit, 5 judge-path gaps + FileReader.onerror fixed; all error copy bilingual + actionable
 - [ ] **U3 · Tap-to-explain tooltips** (P0, S) — every dense number (PD, IV, DBR, verified share, AUC, PSI) gets a plain-AR/EN tooltip from a static copy map. A judge is never confused in live review.
 - [ ] **U4 · Judge guided tour** (P1, S) — skippable 3-step overlay: ① reveal → ② score → ③ lend against it. Kills "what do I click" in a timed review.
 - [ ] **U2 · Decision Cockpit** (P1, M) — one screen a credit officer could paste into a memo: reveal delta → gauge → decision → affordability → top reasons. Recompose existing components.
