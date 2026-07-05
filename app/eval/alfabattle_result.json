@@ -1,30 +1,30 @@
 {
   "dataset": "AlfaBattle 2.0 (real bank card transactions, ods.ai dl-fintech-card-transactions)",
   "source": "huggingface.co/datasets/pytorch-lifestream/alfa-scoring-trx (public, ungated)",
-  "n_accounts": 213383,
-  "n_defaults": 4905,
-  "bad_rate": 0.02299,
-  "n_parts_used": 10,
+  "n_accounts": 963811,
+  "n_defaults": 26577,
+  "bad_rate": 0.02757,
+  "n_parts_used": 50,
   "n_parts_total": 50,
   "baseline": {
     "label": "Application-only view (product)",
-    "auc": 0.5939
+    "auc": 0.5804
   },
   "full": {
     "label": "+ transaction-behaviour layer (14 mapped features)",
-    "auc": 0.7028
+    "auc": 0.697
   },
   "lift": {
-    "auc": 0.1089,
-    "ci_low": 0.1012,
-    "ci_high": 0.1169,
+    "auc": 0.1167,
+    "ci_low": 0.1124,
+    "ci_high": 0.1205,
     "n_boot": 500
   },
   "thin_file": {
     "definition": "shortest-history third by observed transaction span",
-    "n": 71657,
-    "baseline_auc": 0.6163,
-    "full_auc": 0.6969
+    "n": 323181,
+    "baseline_auc": 0.6047,
+    "full_auc": 0.694
   },
   "income_flag_level_inferred_as_inflow": 2,
   "feature_mapping": [

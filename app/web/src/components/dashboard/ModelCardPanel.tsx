@@ -479,10 +479,13 @@ function ReplicationTab() {
             <span className="mc-swap-cap"><span dir="ltr">+{ac.lift.auc.toFixed(2)} AUC · {intFmt(ac.n_accounts)}</span> {tx('real labeled applications', 'طلب حقيقي موسوم')} · <span dir="ltr">{intFmt(ac.n_defaults)}</span> {tx('real defaults', 'تعثّر حقيقي')}</span>
           </div>
           <p className="mv-claim">
-            {tx(
-              'Three real populations, three decades, three scales — the behaviour lift is always positive and always significant: +0.203 → +0.131 → +0.109. The attenuation across populations is the honest finding, not a footnote.',
-              'ثلاثة مجتمعات حقيقية، عبر ثلاثة عقود وثلاثة أحجام — رفعُ السلوك موجبٌ ودالٌّ إحصائيًا دائمًا: ‎+0.203 ← ‎+0.131 ← ‎+0.109. والتناقص عبر المجتمعات هو النتيجة الصادقة، لا هامشًا.',
-            )}
+            {(() => {
+              const series = `+${c.lift.auc.toFixed(3)} → +${(cc?.lift.auc ?? 0).toFixed(3)} → +${ac.lift.auc.toFixed(3)}`
+              return tx(
+                `Three real populations, three decades, three scales — the behaviour lift is always positive and always significant: ${series}. The variation across populations is the honest finding, not a footnote.`,
+                `ثلاثة مجتمعات حقيقية، عبر ثلاثة عقود وثلاثة أحجام — رفعُ السلوك موجبٌ ودالٌّ إحصائيًا دائمًا: ‎${series.replace(/→/g, '←')}‎. والتفاوت عبر المجتمعات هو النتيجة الصادقة، لا هامشًا.`,
+              )
+            })()}
           </p>
           <Method>{ac.caveats?.[1] ?? ac.caveats?.[0]}</Method>
         </div>

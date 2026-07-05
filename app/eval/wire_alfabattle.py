@@ -25,8 +25,18 @@ CARDS = [
 
 
 def patch(card: dict, res: dict) -> bool:
-    if "alfabattle" in card:
-        return False  # already wired
+    # Replace-not-skip: re-running after a bigger eval refreshes the numbers.
+    prev = card.pop("alfabattle", None)
+    if prev and prev.get("n_accounts") == res["n_accounts"]:
+        card["alfabattle"] = prev
+        return False  # same run already wired
+    card["external_validity"]["populations"] = [
+        p for p in card["external_validity"]["populations"] if p["key"] != "alfabattle"
+    ]
+    card["performance_ledger"]["rows"] = [
+        r for r in card["performance_ledger"]["rows"]
+        if not str(r.get("role", "")).startswith("third-replication")
+    ]
 
     card["alfabattle"] = {
         "dataset": res["dataset"],
@@ -52,7 +62,7 @@ def patch(card: dict, res: dict) -> bool:
         "n": f"{res['n_accounts']:,} applications · {res['n_defaults']:,} real defaults (first {res['n_parts_used']} of {res['n_parts_total']} public parts)",
         "role": "Independent replication — at scale",
         "finding": (
-            f"Behaviour lift replicates at ~300× Berka's n: +{res['lift']['auc']:.3f} AUC "
+            f"Behaviour lift replicates at ~{round(res['n_accounts'] / 682, -2):,.0f}× Berka's n: +{res['lift']['auc']:.3f} AUC "
             f"(CI {res['lift']['ci_low']:+.3f}…{res['lift']['ci_high']:+.3f}) over the application-only view; "
             f"thin-file third {res['thin_file']['baseline_auc']:.2f}→{res['thin_file']['full_auc']:.2f}. "
             "Card stream (no balances) — feature-mapped like UCI."
@@ -72,8 +82,11 @@ def patch(card: dict, res: dict) -> bool:
 
     for t in card["lineage"]["tiers"]:
         if t["tier"] == "Generalization":
-            t["source"] = "UCI Taiwan (30,000) + AlfaBattle 2.0 (213,383) — both real, labeled"
-            t["claim"] = "Lift sign + significance replicate on two more real populations: +0.13 (Taiwan cards) · +0.11 (bank card stream at scale)"
+            t["source"] = f"UCI Taiwan (30,000) + AlfaBattle 2.0 ({res['n_accounts']:,}) — both real, labeled"
+            t["claim"] = (
+                "Lift sign + significance replicate on two more real populations: "
+                f"+0.13 (Taiwan cards) · +{res['lift']['auc']:.2f} (bank card stream at scale)"
+            )
     return True
 
 

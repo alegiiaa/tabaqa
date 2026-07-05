@@ -1041,8 +1041,8 @@
       },
       {
         "tier": "Generalization",
-        "source": "UCI Taiwan (30,000) + AlfaBattle 2.0 (213,383) — both real, labeled",
-        "claim": "Lift sign + significance replicate on two more real populations: +0.13 (Taiwan cards) · +0.11 (bank card stream at scale)"
+        "source": "UCI Taiwan (30,000) + AlfaBattle 2.0 (963,811) — both real, labeled",
+        "claim": "Lift sign + significance replicate on two more real populations: +0.13 (Taiwan cards) · +0.12 (bank card stream at scale)"
       }
     ],
     "live_scorer": "Live score = a transparent expert policy card, DIRECTION-LOCKED to the Berka fit: _verify_lineage machine-checks at import that every weight's SIGN matches the validated fit (one documented monotonic override). Magnitudes are policy-set, not fitted — disclosed, and re-fit on the licensee's own book at deployment via the same train.py path. The fitted scorecard (Berka full model, 5-fold CV AUC 0.86) is the drop-in production swap with an identical I/O contract."
@@ -1211,20 +1211,20 @@
         "role": "transparency-cost benchmark — beats the additive card by only 0.022"
       },
       {
-        "value": 0.5939,
+        "value": 0.5804,
         "metric": "AUC",
         "headline": false,
-        "dataset": "AlfaBattle 2.0 (real bank cards, n=213,383)",
+        "dataset": "AlfaBattle 2.0 (real bank cards, n=963,811)",
         "features": "application-only (product)",
         "model": "logistic (class-balanced)",
         "split": "5-fold CV, out-of-fold",
         "role": "third-replication baseline"
       },
       {
-        "value": 0.7028,
+        "value": 0.697,
         "metric": "AUC",
         "headline": false,
-        "dataset": "AlfaBattle 2.0 (real bank cards, n=213,383)",
+        "dataset": "AlfaBattle 2.0 (real bank cards, n=963,811)",
         "features": "+14 mapped transaction-behaviour aggregates",
         "model": "logistic (class-balanced)",
         "split": "5-fold CV, out-of-fold",
@@ -1252,9 +1252,9 @@
       {
         "key": "alfabattle",
         "label": "AlfaBattle 2.0 — bank card transactions (2020s)",
-        "n": "213,383 applications · 4,905 real defaults (first 10 of 50 public parts)",
+        "n": "963,811 applications · 26,577 real defaults (first 50 of 50 public parts)",
         "role": "Independent replication — at scale",
-        "finding": "Behaviour lift replicates at ~300× Berka's n: +0.109 AUC (CI +0.101…+0.117) over the application-only view; thin-file third 0.62→0.70. Card stream (no balances) — feature-mapped like UCI."
+        "finding": "Behaviour lift replicates at ~1,400× Berka's n: +0.117 AUC (CI +0.112…+0.120) over the application-only view; thin-file third 0.60→0.69. Card stream (no balances) — feature-mapped like UCI."
       },
       {
         "key": "saudi",
@@ -1438,30 +1438,30 @@
   "alfabattle": {
     "dataset": "AlfaBattle 2.0 (real bank card transactions, ods.ai dl-fintech-card-transactions)",
     "source": "huggingface.co/datasets/pytorch-lifestream/alfa-scoring-trx (public, ungated)",
-    "n_accounts": 213383,
-    "n_defaults": 4905,
-    "bad_rate": 0.02299,
-    "n_parts_used": 10,
+    "n_accounts": 963811,
+    "n_defaults": 26577,
+    "bad_rate": 0.02757,
+    "n_parts_used": 50,
     "n_parts_total": 50,
     "baseline": {
       "label": "Application-only view (product)",
-      "auc": 0.5939
+      "auc": 0.5804
     },
     "full": {
       "label": "+ transaction-behaviour layer (14 mapped features)",
-      "auc": 0.7028
+      "auc": 0.697
     },
     "lift": {
-      "auc": 0.1089,
-      "ci_low": 0.1012,
-      "ci_high": 0.1169,
+      "auc": 0.1167,
+      "ci_low": 0.1124,
+      "ci_high": 0.1205,
       "n_boot": 500
     },
     "thin_file": {
       "definition": "shortest-history third by observed transaction span",
-      "n": 71657,
-      "baseline_auc": 0.6163,
-      "full_auc": 0.6969
+      "n": 323181,
+      "baseline_auc": 0.6047,
+      "full_auc": 0.694
     },
     "feature_mapping": [
       {
