@@ -9,6 +9,7 @@ import { Dashboard } from './components/dashboard/Dashboard'
 import { BasePage } from './components/BasePage'
 import { DevelopersPage } from './components/DevelopersPage'
 import { CreditReport } from './components/CreditReport'
+import { ComplianceReceiptDoc } from './components/ComplianceReceiptDoc'
 import { ReportVerify } from './components/ReportVerify'
 import App from './App'
 import './styles.css'
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/base" element={<BasePage />} />
             <Route path="/developers" element={<DevelopersPage />} />
             <Route path="/report" element={<CreditReport />} />
+            <Route path="/receipt" element={<ComplianceReceiptDoc />} />
             <Route path="/verify" element={<ReportVerify />} />
             {/* Frictionless judge/demo entry — straight into the app, no sign-up. */}
             <Route path="/demo" element={<Dashboard />} />

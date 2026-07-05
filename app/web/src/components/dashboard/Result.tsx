@@ -7,6 +7,7 @@ import { MerchantLogo } from './MerchantLogo'
 import { AccountCard } from './AccountCard'
 import { ScoreWaterfall } from './ScoreWaterfall'
 import { RecoursePanel } from './RecoursePanel'
+import { ComplianceReceipt } from './ComplianceReceipt'
 import { ConfidenceBadge, BenchmarkPanel } from './ScoreExtras'
 import modelCard from '../../data/model_card.json'
 import { dualDate } from '../../lib/dates'
@@ -491,6 +492,9 @@ export function AffordScreen({ result }: { result: ScoreResult }) {
   const [capMode, setCapMode] = useState<'employee' | 'retiree' | 'custom'>('employee')
   const [customCap, setCustomCap] = useState(33) // percent
   const [out, setOut] = useState<AffordabilityResult | null>(null)
+  // Inputs snapshotted at calc time, so the receipt documents the decision that was
+  // actually computed even if the form fields are edited afterwards.
+  const [snap, setSnap] = useState<{ amount: number; tenor: number } | null>(null)
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -510,6 +514,7 @@ export function AffordScreen({ result }: { result: ScoreResult }) {
           : { customer_type: capMode }),
       })
       setOut(r)
+      setSnap({ amount, tenor })
     } catch (e: any) {
       setErr(e.message)
     } finally {
@@ -582,6 +587,9 @@ export function AffordScreen({ result }: { result: ScoreResult }) {
                 </span>
               </div>
             </div>
+          )}
+          {snap && (
+            <ComplianceReceipt result={result} out={out} amount={snap.amount} tenor={snap.tenor} />
           )}
         </div>
       )}

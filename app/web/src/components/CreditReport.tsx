@@ -16,7 +16,7 @@ function refId(conn: string, d: Date) {
 const RISK_AR: Record<string, string> = { low: 'منخفض', medium: 'متوسط', high: 'مرتفع' }
 
 /** Tabaqa "stacked layers" mark — color-controllable for masthead / seal / watermark. */
-function Mark({ fill, className }: { fill: string; className?: string }) {
+export function Mark({ fill, className }: { fill: string; className?: string }) {
   return (
     <svg className={className} viewBox="0 0 100 92" aria-hidden>
       <g fill={fill}>

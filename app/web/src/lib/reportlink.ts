@@ -58,6 +58,35 @@ export function decodeFacts(p: string): VerifyFacts {
   return JSON.parse(b64urlDecode(p)) as VerifyFacts
 }
 
+/**
+ * F1 · Compliance Receipt — the issued facts of ONE financing decision, compact enough
+ * for a QR (same philosophy as VerifyFacts: the receipt certifies what was issued;
+ * authenticity, not a live re-score). `ck` is the check bitstring in fixed order:
+ * [DBR≤cap, verified-income, adverse-action reasons, consent on file, no PIS].
+ */
+export interface ReceiptFacts {
+  r: string   // reference
+  n: string   // applicant name
+  d: string   // decision APPROVE | REVIEW | DECLINE
+  a: number   // financing amount (SAR)
+  t: number   // tenor (months)
+  i: number   // monthly installment (SAR)
+  da: number  // DBR after financing (fraction; -1 = n/a)
+  cp: number  // cap applied (fraction)
+  s: number   // tabaqa score
+  vs: number  // verified income share (fraction)
+  ck: string  // check bits, e.g. "11111"
+  ts: string  // issue date YYYY-MM-DD
+}
+
+export function encodeReceipt(f: ReceiptFacts): string {
+  return b64urlEncode(JSON.stringify(f))
+}
+
+export function decodeReceipt(p: string): ReceiptFacts {
+  return JSON.parse(b64urlDecode(p)) as ReceiptFacts
+}
+
 export interface ReportSource {
   connectionId?: string
   statement?: StatementInput

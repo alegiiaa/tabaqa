@@ -113,6 +113,15 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 
 **Current state (verified):** regulator-accurate (SAMA 33.33/25 + 45/55/65 bands in `sama.py`, Nova Credit $45M, refuted claims swept — `PROOF.md`); `/v1/affordability` enforces a **configurable** DBR with policy label + citation; data-processor-on-consent route, Alinma GTM, per-decision pricing, print-ready credit report + QR verify page. The serving layer (API keys/metering/playground) is **built and deployed** — but `keyed:false`, so key issuance is still fail-open demo mode.
 
+> **STATUS 2026-07-05 — F1 SHIPPED (build-green + engine-verified, not yet committed/deployed).**
+> The Compliance Receipt lives on the ④ financing decision: 5 checks **computed from the actual
+> decision** (DBR ≤ SAMA cap with the applied policy · decision-on-verified-income share ·
+> adverse-action reason codes + recourse · read-only-AIS consent (demo-labelled honest) · no-PIS),
+> a `TBQ-C…` reference, a QR → `/verify?rc=<compact token>` (~210 chars, self-contained — same
+> architecture as the report), and **Print/PDF → `/receipt?rc=…`**, a Watheeq-style A4 sibling of
+> the credit report (reuses the `rpt-*` shell + Hijri issue date). A DECLINE prints an honest ✗
+> with the numbers — the receipt documents *why*, which IS adverse-action compliance.
+
 **Where it's thin:** the feasibility story is largely **told in docs**, not **experienced in the product**. A judge can't yet *feel* "a bank integrates this in 5 lines" or "a compliance officer could file this decision."
 
 **Design principle:** make deployability **tangible and clickable**, not claimed.
