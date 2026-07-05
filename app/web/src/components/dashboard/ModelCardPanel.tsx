@@ -37,6 +37,7 @@ interface ModelCard {
   caveats: string[]
   corpus?: Corpus
   cross_check?: CrossCheck | null
+  alfabattle?: ThirdCheck | null
   champion_challenger?: ChampionChallenger | null
   lineage?: Lineage
   psi?: Psi
@@ -71,6 +72,14 @@ interface CrossCheck {
   lift: { auc: number; ci_low: number; ci_high: number; p_gt_0: number }
   feature_mapping: { tabaqa: string; homecredit: string }[]; caveats: string[]
   attenuation_note?: string
+}
+interface ThirdCheck {
+  dataset: string; n_accounts: number; n_defaults: number; bad_rate: number
+  n_parts_used: number; n_parts_total: number
+  baseline: { label: string; auc: number }; full: { label: string; auc: number }
+  lift: { auc: number; ci_low: number; ci_high: number }
+  thin_file: { definition: string; n: number; baseline_auc: number; full_auc: number }
+  caveats: string[]
 }
 interface Lineage { tiers: { tier: string; source: string; claim: string }[]; live_scorer: string }
 interface LedgerRow {
@@ -443,6 +452,7 @@ function PerformanceTab() {
 function ReplicationTab() {
   const { tx } = useTx()
   const cc = c.cross_check
+  const ac = c.alfabattle
   const ch = c.champion_challenger
   const ev = c.external_validity
   return (
@@ -457,6 +467,24 @@ function ReplicationTab() {
           {/* P4 — the attenuation, stated before anyone asks (stays visible, never folded) */}
           {cc.attenuation_note && <p className="mv-claim">{cc.attenuation_note}</p>}
           <Method>{cc.caveats?.[0]}</Method>
+        </div>
+      )}
+
+      {ac && (
+        <div className="mc-block">
+          <SectionHead en="…and a third real population — at scale" ar="…وعلى مجتمع حقيقي ثالث — وبالحجم"
+            note={<>{ac.dataset} · {tx(`first ${ac.n_parts_used} of ${ac.n_parts_total} public parts`, `أول ${ac.n_parts_used} من ${ac.n_parts_total} جزءًا عامًا`)}</>} />
+          <div className="mc-swap-head">
+            <StatDelta from={`${tx('App-only', 'الطلب فقط')} ${ac.baseline.auc.toFixed(3)}`} to={`+ ${tx('Behaviour', 'السلوك')} ${ac.full.auc.toFixed(3)}`} good />
+            <span className="mc-swap-cap"><span dir="ltr">+{ac.lift.auc.toFixed(2)} AUC · {intFmt(ac.n_accounts)}</span> {tx('real labeled applications', 'طلب حقيقي موسوم')} · <span dir="ltr">{intFmt(ac.n_defaults)}</span> {tx('real defaults', 'تعثّر حقيقي')}</span>
+          </div>
+          <p className="mv-claim">
+            {tx(
+              'Three real populations, three decades, three scales — the behaviour lift is always positive and always significant: +0.203 → +0.131 → +0.109. The attenuation across populations is the honest finding, not a footnote.',
+              'ثلاثة مجتمعات حقيقية، عبر ثلاثة عقود وثلاثة أحجام — رفعُ السلوك موجبٌ ودالٌّ إحصائيًا دائمًا: ‎+0.203 ← ‎+0.131 ← ‎+0.109. والتناقص عبر المجتمعات هو النتيجة الصادقة، لا هامشًا.',
+            )}
+          </p>
+          <Method>{ac.caveats?.[1] ?? ac.caveats?.[0]}</Method>
         </div>
       )}
 

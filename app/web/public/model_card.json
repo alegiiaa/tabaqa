@@ -1,5 +1,5 @@
 {
-  "dataset": "Berka / PKDD'99 (CTU relational MariaDB \u2014 public, no login)",
+  "dataset": "Berka / PKDD'99 (CTU relational MariaDB — public, no login)",
   "n_accounts": 682,
   "n_defaults": 76,
   "bad_rate": 0.1114,
@@ -382,7 +382,7 @@
     "n_boot": 3000
   },
   "thin_file": {
-    "definition": "shortest-history third (\u2264 11 months of pre-loan banking)",
+    "definition": "shortest-history third (≤ 11 months of pre-loan banking)",
     "n": 252,
     "n_defaults": 33,
     "baseline_auc": 0.5955,
@@ -843,13 +843,13 @@
   "method": {
     "validation": "5-fold cross-validated out-of-sample predictions",
     "leakage_control": "cash-flow features computed on strictly pre-loan transactions",
-    "ablation": "nested \u2014 FULL = BASELINE + wallet layer, same accounts",
+    "ablation": "nested — FULL = BASELINE + wallet layer, same accounts",
     "model": "standardized, class-balanced logistic regression"
   },
   "caveats": [
-    "Berka is Czech retail banking (1990s) \u2014 the only PUBLIC data pairing real transactions with real default outcomes; a proxy for the Saudi product.",
-    "The 'bureau view' here is a demographics/district/loan-terms proxy for a real credit-bureau file (Berka has no bureau feed) \u2014 stated honestly.",
-    "Labels are BOOKED loans only; a production model adds reject inference for the through-the-door population (selection bias) \u2014 out of scope for this benchmark."
+    "Berka is Czech retail banking (1990s) — the only PUBLIC data pairing real transactions with real default outcomes; a proxy for the Saudi product.",
+    "The 'bureau view' here is a demographics/district/loan-terms proxy for a real credit-bureau file (Berka has no bureau feed) — stated honestly.",
+    "Labels are BOOKED loans only; a production model adds reject inference for the through-the-door population (selection bias) — out of scope for this benchmark."
   ],
   "corpus": {
     "generator": "numpy Gaussian copula (zero-dependency)",
@@ -934,11 +934,11 @@
         }
       }
     ],
-    "methodology": "Default labels are SAMPLED from a joint distribution learned on real Berka outcomes (never hand-injected), so no feature\u2192default relationship is tautological. Validity is measured only on real data (the ablation + the UCI Taiwan cross-check); the synthetic corpus proves scale/capacity, and Train-on-Synthetic/Test-on-Real (corpus_train.py) certifies the sample carries the real signal. Scope: TSTR is a fidelity check on the SYNTHESIZER \u2014 it is not evidence of transfer to the Saudi population (see external_validity).",
+    "methodology": "Default labels are SAMPLED from a joint distribution learned on real Berka outcomes (never hand-injected), so no feature→default relationship is tautological. Validity is measured only on real data (the ablation + the UCI Taiwan cross-check); the synthetic corpus proves scale/capacity, and Train-on-Synthetic/Test-on-Real (corpus_train.py) certifies the sample carries the real signal. Scope: TSTR is a fidelity check on the SYNTHESIZER — it is not evidence of transfer to the Saudi population (see external_validity).",
     "tstr": {
       "auc": 0.8696,
       "ks": 0.6108,
-      "note": "train on synthetic, test on REAL held-out Berka \u2014 certifies the synthesizer's fidelity to the source population, not Saudi generalization"
+      "note": "train on synthetic, test on REAL held-out Berka — certifies the synthesizer's fidelity to the source population, not Saudi generalization"
     },
     "trtr": {
       "auc": 0.9044,
@@ -978,7 +978,7 @@
           "ks_complement": 0.983
         }
       ],
-      "note": "1 \u2212 KS statistic between real and synthetic marginals (\u21921 is faithful)"
+      "note": "1 − KS statistic between real and synthetic marginals (→1 is faithful)"
     }
   },
   "cross_check": {
@@ -1011,11 +1011,11 @@
       },
       {
         "tabaqa": "recurring_obligation_load",
-        "homecredit": "credit utilisation (BILL \u00f7 LIMIT)"
+        "homecredit": "credit utilisation (BILL ÷ LIMIT)"
       },
       {
         "tabaqa": "income_expense_ratio",
-        "homecredit": "repayment coverage (PAY_AMT \u00f7 BILL)"
+        "homecredit": "repayment coverage (PAY_AMT ÷ BILL)"
       },
       {
         "tabaqa": "balance_volatility",
@@ -1023,9 +1023,9 @@
       }
     ],
     "caveats": [
-      "An independent replication on a second real, labelled dataset. Credit-card repayment behaviour stands in for the wallet cash-flow feed, so this is directional evidence the mechanism generalises beyond Berka \u2014 not a like-for-like wallet result."
+      "An independent replication on a second real, labelled dataset. Credit-card repayment behaviour stands in for the wallet cash-flow feed, so this is directional evidence the mechanism generalises beyond Berka — not a like-for-like wallet result."
     ],
-    "attenuation_note": "Disclosed up front: the lift attenuates out-of-domain \u2014 +0.203 on Berka \u2192 +0.131 here (35% smaller). Expected, for three reasons: a different product (revolving cards vs retail banking), proxy features (card repayment behaviour stands in for true bank cash-flow), and a 2\u00d7 base rate (22% vs 11%). What replicates is what we claim: the SIGN and the SIGNIFICANCE \u2014 both CIs exclude zero. It attenuates; it does not vanish."
+    "attenuation_note": "Disclosed up front: the lift attenuates out-of-domain — +0.203 on Berka → +0.131 here (35% smaller). Expected, for three reasons: a different product (revolving cards vs retail banking), proxy features (card repayment behaviour stands in for true bank cash-flow), and a 2× base rate (22% vs 11%). What replicates is what we claim: the SIGN and the SIGNIFICANCE — both CIs exclude zero. It attenuates; it does not vanish."
   },
   "lineage": {
     "tiers": [
@@ -1041,16 +1041,16 @@
       },
       {
         "tier": "Generalization",
-        "source": "UCI Default of Credit Card Clients (Taiwan) (30,000 real accounts)",
-        "claim": "Lift sign + significance replicate: +0.13 AUC via proxy cash-flow"
+        "source": "UCI Taiwan (30,000) + AlfaBattle 2.0 (213,383) — both real, labeled",
+        "claim": "Lift sign + significance replicate on two more real populations: +0.13 (Taiwan cards) · +0.11 (bank card stream at scale)"
       }
     ],
-    "live_scorer": "Live score = a transparent expert policy card, DIRECTION-LOCKED to the Berka fit: _verify_lineage machine-checks at import that every weight's SIGN matches the validated fit (one documented monotonic override). Magnitudes are policy-set, not fitted \u2014 disclosed, and re-fit on the licensee's own book at deployment via the same train.py path. The fitted scorecard (Berka full model, 5-fold CV AUC 0.86) is the drop-in production swap with an identical I/O contract."
+    "live_scorer": "Live score = a transparent expert policy card, DIRECTION-LOCKED to the Berka fit: _verify_lineage machine-checks at import that every weight's SIGN matches the validated fit (one documented monotonic override). Magnitudes are policy-set, not fitted — disclosed, and re-fit on the licensee's own book at deployment via the same train.py path. The fitted scorecard (Berka full model, 5-fold CV AUC 0.86) is the drop-in production swap with an identical I/O contract."
   },
   "psi": {
-    "reference": "300k-account reference draw from the 1M synthetic scoring corpus (demonstration \u2014 no live stream yet)",
-    "method": "PSI on the reference deciles \u00b7 <0.1 stable \u00b7 0.1\u20130.25 shift \u00b7 >0.25 significant",
-    "note": "A drift-monitor DEMONSTRATION on the synthetic scoring corpus \u2014 no live applicant stream exists yet, and this panel does not pretend one does. In-control = an independent draw from the same corpus (no false alarm \u2014 reads flat). Economic-stress = a known covariate shift injected into that draw (thinner buffers, more volatile balances, heavier obligations) to prove the monitor fires. In production the identical PSI runs on live applicants vs the training distribution; this demonstrates the monitor, not live drift.",
+    "reference": "300k-account reference draw from the 1M synthetic scoring corpus (demonstration — no live stream yet)",
+    "method": "PSI on the reference deciles · <0.1 stable · 0.1–0.25 shift · >0.25 significant",
+    "note": "A drift-monitor DEMONSTRATION on the synthetic scoring corpus — no live applicant stream exists yet, and this panel does not pretend one does. In-control = an independent draw from the same corpus (no false alarm — reads flat). Economic-stress = a known covariate shift injected into that draw (thinner buffers, more volatile balances, heavier obligations) to prove the monitor fires. In production the identical PSI runs on live applicants vs the training distribution; this demonstrates the monitor, not live drift.",
     "scenarios": [
       {
         "key": "in_control",
@@ -1094,7 +1094,7 @@
       {
         "key": "stress",
         "label": "Economic-stress shift (simulated)",
-        "desc": "thinner buffers \u00b7 more volatile balances \u00b7 heavier obligations",
+        "desc": "thinner buffers · more volatile balances · heavier obligations",
         "max_psi": 0.347,
         "status": "significant",
         "per_feature": [
@@ -1145,10 +1145,10 @@
     },
     "gap_auc": -0.022,
     "rank_agreement": 0.86,
-    "note": "Both models re-fit on the same in-distribution data (no cross-currency confound): a transparent additive scorecard \u2014 the same glass-box family Tabaqa deploys, re-fit on this dataset (NOT the served demo card; see performance_ledger) \u2014 vs a gradient-boosted black box. Within a couple of AUC points, ranking borrowers in close agreement: transparency costs almost nothing."
+    "note": "Both models re-fit on the same in-distribution data (no cross-currency confound): a transparent additive scorecard — the same glass-box family Tabaqa deploys, re-fit on this dataset (NOT the served demo card; see performance_ledger) — vs a gradient-boosted black box. Within a couple of AUC points, ranking borrowers in close agreement: transparency costs almost nothing."
   },
   "performance_ledger": {
-    "note": "One headline, no number soup: every AUC in this card belongs to a specific {dataset \u00b7 features \u00b7 model \u00b7 split}. None of them IS the served demo card \u2014 that is an expert policy card direction-locked to the Berka fit (see lineage).",
+    "note": "One headline, no number soup: every AUC in this card belongs to a specific {dataset · features · model · split}. None of them IS the served demo card — that is an expert policy card direction-locked to the Berka fit (see lineage).",
     "rows": [
       {
         "value": 0.8638,
@@ -1158,7 +1158,7 @@
         "features": "bureau proxy + 7 cash-flow",
         "model": "logistic (class-balanced)",
         "split": "5-fold CV, out-of-fold",
-        "role": "THE headline: the full model \u2014 +0.203 over bureau-only"
+        "role": "THE headline: the full model — +0.203 over bureau-only"
       },
       {
         "value": 0.6612,
@@ -1168,7 +1168,7 @@
         "features": "bureau proxy only",
         "model": "logistic",
         "split": "5-fold CV, out-of-fold",
-        "role": "ablation baseline \u2014 what a bureau-only view achieves"
+        "role": "ablation baseline — what a bureau-only view achieves"
       },
       {
         "value": 0.89,
@@ -1184,11 +1184,11 @@
         "value": 0.8696,
         "metric": "AUC",
         "headline": false,
-        "dataset": "synthetic corpus \u2192 REAL held-out Berka",
+        "dataset": "synthetic corpus → REAL held-out Berka",
         "features": "same as full model",
         "model": "logistic",
         "split": "TSTR vs TRTR ceiling 0.9044",
-        "role": "synthesizer fidelity \u2014 the 1M corpus carries the real signal (not a generalization claim)"
+        "role": "synthesizer fidelity — the 1M corpus carries the real signal (not a generalization claim)"
       },
       {
         "value": 0.75,
@@ -1198,7 +1198,7 @@
         "features": "demographics + proxy cash-flow",
         "model": "logistic",
         "split": "5-fold CV, out-of-fold",
-        "role": "independent replication \u2014 lift +0.131 over its own baseline 0.619"
+        "role": "independent replication — lift +0.131 over its own baseline 0.619"
       },
       {
         "value": 0.772,
@@ -1208,39 +1208,66 @@
         "features": "same as champion",
         "model": "gradient boosting (black box)",
         "split": "5-fold CV, out-of-fold",
-        "role": "transparency-cost benchmark \u2014 beats the additive card by only 0.022"
+        "role": "transparency-cost benchmark — beats the additive card by only 0.022"
+      },
+      {
+        "value": 0.5939,
+        "metric": "AUC",
+        "headline": false,
+        "dataset": "AlfaBattle 2.0 (real bank cards, n=213,383)",
+        "features": "application-only (product)",
+        "model": "logistic (class-balanced)",
+        "split": "5-fold CV, out-of-fold",
+        "role": "third-replication baseline"
+      },
+      {
+        "value": 0.7028,
+        "metric": "AUC",
+        "headline": false,
+        "dataset": "AlfaBattle 2.0 (real bank cards, n=213,383)",
+        "features": "+14 mapped transaction-behaviour aggregates",
+        "model": "logistic (class-balanced)",
+        "split": "5-fold CV, out-of-fold",
+        "role": "third-replication full"
       }
     ]
   },
   "external_validity": {
-    "claim": "We do NOT claim these coefficients predict Saudi default. We claim the MECHANISM transfers: cash-flow features add a large, significant lift over bureau-only \u2014 largest for thin-file borrowers \u2014 and that effect replicates across two maximally-different real populations (Czech retail 1990s, Taiwan cards 2005).",
+    "claim": "We do NOT claim these coefficients predict Saudi default. We claim the MECHANISM transfers: cash-flow features add a large, significant lift over bureau-only — largest for thin-file borrowers — and that effect replicates across two maximally-different real populations (Czech retail 1990s, Taiwan cards 2005).",
     "populations": [
       {
         "key": "berka",
-        "label": "Berka \u2014 Czech retail banking (1990s)",
-        "n": "682 accounts \u00b7 76 real defaults",
+        "label": "Berka — Czech retail banking (1990s)",
+        "n": "682 accounts · 76 real defaults",
         "role": "Primary validation",
-        "finding": "Cash-flow lift +0.203 AUC over bureau-only (95% CI +0.14\u2026+0.27); thin-file 0.60\u21920.77"
+        "finding": "Cash-flow lift +0.203 AUC over bureau-only (95% CI +0.14…+0.27); thin-file 0.60→0.77"
       },
       {
         "key": "uci",
-        "label": "UCI Taiwan \u2014 credit cards (2005)",
-        "n": "30,000 clients \u00b7 22.1% default",
+        "label": "UCI Taiwan — credit cards (2005)",
+        "n": "30,000 clients · 22.1% default",
         "role": "Independent replication",
-        "finding": "Sign + significance replicate: +0.131 AUC (CI +0.123\u2026+0.139) via proxy cash-flow features"
+        "finding": "Sign + significance replicate: +0.131 AUC (CI +0.123…+0.139) via proxy cash-flow features"
+      },
+      {
+        "key": "alfabattle",
+        "label": "AlfaBattle 2.0 — bank card transactions (2020s)",
+        "n": "213,383 applications · 4,905 real defaults (first 10 of 50 public parts)",
+        "role": "Independent replication — at scale",
+        "finding": "Behaviour lift replicates at ~300× Berka's n: +0.109 AUC (CI +0.101…+0.117) over the application-only view; thin-file third 0.62→0.70. Card stream (no balances) — feature-mapped like UCI."
       },
       {
         "key": "saudi",
-        "label": "Saudi Arabia \u2014 wallet + open banking (target)",
+        "label": "Saudi Arabia — wallet + open banking (target)",
         "n": "no public labeled default data exists",
-        "role": "Deployment population \u2014 NOT validated here",
+        "role": "Deployment population — NOT validated here",
         "finding": "No Saudi outcome data is public (for anyone, pre-launch). The Saudi-cited layer is regulatory, not statistical: SAMA Responsible-Lending DBR caps (sama.py). Coefficients are re-fit on the licensee's own book at go-live."
       }
     ],
-    "transfers": "Transfers: the mechanism (cash-flow > bureau-only for thin files) and every feature's direction (sign-locked at import by _verify_lineage). Does NOT transfer \u2014 re-fit locally: coefficient magnitudes, base rates, currency scale, score cutoffs.",
+    "transfers": "Transfers: the mechanism (cash-flow > bureau-only for thin files) and every feature's direction (sign-locked at import by _verify_lineage). Does NOT transfer — re-fit locally: coefficient magnitudes, base rates, currency scale, score cutoffs.",
     "deployment_plan": [
       "Go-live: score with the direction-locked policy card inside the licensee's approval flow (champion/challenger, no auto-decline).",
-      "Months 1\u20136: accumulate the licensee's own outcomes; re-fit magnitudes on that book via the existing train.py path (identical I/O contract).",
+      "Months 1–6: accumulate the licensee's own outcomes; re-fit magnitudes on that book via the existing train.py path (identical I/O contract).",
       "Ongoing: PSI drift monitor + annual SAMA-style model validation on the live population."
     ]
   },
@@ -1248,32 +1275,32 @@
     "name": "Saudi-anchored demonstration population",
     "no_accuracy_claim": true,
     "n_accounts": 1000000,
-    "method": "One global scale factor s = SAR 7,362 (GASTAT HIES 2023 median household disposable income) / CZK 8,991 (corpus median district salary) = 0.819, applied to the 5 money columns only. A single multiplicative rescale preserves every rank, ratio and correlation of the Berka-learned copula: the SCALE is Saudi (SAR), the SHAPE remains the validated Czech source \u2014 disclosed, not hidden. No Saudi default labels exist publicly, so this population carries NO accuracy claim; it exists so the pipeline demonstrably runs end-to-end on Saudi-scale data and so the percentile ruler compares SAR against SAR.",
+    "method": "One global scale factor s = SAR 7,362 (GASTAT HIES 2023 median household disposable income) / CZK 8,991 (corpus median district salary) = 0.819, applied to the 5 money columns only. A single multiplicative rescale preserves every rank, ratio and correlation of the Berka-learned copula: the SCALE is Saudi (SAR), the SHAPE remains the validated Czech source — disclosed, not hidden. No Saudi default labels exist publicly, so this population carries NO accuracy claim; it exists so the pipeline demonstrably runs end-to-end on Saudi-scale data and so the percentile ruler compares SAR against SAR.",
     "scale_factor": 0.8188,
     "priors_used": [
       {
-        "prior": "Median household disposable income \u2014 SAR 7,362/mo (THE scale anchor)",
-        "source": "GASTAT HIES 2023 \u00b7 data/saudi_priors/hies23_tables.xlsx"
+        "prior": "Median household disposable income — SAR 7,362/mo (THE scale anchor)",
+        "source": "GASTAT HIES 2023 · data/saudi_priors/hies23_tables.xlsx"
       },
       {
         "prior": "Income deciles 2024 (distribution context, Kingdom level)",
-        "source": "GASTAT database.stats.gov.sa HIES cube \u00b7 data/saudi_priors/sel_decile.json"
+        "source": "GASTAT database.stats.gov.sa HIES cube · data/saudi_priors/sel_decile.json"
       },
       {
         "prior": "Wage bands, 13.1M GOSI contributors Q2 2025 (segment context)",
-        "source": "GOSI via open.data.gov.sa \u00b7 data/saudi_priors/gosi_wage.csv"
+        "source": "GOSI via open.data.gov.sa · data/saudi_priors/gosi_wage.csv"
       },
       {
         "prior": "Avg wage Saudi SAR 11,034 / non-Saudi 3,933",
-        "source": "GASTAT Labor Market Statistics Q2 2025 \u00b7 data/saudi_priors/lms_q2_2025.xlsx"
+        "source": "GASTAT Labor Market Statistics Q2 2025 · data/saudi_priors/lms_q2_2025.xlsx"
       },
       {
-        "prior": "Account ownership 78.8% \u00b7 borrowed formally 30.5% (2024)",
-        "source": "World Bank Global Findex 2025 \u00b7 data/saudi_priors/findex2025.csv"
+        "prior": "Account ownership 78.8% · borrowed formally 30.5% (2024)",
+        "source": "World Bank Global Findex 2025 · data/saudi_priors/findex2025.csv"
       },
       {
         "prior": "Consumer loans outstanding SAR 481.1bn (Q1 2026)",
-        "source": "SAMA Monthly Bulletin May 2026, table 13a \u00b7 data/saudi_priors/sama_bulletin_may2026.xlsx"
+        "source": "SAMA Monthly Bulletin May 2026, table 13a · data/saudi_priors/sama_bulletin_may2026.xlsx"
       }
     ],
     "income_deciles_sar": [
@@ -1320,27 +1347,27 @@
     ],
     "gosi_wage_bands": [
       {
-        "band_sar": "400 \u2013 5000",
+        "band_sar": "400 – 5000",
         "contributors": 10714622,
         "share": 0.8176
       },
       {
-        "band_sar": "5001 \u2013 9999",
+        "band_sar": "5001 – 9999",
         "contributors": 1128766,
         "share": 0.0861
       },
       {
-        "band_sar": "10000 \u2013 19999",
+        "band_sar": "10000 – 19999",
         "contributors": 753543,
         "share": 0.0575
       },
       {
-        "band_sar": "20000 \u2013 29999",
+        "band_sar": "20000 – 29999",
         "contributors": 265620,
         "share": 0.0203
       },
       {
-        "band_sar": "30000 \u2013 39999",
+        "band_sar": "30000 – 39999",
         "contributors": 108320,
         "share": 0.0083
       },
@@ -1403,9 +1430,65 @@
       }
     ],
     "caveats": [
-      "Distribution SHAPES (including balances and default correlations) remain those of the validated Czech Berka fit \u2014 only the money scale is Saudi. No observed Saudi balance or DBR distribution exists publicly; SAMA DBR figures are regulatory caps, not distributions.",
+      "Distribution SHAPES (including balances and default correlations) remain those of the validated Czech Berka fit — only the money scale is Saudi. No observed Saudi balance or DBR distribution exists publicly; SAMA DBR figures are regulatory caps, not distributions.",
       "GASTAT 2024 decile cube is Kingdom-level individual income (not nationality-crossed); the 2023 publication median is used as the headline anchor per GASTAT vintage guidance.",
       "GOSI bands are contributory basic wage (excludes allowances), 82% in the lowest band."
+    ]
+  },
+  "alfabattle": {
+    "dataset": "AlfaBattle 2.0 (real bank card transactions, ods.ai dl-fintech-card-transactions)",
+    "source": "huggingface.co/datasets/pytorch-lifestream/alfa-scoring-trx (public, ungated)",
+    "n_accounts": 213383,
+    "n_defaults": 4905,
+    "bad_rate": 0.02299,
+    "n_parts_used": 10,
+    "n_parts_total": 50,
+    "baseline": {
+      "label": "Application-only view (product)",
+      "auc": 0.5939
+    },
+    "full": {
+      "label": "+ transaction-behaviour layer (14 mapped features)",
+      "auc": 0.7028
+    },
+    "lift": {
+      "auc": 0.1089,
+      "ci_low": 0.1012,
+      "ci_high": 0.1169,
+      "n_boot": 500
+    },
+    "thin_file": {
+      "definition": "shortest-history third by observed transaction span",
+      "n": 71657,
+      "baseline_auc": 0.6163,
+      "full_auc": 0.6969
+    },
+    "feature_mapping": [
+      {
+        "tabaqa": "income_regularity",
+        "alfabattle": "weekly-inflow CV + inflow weeks (income_flag)"
+      },
+      {
+        "tabaqa": "income_expense_ratio",
+        "alfabattle": "inflow/outflow sum ratio (normalized amounts)"
+      },
+      {
+        "tabaqa": "balance_volatility",
+        "alfabattle": "NOT computable (no balances) — amount volatility stands in"
+      },
+      {
+        "tabaqa": "avg/min_balance, nsf_count",
+        "alfabattle": "NOT computable (card stream has no balance)"
+      },
+      {
+        "tabaqa": "months_observed",
+        "alfabattle": "active days + observed span"
+      }
+    ],
+    "caveats": [
+      "Card-transaction stream, not full bank statements: normalized amounts, no balances.",
+      "Baseline is application-only (product) — this dataset ships no bureau features, so the ablation reads app-only vs +behaviour, weaker baseline than Berka's bureau-view.",
+      "Mechanism replication only: sign and significance of the behaviour lift; magnitudes are population-specific (performance-ledger discipline)."
     ]
   }
 }
