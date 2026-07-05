@@ -113,6 +113,14 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 
 **Current state (verified):** regulator-accurate (SAMA 33.33/25 + 45/55/65 bands in `sama.py`, Nova Credit $45M, refuted claims swept — `PROOF.md`); `/v1/affordability` enforces a **configurable** DBR with policy label + citation; data-processor-on-consent route, Alinma GTM, per-decision pricing, print-ready credit report + QR verify page. The serving layer (API keys/metering/playground) is **built and deployed** — but `keyed:false`, so key issuance is still fail-open demo mode.
 
+> **STATUS 2026-07-05 (evening) — F2 LIVE & independently verified.** Migration applied (dashboard
+> SQL editor), `SUPABASE_URL`+`SUPABASE_SERVICE_ROLE_KEY`+`TABAQA_SIGNING_SECRET` on `tabaqa-api`,
+> redeployed. Verified from a fresh session: `/health keyed:true` · `POST /v1/keys` → real
+> `tbq_sk_…` (limit 250) · keyed `/v1/score` 200 with `x-ratelimit 250/249/sandbox` · second call
+> 248 (counter persists in Supabase) · anonymous demo path intact (82, `scope:anonymous`) · bogus
+> key → 401. The `/developers` playground now issues real metered keys. **Feasibility idea menu:
+> F1 ✅ F2 ✅ F5 ✅ F6 ✅** — remaining: F3 consent visual, F4 policy engine, F7 fraud overlay (optional).
+>
 > **STATUS 2026-07-05 (later) — F5 + F6 SHIPPED (build-green, arithmetic verified vs model_card.json).**
 > `LenderImpact.tsx` on the Applicants (lender-tools) list: **F5 ROI** — the swap-set measured on
 > real Berka defaults (approved-pool bad rate 7.6% → 2.9%, **−61%**) translated to money with the
