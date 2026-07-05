@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTx } from '../../lib/tx'
 import { NewApplicant, type ScoredPayload } from './NewApplicant'
 import { Result } from './Result'
+import { LenderImpact } from './LenderImpact'
 import { api, type ScoreResult } from '../../lib/api'
 import {
   listApplicants,
@@ -104,13 +105,16 @@ export function Applicants() {
       {persistMsg && <div className="persist-banner" style={{ marginBottom: 18 }}>{persistMsg}</div>}
 
       {view.kind === 'list' && (
-        <ApplicantsList
-          applicants={applicants}
-          loading={loading}
-          onNew={() => setView({ kind: 'new' })}
-          onOpen={openSaved}
-          onRemove={remove}
-        />
+        <>
+          <ApplicantsList
+            applicants={applicants}
+            loading={loading}
+            onNew={() => setView({ kind: 'new' })}
+            onOpen={openSaved}
+            onRemove={remove}
+          />
+          <LenderImpact />
+        </>
       )}
       {view.kind === 'new' && (
         <NewApplicant onScored={onScored} onCancel={() => setView({ kind: 'list' })} />

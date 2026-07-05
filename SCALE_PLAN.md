@@ -113,7 +113,17 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 
 **Current state (verified):** regulator-accurate (SAMA 33.33/25 + 45/55/65 bands in `sama.py`, Nova Credit $45M, refuted claims swept — `PROOF.md`); `/v1/affordability` enforces a **configurable** DBR with policy label + citation; data-processor-on-consent route, Alinma GTM, per-decision pricing, print-ready credit report + QR verify page. The serving layer (API keys/metering/playground) is **built and deployed** — but `keyed:false`, so key issuance is still fail-open demo mode.
 
-> **STATUS 2026-07-05 — F1 SHIPPED (build-green + engine-verified, not yet committed/deployed).**
+> **STATUS 2026-07-05 (later) — F5 + F6 SHIPPED (build-green, arithmetic verified vs model_card.json).**
+> `LenderImpact.tsx` on the Applicants (lender-tools) list: **F5 ROI** — the swap-set measured on
+> real Berka defaults (approved-pool bad rate 7.6% → 2.9%, **−61%**) translated to money with the
+> lender's own inputs (decisions/mo, ticket, LGD, price/decision; defaults → 279 defaults avoided,
+> SAR 7.53M/mo saved vs 250k cost, **×30**), honesty note "measured delta, your policy inputs".
+> **F6 inclusion meter** — 37% thin-file share of the demonstration book, bureau AUC 0.60 ≈
+> coin-flip → 0.77 with the wallet layer, the verified 78.8%-banked / 56.7%-bureau wedge, and an
+> FSDP KPI meter (5.7% → 9.4% actual vs 11% interim missed vs 20%-by-2030) — "an assessment gap,
+> not an appetite gap". All figures from model_card.json + EVIDENCE.md refs 20–21.
+>
+> **STATUS 2026-07-05 — F1 SHIPPED (committed `7cd47bf`).**
 > The Compliance Receipt lives on the ④ financing decision: 5 checks **computed from the actual
 > decision** (DBR ≤ SAMA cap with the applied policy · decision-on-verified-income share ·
 > adverse-action reason codes + recourse · read-only-AIS consent (demo-labelled honest) · no-PIS),

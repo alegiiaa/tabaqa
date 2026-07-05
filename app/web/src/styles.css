@@ -1883,3 +1883,38 @@ html[dir=rtl] .mm-hero{background-position:center left}
 .cmpd-det{font-family:'Traditional Arabic','IBM Plex Sans Arabic',serif;font-size:12.5px;color:#4b5872;
   white-space:nowrap}
 .cmpd-det, .cmpd-det *{font-variant-numeric:tabular-nums}
+
+/* ── F5+F6 · lender impact (Applicants list) — ROI + inclusion meter ──────── */
+.li{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
+@media(max-width:980px){.li{grid-template-columns:1fr}}
+.li-panel{border:1px solid var(--line);border-radius:15px;background:#fff;padding:18px 20px;
+  box-shadow:0 1px 2px rgba(12,18,38,.04);display:flex;flex-direction:column}
+.li-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.li-cap{display:block;font-size:13.5px;font-weight:700;color:var(--blue-deep)}
+.li-sub{display:block;font-size:11.5px;line-height:1.6;margin-top:3px}
+.li-roi{flex:none;font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--blue-deep);
+  font-variant-numeric:tabular-nums;line-height:1}
+.li-inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+@media(max-width:640px){.li-inputs{grid-template-columns:1fr 1fr}}
+.li-inputs .field-wrap input{font-size:13.5px;padding:8px 11px;width:100%}
+.li-outs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.li-outs .stat{padding:11px 13px}
+.li-outs .stat-value{font-size:16.5px}
+.li-net{border-color:rgba(14,127,84,.4);background:rgba(14,127,84,.05)}
+.li-net .stat-value{color:#0e7f54}
+.li-note{margin-top:auto;padding-top:12px;font-size:10.5px;line-height:1.6}
+/* F6 meters */
+.li-meter{margin-top:14px}
+.li-meter-track{height:14px;border-radius:999px;background:var(--bg-soft);border:1px solid var(--line);
+  overflow:hidden;position:relative}
+.li-meter-fill{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#3b82f6,#1d4ed8)}
+.li-meter-legend{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:12px;line-height:1.6}
+.li-fsdp{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.li-fsdp-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  font-size:11.5px;font-weight:650;margin-bottom:8px}
+.li-fsdp-track{height:10px;border-radius:999px;background:var(--bg-soft);border:1px solid var(--line);
+  position:relative;overflow:visible}
+.li-fsdp-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0e7f54,#15a06c)}
+.li-fsdp-tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:#b45309;border-radius:2px}
+.li-fsdp-legend{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:10.5px}
