@@ -215,11 +215,21 @@ def _result_from_request(req: ScoreRequest) -> ProfileResult:
 
 
 @app.get("/health")
-def health() -> dict:
+def health(llm_check: int = 0) -> dict:
     # `keyed` tells the frontend whether real key issuance/metering is live (a
     # service_role key is configured) or the API is running in open demo mode.
-    return {"status": "ok", "connections": sorted(FIXTURES),
-            "keyed": keystore.configured()}
+    out = {"status": "ok", "connections": sorted(FIXTURES),
+           "keyed": keystore.configured()}
+    if llm_check:  # opt-in ops probe: is the narrative LLM reachable from THIS runtime?
+        from pipeline import llm as _llm
+        provider = _llm._active()
+        reply = None
+        if provider == "groq":
+            reply = _llm._groq_raw(_llm.INSIGHTS_MODEL, [{"role": "user", "content": "hi"}],
+                                   max_tokens=8, temperature=0, json_mode=False)
+        out["llm"] = {"provider": provider, "model": _llm.INSIGHTS_MODEL,
+                      "reachable": bool(reply)}
+    return out
 
 
 @app.post("/v1/keys", response_model=KeyResponse)
