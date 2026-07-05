@@ -1,0 +1,57 @@
+{
+  "dataset": "AlfaBattle 2.0 (real bank card transactions, ods.ai dl-fintech-card-transactions)",
+  "source": "huggingface.co/datasets/pytorch-lifestream/alfa-scoring-trx (public, ungated)",
+  "n_accounts": 213383,
+  "n_defaults": 4905,
+  "bad_rate": 0.02299,
+  "n_parts_used": 10,
+  "n_parts_total": 50,
+  "baseline": {
+    "label": "Application-only view (product)",
+    "auc": 0.5939
+  },
+  "full": {
+    "label": "+ transaction-behaviour layer (14 mapped features)",
+    "auc": 0.7028
+  },
+  "lift": {
+    "auc": 0.1089,
+    "ci_low": 0.1012,
+    "ci_high": 0.1169,
+    "n_boot": 500
+  },
+  "thin_file": {
+    "definition": "shortest-history third by observed transaction span",
+    "n": 71657,
+    "baseline_auc": 0.6163,
+    "full_auc": 0.6969
+  },
+  "income_flag_level_inferred_as_inflow": 2,
+  "feature_mapping": [
+    {
+      "tabaqa": "income_regularity",
+      "alfabattle": "weekly-inflow CV + inflow weeks (income_flag)"
+    },
+    {
+      "tabaqa": "income_expense_ratio",
+      "alfabattle": "inflow/outflow sum ratio (normalized amounts)"
+    },
+    {
+      "tabaqa": "balance_volatility",
+      "alfabattle": "NOT computable (no balances) \u2014 amount volatility stands in"
+    },
+    {
+      "tabaqa": "avg/min_balance, nsf_count",
+      "alfabattle": "NOT computable (card stream has no balance)"
+    },
+    {
+      "tabaqa": "months_observed",
+      "alfabattle": "active days + observed span"
+    }
+  ],
+  "caveats": [
+    "Card-transaction stream, not full bank statements: normalized amounts, no balances.",
+    "Baseline is application-only (product) \u2014 this dataset ships no bureau features, so the ablation reads app-only vs +behaviour, weaker baseline than Berka's bureau-view.",
+    "Mechanism replication only: sign and significance of the behaviour lift; magnitudes are population-specific (performance-ledger discipline)."
+  ]
+}

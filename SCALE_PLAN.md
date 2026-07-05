@@ -58,6 +58,32 @@ These are the load-bearing truths — the ideas below are buildable *because* of
 
 **Current state (verified):** genuinely strong and *on-screen*. `ModelCardPanel` shows the wallet-layer ablation (AUC 0.66→0.86, **+0.203** with bootstrap CI), thin-file lift, swap-set (rescued/rejected with realized default), calibration curve, per-feature IV, monotonic score bands, the **1M-account synthetic corpus + TSTR 0.870 (96% retention)**, and a lineage strip. This already beats most teams outright.
 
+### ③-Wave 2 — REAL DATA AT SCALE (opened 2026-07-05, the user's directive: "real data, maximum realness")
+
+> **STATUS 2026-07-05 — D8 MEASURED, same evening.** `eval/alfabattle.py` on the first 10/50
+> parts = **213,383 real applications, 4,911 real defaults (2.3%)**: app-only baseline AUC 0.594
+> → +transaction-behaviour **0.703**, lift **+0.109**, 95% CI [+0.101, +0.117] (500 boots);
+> thin-file third 0.616 → 0.697. Third real population; sign + significance replicate
+> (Berka +0.203 → UCI +0.131 → AlfaBattle +0.109 — attenuation honest and expected: weaker
+> baseline here is app-only, card stream has no balances). Result: `eval/alfabattle_result.json`
+> with feature-mapping + caveats in the D6 discipline. Data gitignored (`data/external/`, 806MB
+> local, expandable to all 963k). NOT yet wired into model_card/UI — that's the next step.
+
+> **The honest ceiling, verified before we start:** public **Saudi** consumer data with default
+> labels does not exist (our priors + SAR demonstration population are the legal maximum);
+> public **US** bank/wallet cash-flow data with labels does not exist either (Cash App/Venmo =
+> private; Kaggle Home Credit/Amex = competition-use-only, verified license-blocked). The two
+> real upgrades that ARE available:
+
+| # | Idea | The insight | Built on | Hits | Effort |
+|---|------|-------------|----------|------|--------|
+| D8 | **AlfaBattle 2.0 third replication** — 963k REAL credit applications + real card-transaction histories + real default labels (ungated), run through the same ablation: app-only baseline vs +transaction-behaviour layer, lift + CI → third row in `external_validity` + `cross_check` | Kills the "682 Czech accounts from the 1990s" attack with **~1M real accounts, third country, 1,400× scale**. Same honest pattern as UCI (feature-mapped, mechanism-not-coefficients). "Replicated on three real populations" is a sentence almost no fintech — let alone hackathon team — can say. | `eval/_ablation_core.py` + the D6 cross-check pattern | Data+Innov | **L** |
+| D9 | **Bring-your-own-wallet (US formats)** — Cash App / Venmo / PayPal CSV export fingerprints in `adapters.ts`, so a judge uploads THEIR OWN real wallet export and scores themselves | The only legal "real US e-wallet data" on earth is data brought by its owner. Turns "we support any wallet" from a claim into a live stunt: a judge's real Cash App statement → score, on stage. | universal-ingestion adapter layer (shipped) | Data+UX+Tech | **S** |
+
+**Wave-2 bets:** D8 first (the headline), D9 as the demo stunt. Gate for D8: verify the HF
+mirror's exact size/license, then subsample honestly if the full 450M-txn download is
+hackathon-hostile (a 100–200k-client stratified sample still dwarfs every other team's data).
+
 **Where it's thin:** it's all **population-level** ("the model is good"). A credit officer's next three questions are *applicant-level* and *governance-level*: **"why THIS score?"**, **"what would change it?"**, **"will it keep working?"** — none are answered yet. That's the gap to attack.
 
 **Design principle:** move from *"we validated a model"* → *"we do data science a bank's Model Risk team would respect, live on the applicant."*
