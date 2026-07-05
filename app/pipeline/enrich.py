@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 
 from . import llm
 from .clean import normalize
@@ -175,6 +176,11 @@ def _llm_enrich_gaps(transactions: list[Transaction]) -> None:
     Income provenance is untouched (that stays the verifier's Masdr job); the LLM
     only labels merchant/category and a first-pass type where the rules said unknown.
     """
+    # Kill-switch for token-metered deploys: the enricher is invisible polish, and on
+    # Groq's 6k-TPM free tier its calls starve the user-visible insights narrative
+    # fired later in the same request. TABAQA_ENRICH_LLM=0 keeps enrichment rules-only.
+    if os.environ.get("TABAQA_ENRICH_LLM", "1").strip().lower() in ("0", "false", "off"):
+        return
     gaps = [t for t in transactions if _gap(t)]
     if not gaps or not llm.available():
         return
@@ -191,7 +197,7 @@ def _llm_enrich_gaps(transactions: list[Transaction]) -> None:
         system=_ENRICH_SYSTEM,
         prompt="index\tdir\tamount\tdescription\n" + listing,
         schema=_ENRICH_SCHEMA,
-        max_tokens=4096,  # one JSON object per gap row; give the batch room
+        max_tokens=min(4096, 96 + 48 * len(gaps)),  # ~one small JSON item per gap row
         cache_key=key,
     )
     if not out:

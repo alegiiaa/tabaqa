@@ -28,6 +28,9 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any, Optional
@@ -155,25 +158,57 @@ def _anthropic_chat(model, system, messages, max_tokens) -> Optional[str]:
 
 
 # ── groq / ALLaM transport (OpenAI-compatible REST, stdlib only) ────────────
+# Groq free tier meters allam-2-7b at 6,000 tokens/minute and counts REQUESTED
+# max_tokens in the pre-check — so oversized asks (sized for Claude's thinking
+# budget) 429 even when the actual reply is short. Clamp the ask; ALLaM's role
+# here is a 3-5 sentence narrative or a small JSON object, never a long essay.
+_GROQ_MAX_COMPLETION = int(os.environ.get("TABAQA_GROQ_MAX_COMPLETION", "600"))
+
+
 def _groq_raw(model, messages, max_tokens, temperature, json_mode) -> Optional[str]:
     key = _groq_key()
     if not key:
         return None
     body: dict[str, Any] = dict(model=model, messages=messages,
-                                max_tokens=max_tokens, temperature=temperature)
+                                max_tokens=min(max_tokens, _GROQ_MAX_COMPLETION),
+                                temperature=temperature)
     if json_mode:
         body["response_format"] = {"type": "json_object"}
-    req = urllib.request.Request(
-        GROQ_URL, data=json.dumps(body).encode("utf-8"), method="POST",
-        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
-                 "User-Agent": _UA},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=45) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
-        return payload["choices"][0]["message"]["content"]
-    except Exception:  # pragma: no cover - network/HTTP/parse → graceful fallback
-        return None
+    data = json.dumps(body).encode("utf-8")
+
+    for attempt in (0, 1):
+        req = urllib.request.Request(
+            GROQ_URL, data=data, method="POST",
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
+                     "User-Agent": _UA},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            return payload["choices"][0]["message"]["content"]
+        except urllib.error.HTTPError as e:  # pragma: no cover - live-service behaviour
+            err_body = e.read().decode("utf-8", "ignore")
+            # Groq's json_object mode 400s when the model emits imperfect JSON — but
+            # ships the raw generation in the error. Return it; callers already salvage
+            # the first {...} block, so a trailing-comma-grade slip still lands.
+            if e.code == 400 and json_mode and "failed_generation" in err_body:
+                try:
+                    failed = json.loads(err_body)["error"]["failed_generation"]
+                    if isinstance(failed, str) and failed.strip():
+                        return failed
+                except Exception:
+                    pass
+            # 429 with a short suggested wait → one retry; anything else → fallback.
+            if e.code == 429 and attempt == 0:
+                m = re.search(r"try again in ([0-9.]+)s", err_body)
+                wait = float(m.group(1)) if m else 0.0
+                if 0 < wait <= 3.0:
+                    time.sleep(wait + 0.2)
+                    continue
+            return None
+        except Exception:  # pragma: no cover - network/parse → graceful fallback
+            return None
+    return None
 
 
 def _groq_structured(model, system, prompt, schema, max_tokens) -> Optional[dict]:

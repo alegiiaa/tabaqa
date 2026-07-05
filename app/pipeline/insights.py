@@ -260,12 +260,17 @@ def _narrate_with_claude(signals: dict) -> Optional[dict]:
     )
     if not out:
         return None
-    return {
+    narrated = {
         "summary_line": str(out.get("summary_line", "")).strip(),
         "narrative": str(out.get("narrative", "")).strip(),
         "highlights": [str(h).strip() for h in out.get("highlights", []) if str(h).strip()],
         "risks": [str(r).strip() for r in out.get("risks", []) if str(r).strip()],
     }
+    # A salvaged or truncated generation can be valid JSON yet miss the essentials —
+    # an empty narrative on screen is worse than the deterministic template.
+    if not narrated["summary_line"] or not narrated["narrative"]:
+        return None
+    return narrated
 
 
 _FLAG_RISK = {
