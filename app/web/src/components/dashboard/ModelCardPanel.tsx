@@ -516,8 +516,8 @@ function ReplicationTab() {
             {(() => {
               const series = `+${c.lift.auc.toFixed(3)} → +${(cc?.lift.auc ?? 0).toFixed(3)} → +${ac.lift.auc.toFixed(3)}`
               return tx(
-                `Three real populations, three decades, three scales — the behaviour lift is always positive and always significant: ${series}. The variation across populations is the honest finding, not a footnote.`,
-                `ثلاثة مجتمعات حقيقية، عبر ثلاثة عقود وثلاثة أحجام — رفعُ السلوك موجبٌ ودالٌّ إحصائيًا دائمًا: ‎${series.replace(/→/g, '←')}‎. والتفاوت عبر المجتمعات هو النتيجة الصادقة، لا هامشًا.`,
+                `Three real populations, three decades, three scales — the behaviour lift is always positive and always significant: ${series}. Each answers the one question it is identified to answer: Berka isolates the mechanism (two independent sources — cash-flow over a credit-file view), UCI is the falsification test (zero when single-source — the negative control above), AlfaBattle proves scoreability at production scale. The variation across populations is the honest finding, not a footnote.`,
+                `ثلاثة مجتمعات حقيقية، عبر ثلاثة عقود وثلاثة أحجام — رفعُ السلوك موجبٌ ودالٌّ إحصائيًا دائمًا: ‎${series.replace(/→/g, '←')}‎. وكلٌّ منها يجيب عن السؤال الوحيد الذي صُمّم للإجابة عنه: Berka يعزل الآلية (مصدران مستقلان — التدفق النقدي فوق رؤية الملف الائتماني)، وUCI هو اختبار الدحض (صفر عند المصدر الواحد — الضابط السلبي أعلاه)، وAlfaBattle يثبت قابلية التسجيل على نطاق الإنتاج. والتفاوت عبر المجتمعات هو النتيجة الصادقة، لا هامشًا.`,
               )
             })()}
           </p>
