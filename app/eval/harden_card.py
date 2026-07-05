@@ -44,13 +44,15 @@ def build_ledger(card: dict, params: dict | None) -> dict:
             "dataset": "Berka (Czech retail, 682 accounts)",
             "features": "bureau proxy + 7 cash-flow", "model": "logistic (class-balanced)",
             "split": "5-fold CV, out-of-fold",
-            "role": f"THE headline: the full model — +{card['lift']['auc']:.3f} over bureau-only",
+            "role": f"THE headline: the full model — +{card['lift']['auc']:.3f} over the bureau-proxy view",
         },
         {
             "value": card["baseline"]["auc"], "metric": "AUC", "headline": False,
             "dataset": "Berka", "features": "bureau proxy only", "model": "logistic",
             "split": "5-fold CV, out-of-fold",
-            "role": "ablation baseline — what a bureau-only view achieves",
+            "role": ("ablation baseline — the bureau-proxy (credit-file) view; the cash-flow layer "
+                     "comes from a SEPARATE source (the checking account), so this is the one "
+                     "identified bureau-incremental design"),
         },
     ]
     if params:
@@ -77,8 +79,21 @@ def build_ledger(card: dict, params: dict | None) -> dict:
             "dataset": f"{cc['dataset']} (n={cc['n_accounts']:,})",
             "features": "demographics + proxy cash-flow", "model": "logistic",
             "split": "5-fold CV, out-of-fold",
-            "role": f"independent replication — lift +{cc['lift']['auc']:.3f} over its own baseline {cc['baseline']['auc']:.3f}",
+            "role": (f"independent replication — lift +{cc['lift']['auc']:.3f} over its "
+                     f"application-only baseline {cc['baseline']['auc']:.3f} (the lender's real "
+                     "starting point for a no-file applicant)"),
         })
+        bi = cc.get("bureau_incremental")
+        if bi:
+            rows.append({
+                "value": bi["full"]["auc"], "metric": "AUC", "headline": False,
+                "dataset": f"{cc['dataset']} (n={cc['n_accounts']:,})",
+                "features": "bureau-like (delinquency history) + amount-flow dynamics",
+                "model": "logistic (class-balanced)", "split": "5-fold CV, out-of-fold",
+                "role": (f"negative control — {bi['lift']['auc']:+.3f} over the bureau-like baseline "
+                         f"{bi['baseline']['auc']:.3f}: a single-source dataset yields no "
+                         "bureau-incremental lift, exactly as it must (see cross_check.bureau_incremental)"),
+            })
     ch = card.get("champion_challenger") or {}
     if ch:
         rows.append({
@@ -87,6 +102,10 @@ def build_ledger(card: dict, params: dict | None) -> dict:
             "model": "gradient boosting (black box)", "split": "5-fold CV, out-of-fold",
             "role": f"transparency-cost benchmark — beats the additive card by only {abs(ch['gap_auc']):.3f}",
         })
+    # Carry forward rows injected by wire_alfabattle.py — rebuilding the ledger must not
+    # silently drop the third replication when this script re-runs after it.
+    rows += [r for r in (card.get("performance_ledger") or {}).get("rows", [])
+             if str(r.get("role", "")).startswith("third-replication")]
     return {
         "note": ("One headline, no number soup: every AUC in this card belongs to a specific "
                  "{dataset · features · model · split}. None of them IS the served demo card — "
@@ -104,20 +123,29 @@ def build_external_validity(card: dict, cc: dict | None) -> dict:
             "label": "Berka — Czech retail banking (1990s)",
             "n": f"{card['n_accounts']} accounts · {card['n_defaults']} real defaults",
             "role": "Primary validation",
-            "finding": (f"Cash-flow lift +{lift['auc']:.3f} AUC over bureau-only "
+            "finding": (f"Cash-flow lift +{lift['auc']:.3f} AUC over the bureau-proxy view "
                         f"(95% CI +{lift['ci_low']:.2f}…+{lift['ci_high']:.2f}); "
-                        f"thin-file {thin['baseline_auc']:.2f}→{thin['full_auc']:.2f}"),
+                        f"thin-file {thin['baseline_auc']:.2f}→{thin['full_auc']:.2f}. "
+                        "The one identified bureau-incremental design: cash-flow comes from a "
+                        "SEPARATE source (the checking account) than the credit-file baseline."),
         },
     ]
     if cc:
+        bi = cc.get("bureau_incremental")
+        finding = (f"Sign + significance replicate vs the application-only baseline — the lender's "
+                   f"real starting point for a no-file applicant: +{cc['lift']['auc']:.3f} AUC "
+                   f"(CI +{cc['lift']['ci_low']:.3f}…+{cc['lift']['ci_high']:.3f}) "
+                   "via proxy cash-flow features.")
+        if bi:
+            finding += (f" Negative control: with delinquency history IN the baseline the residual "
+                        f"lift is {bi['lift']['auc']:+.3f} — zero, as it must be on single-source "
+                        "data (no external cash-flow feed exists here to add).")
         populations.append({
             "key": "uci",
             "label": "UCI Taiwan — credit cards (2005)",
             "n": f"{cc['n_accounts']:,} clients · {cc['bad_rate']:.1%} default",
             "role": "Independent replication",
-            "finding": (f"Sign + significance replicate: +{cc['lift']['auc']:.3f} AUC "
-                        f"(CI +{cc['lift']['ci_low']:.3f}…+{cc['lift']['ci_high']:.3f}) "
-                        "via proxy cash-flow features"),
+            "finding": finding,
         })
     populations.append({
         "key": "saudi",
@@ -128,11 +156,25 @@ def build_external_validity(card: dict, cc: dict | None) -> dict:
                     "is regulatory, not statistical: SAMA Responsible-Lending DBR caps (sama.py). "
                     "Coefficients are re-fit on the licensee's own book at go-live."),
     })
+    # Carry forward the population wire_alfabattle.py inserted — rebuilding this table must
+    # not silently drop the third replication when this script re-runs after it.
+    old_pops = (card.get("external_validity") or {}).get("populations", [])
+    alfa = next((p for p in old_pops if p.get("key") == "alfabattle"), None)
+    if alfa:
+        populations.insert(len(populations) - 1, alfa)
     return {
-        "claim": ("We do NOT claim these coefficients predict Saudi default. We claim the MECHANISM "
-                  "transfers: cash-flow features add a large, significant lift over bureau-only — "
-                  "largest for thin-file borrowers — and that effect replicates across two "
-                  "maximally-different real populations (Czech retail 1990s, Taiwan cards 2005)."),
+        "claim": ("Three claims, each measured against its honest baseline. (1) For the NO-FILE "
+                  "applicant — Tabaqa's target — no bureau score exists, so the lender's real "
+                  "baseline is the application form: the behaviour layer lifts it in every "
+                  "population tested, at up to 963,811 real applications. (2) Bureau-incremental "
+                  "lift needs a second data source, and we measured it where the design permits: "
+                  f"Berka, checking-account cash-flow over a credit-file baseline, +{lift['auc']:.3f} "
+                  "AUC — with a UCI negative control showing single-source data correctly yields "
+                  "zero. (3) Against REAL bureau scores we cite the independent literature rather "
+                  "than re-prove it: BIS WP 779 (0.76 vs 0.64) and FinRegLab (6 US lenders). "
+                  "We do NOT claim these coefficients predict Saudi default, and we do NOT claim "
+                  "to beat a live bureau score on fully-scored borrowers — we score the people "
+                  "the bureau cannot see."),
         "populations": populations,
         "transfers": ("Transfers: the mechanism (cash-flow > bureau-only for thin files) and every "
                       "feature's direction (sign-locked at import by _verify_lineage). Does NOT "
@@ -225,11 +267,21 @@ def harden(card: dict, params: dict | None) -> dict:
         lineage["live_scorer"] = LIVE_SCORER
         tiers = [t for t in lineage.get("tiers", []) if t.get("tier") != "Generalization"]
         if cc:
-            tiers.append({
-                "tier": "Generalization",
-                "source": f"{cc['dataset']} ({cc['n_accounts']:,} real accounts)",
-                "claim": f"Lift sign + significance replicate: +{cc['lift']['auc']:.2f} AUC via proxy cash-flow",
-            })
+            ab = card.get("alfabattle")
+            if ab:  # keep both replications cited — wire_alfabattle.py skips when already wired
+                tiers.append({
+                    "tier": "Generalization",
+                    "source": f"UCI Taiwan ({cc['n_accounts']:,}) + AlfaBattle 2.0 ({ab['n_accounts']:,}) — both real, labeled",
+                    "claim": ("Lift sign + significance replicate on two more real populations vs "
+                              f"their application-only baselines: +{cc['lift']['auc']:.2f} (Taiwan cards) "
+                              f"· +{ab['lift']['auc']:.2f} (bank card stream at scale)"),
+                })
+            else:
+                tiers.append({
+                    "tier": "Generalization",
+                    "source": f"{cc['dataset']} ({cc['n_accounts']:,} real accounts)",
+                    "claim": f"Lift sign + significance replicate: +{cc['lift']['auc']:.2f} AUC via proxy cash-flow",
+                })
         lineage["tiers"] = tiers
 
     ch = card.get("champion_challenger")

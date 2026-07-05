@@ -66,12 +66,24 @@ interface Corpus {
   retention: number
   fidelity: { avg_ks_complement: number; per_feature: { name: string; ks_complement: number }[]; note: string }
 }
+interface BureauIncremental {
+  question: string; baseline_definition: string; flow_definition: string
+  baseline: { auc: number; ks: number }; full: { auc: number; ks: number }
+  lift: { auc: number; ci_low: number; ci_high: number; p_gt_0: number }
+  strict_variant: {
+    baseline_definition: string
+    baseline: { auc: number }; full: { auc: number }
+    lift: { auc: number; ci_low: number; ci_high: number; p_gt_0: number }
+  }
+  role: string; note: string
+}
 interface CrossCheck {
   dataset: string; n_accounts: number; n_defaults: number; bad_rate: number
   baseline: { auc: number; ks: number }; full: { auc: number; ks: number }
   lift: { auc: number; ci_low: number; ci_high: number; p_gt_0: number }
   feature_mapping: { tabaqa: string; homecredit: string }[]; caveats: string[]
   attenuation_note?: string
+  bureau_incremental?: BureauIncremental | null
 }
 interface ThirdCheck {
   dataset: string; n_accounts: number; n_defaults: number; bad_rate: number
@@ -461,12 +473,34 @@ function ReplicationTab() {
         <div className="mc-block first">
           <SectionHead en="Replicated on a second real dataset" ar="مُكرَّر على مجموعة بيانات حقيقية ثانية" note={cc.dataset} />
           <div className="mc-swap-head">
-            <StatDelta from={`${tx('Bureau', 'المكتب')} ${cc.baseline.auc.toFixed(3)}`} to={`+ ${tx('Cash-flow', 'التدفق النقدي')} ${cc.full.auc.toFixed(3)}`} good />
-            <span className="mc-swap-cap"><span dir="ltr">+{cc.lift.auc.toFixed(2)} AUC · {intFmt(cc.n_accounts)}</span> {tx('real labeled applications', 'طلب حقيقي موسوم')}</span>
+            <StatDelta from={`${tx('App-only', 'الطلب فقط')} ${cc.baseline.auc.toFixed(3)}`} to={`+ ${tx('Cash-flow', 'التدفق النقدي')} ${cc.full.auc.toFixed(3)}`} good />
+            <span className="mc-swap-cap"><span dir="ltr">+{cc.lift.auc.toFixed(2)} AUC · {intFmt(cc.n_accounts)}</span> {tx('real labeled applications', 'طلب حقيقي موسوم')} · {tx('vs the application-only view — a no-file applicant’s real baseline', 'مقابل رؤية الطلب فقط — خط الأساس الفعلي لمن لا سجل له')}</span>
           </div>
           {/* P4 — the attenuation, stated before anyone asks (stays visible, never folded) */}
           {cc.attenuation_note && <p className="mv-claim">{cc.attenuation_note}</p>}
           <Method>{cc.caveats?.[0]}</Method>
+        </div>
+      )}
+
+      {cc?.bureau_incremental && (
+        <div className="mc-block">
+          <SectionHead en="The negative control — we asked the bureau question ourselves" ar="الضابط السلبي — طرحنا سؤال المكتب على أنفسنا"
+            note={tx('what if the baseline already sees the delinquency history?', 'ماذا لو كان خط الأساس يرى سجلّ التأخر أصلًا؟')} />
+          <div className="mc-swap-head">
+            <span className="mc-delta-row">
+              <span className="mc-from">{tx('Bureau-like', 'شبيه المكتب')} {cc.bureau_incremental.baseline.auc.toFixed(3)}</span>
+              <span className="mc-arrow">→</span>
+              <span className="mc-to">+ {tx('Amount dynamics', 'ديناميكا المبالغ')} {cc.bureau_incremental.full.auc.toFixed(3)}</span>
+            </span>
+            <span className="mc-swap-cap"><span dir="ltr">{cc.bureau_incremental.lift.auc >= 0 ? '+' : ''}{cc.bureau_incremental.lift.auc.toFixed(3)} AUC</span> — {tx('zero, and that is the point', 'صفر، وهذا هو المقصود')}</span>
+          </div>
+          <p className="mv-claim">
+            {tx(
+              'On single-source data (every feature from the same card account a bureau sees) the ablation finds nothing — proof the machinery doesn’t manufacture lift. Bureau-incremental lift needs a second data source: that is Berka (+0.203, checking-account cash-flow over a credit-file baseline) and, against real bureau scores, the independent literature: BIS 0.76 vs 0.64, FinRegLab.',
+              'على بيانات من مصدر واحد (كل الميزات من حساب البطاقة نفسه الذي يراه المكتب) لا تجد المنهجية شيئًا — دليل أنها لا تُصنّع رفعًا من العدم. الرفع فوق المكتب يتطلب مصدر بيانات ثانيًا: وهذا هو Berka ‏(+0.203، تدفق الحساب الجاري فوق خط أساس الملف الائتماني)، وأمام درجات مكاتب حقيقية: أدبيات مستقلة — بنك التسويات الدولية 0.76 مقابل 0.64، وFinRegLab.',
+            )}
+          </p>
+          <Method>{cc.bureau_incremental.note}</Method>
         </div>
       )}
 

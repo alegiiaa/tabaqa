@@ -55,7 +55,7 @@
 
 ---
 
-## الأسئلة الخمسة الصعبة — أجوبة منطوقة (٣٠–٦٠ ثانية)
+## الأسئلة الصعبة — أجوبة منطوقة (٣٠–٦٠ ثانية)
 
 ### س١ · «ليش بيانات تشيكية من ١٩٩٩؟»
 > «لأنه لا توجد بيانات تعثّر سعودية عامة — لأي أحد، فهي سرية لدى سمة والبنوك. فأثبتنا **الآلية** — أن التدفق النقدي يتفوّق على رؤية المكتب لمحدودي السجل — على تعثّرات حقيقية في بلدين مختلفين تمامًا: تشيكيا وتايوان. والأهم: **لا ندّعي أن الأوزان تنتقل** — عند الإطلاق يعيد البنك معايرتها على محفظته الخاصة، وهذه هي الطريقة نفسها التي دخلت بها FICO أسواقًا جديدة. الاتجاهات مثبتة؛ والقيم تُعاير محليًا.»
@@ -91,6 +91,11 @@
 > «صحيح — وهذا أفضل دليل على السوق: تمارا رفعت موافقاتها ٣٢٪ بربط الحساب البنكي، عبر Lean. لكن انظروا ماذا يحصل للمرفوض عندهم: تمام نفسها تقول في أسئلتها الشائعة إن الرفض "بحسب سياسة المنتج" — بلا سبب، بلا طريق. كل تطبيق في المملكة **صندوق أسود داخل دفتر مقرضٍ واحد**، وولا واحد منهم يدمج المحفظة الرقمية مع البنك — حتى من يملكون محافظ. طبقة هي الطبقة المستقلة المعاكسة: نوجّه الدرجة نحو المتقدّم — لماذا، وماذا يغيّر القرار، وكم تكفي بياناته — ونبيعها لأي مقرض. هم أثبتوا أن الآلية تربح؛ نحن بنينا ما لم يبنه أحد فوقها.»
 
 **EN:** Correct — and that's our best market proof: Tamara lifted approvals 32% by linking bank accounts, via Lean. But look what happens to the declined customer: Tamam's own FAQ says rejections are "based on the product policy" — no reason, no path. Every KSA implementation is a black box inside one lender's book, and none fuses wallet + bank — even the ones that own wallets. Tabaqa is the independent, inverted layer: we turn the score toward the applicant — the why, the what-changes-it, the how-much-data-suffices — and sell it to any lender. They proved the mechanism wins; we built what nobody built on top of it. *(Full verified landscape + dead-claims list: `COMPETITION.md`.)*
+
+### س٨ · «رفعكم مقاس فوق «الطلب فقط» — وش زيادتكم فوق سكور سِمة الفعلي؟» ⚠️ سؤال مدير المخاطر
+> «سؤال دقيق، وأجبنا عليه داخل المنتج قبل أن يُطرح — على ثلاث طبقات. أولًا: عميلنا المستهدف **بلا ملف أصلًا** — لا يوجد سكور سِمة نتفوّق عليه؛ خط الأساس الحقيقي عند المُقرض هو نموذج الطلب نفسه، وهذا بالضبط ما قسناه على **٩٦٤ ألف طلب حقيقي**: من 0.58 إلى 0.70. ثانيًا: حيث تملك البيانات مصدرين مستقلين — Berka: تدفق الحساب الجاري فوق خط أساس الملف الائتماني — الرفع **+0.20**. وشغّلنا **الضابط السلبي** بأنفسنا ونشرناه في المنتج: لما أعطينا خط الأساس سجلّ التأخر في بياناتٍ من مصدر واحد، كان الرفع المتبقي **صفرًا** — أي أن منهجيتنا لا تصنع أرقامًا من العدم. ثالثًا: أمام سكور مكتبٍ حقيقي، الدليل أدبيات مستقلة لا نعيد إثباتها: بنك التسويات الدولية **0.76 مقابل 0.64**، وFinRegLab على ستة مقرضين أمريكيين. ولا ندّعي التفوق على سِمة لأصحاب الملفات الكاملة — **نحن نسجّل من لا تراه سِمة.**»
+
+**EN:** Precise question — and we answered it in-product before it was asked, in three layers. First: our target applicant has **no file** — there is no SIMAH score to beat; the lender's real baseline is the application form itself, which is exactly what we measured on **963,811 real applications**: 0.58 → 0.70. Second: where the data has two independent sources — Berka, checking-account cash-flow over a credit-file baseline — the lift is **+0.203**. And we ran the **negative control** ourselves and published it in the product: give the baseline the delinquency history on single-source data and the residual lift is **zero** — proof our machinery doesn't manufacture numbers. Third: against a *real* bureau score, the evidence is independent literature we cite rather than re-prove: **BIS 0.76 vs 0.64**, FinRegLab across six US lenders. And we don't claim to beat SIMAH on thick-file borrowers — **we score the people SIMAH can't see.** *(The negative control lives in the Replication tab of the model card; numbers in `cross_check.bureau_incremental`.)*
 
 ---
 
