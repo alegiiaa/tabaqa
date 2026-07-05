@@ -700,6 +700,7 @@ function GovernanceTab() {
       {psi && (
         <div className="mc-block">
           <SectionHead en="Population stability — drift-monitor demonstration" ar="استقرار التوزيع — عرض مراقب الانزياح" note={<>{psi.method}<InfoTip k="psi" /></>} />
+          <div className="drift-scroll">
           <div className="drift-grid" style={{ gridTemplateColumns: `1.4fr repeat(${psi.scenarios.length}, 1fr)` }}>
             <span className="drift-h" />
             {psi.scenarios.map((s) => (
@@ -723,6 +724,7 @@ function GovernanceTab() {
                 </div>
               )
             })}
+          </div>
           </div>
           <Method>{psi.note}</Method>
         </div>

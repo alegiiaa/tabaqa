@@ -131,24 +131,28 @@ export function StatementUpload({
             {files.map((f, i) => {
               const inst = f.institutionId ? institution(f.institutionId) : undefined
               return (
-                <div key={`${f.fileName ?? 'file'}-${i}`} className="upl-file">
-                  <span className={`upl-file-kind ${f.kind ?? 'bank'}`}>
-                    {f.kind === 'wallet' ? tx('Wallet', 'محفظة') : tx('Bank', 'بنك')}
-                  </span>
-                  <span className="upl-file-name">
-                    {inst ? tx(inst.name[0], inst.name[1]) : (f.fileName ?? tx('Pasted statement', 'كشف ملصوق'))}
-                  </span>
-                  <span className="upl-file-meta" dir="ltr">
-                    {f.rows.length} {tx('rows', 'صف')}{f.formatLabel ? ` · ${f.formatLabel}` : ''}
-                  </span>
+                <div key={`${f.fileName ?? 'file'}-${i}`}>
+                  <div className="upl-file">
+                    <span className={`upl-file-kind ${f.kind ?? 'bank'}`}>
+                      {f.kind === 'wallet' ? tx('Wallet', 'محفظة') : tx('Bank', 'بنك')}
+                    </span>
+                    <span className="upl-file-name">
+                      {inst ? tx(inst.name[0], inst.name[1]) : (f.fileName ?? tx('Pasted statement', 'كشف ملصوق'))}
+                    </span>
+                    <span className="upl-file-meta" dir="ltr">
+                      {f.rows.length} {tx('rows', 'صف')}{f.formatLabel ? ` · ${f.formatLabel}` : ''}
+                    </span>
+                    {f.warnings.length > 0 && <span className="upl-file-warn">!</span>}
+                    <button
+                      className="upl-file-x"
+                      aria-label={tx('Remove file', 'إزالة الملف')}
+                      onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
+                    >×</button>
+                  </div>
+                  {/* warnings inline — title= tooltips never show on touch */}
                   {f.warnings.length > 0 && (
-                    <span className="upl-file-warn" title={f.warnings.join('\n')}>!</span>
+                    <div className="upl-file-warns">{f.warnings.join(' · ')}</div>
                   )}
-                  <button
-                    className="upl-file-x"
-                    aria-label={tx('Remove file', 'إزالة الملف')}
-                    onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))}
-                  >×</button>
                 </div>
               )
             })}

@@ -1930,3 +1930,31 @@ html[dir=rtl] .mm-hero{background-position:center left}
 .li-fsdp-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0e7f54,#15a06c)}
 .li-fsdp-tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:#b45309;border-radius:2px}
 .li-fsdp-legend{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:10.5px}
+
+/* ── phone polish (mobile audit 2026-07-05) ─────────────────────────────── */
+/* drift matrix scrolls sideways instead of colliding cells */
+.drift-scroll{overflow-x:auto}
+@media(max-width:640px){.drift-grid{min-width:540px}}
+/* dense stat grids: step down before the big numbers cram */
+@media(max-width:520px){
+  .kpi-grid,.kpi-grid.three{grid-template-columns:1fr 1fr}
+  .val-metrics{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .kpi-grid,.kpi-grid.three,.val-metrics,.afford-grid,.li-outs{grid-template-columns:1fr}
+}
+/* header never crowds: wrap + title ellipsis on narrow phones */
+@media(max-width:560px){
+  .ds-top{flex-wrap:wrap;row-gap:6px}
+  .ds-top-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50vw}
+}
+/* touch devices: comfortable hit areas (no visual change on desktop) */
+@media(pointer:coarse){
+  .res-tab{min-height:44px}
+  .mv-tabs button{min-height:40px}
+  .acard-x{padding:8px 10px}
+  .upl-file-x{padding:8px 10px}
+}
+/* upload warnings readable on touch (title= is hover-only) */
+.upl-file-warns{font-size:11.5px;color:#a86500;background:#fff8ec;
+  border:1px solid #f3e0b8;border-radius:8px;padding:6px 10px;margin-top:2px}
