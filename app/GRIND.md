@@ -53,7 +53,7 @@ Done, don't reopen: animated reveal · bilingual EN/AR RTL + Hijri ledger dates 
 
 Done, don't reopen: live web + API on Vercel · Supabase keys + metering verified live · smoke_test zero-dep repro · direction-locked scorecard lineage · universal ingestion (Arabic/EN headers, Hijri, D360 fingerprints) · `/developers` + `API_REFERENCE.md` hosted.
 
-- [ ] **DECIDE: ALLaM on the deploy** (~~P1~~ **P0** per ed.1 calibration, 15 min) — set `GROQ_API_KEY` in Vercel env → the Saudi-national-model story becomes live, or consciously park it and demo locally. Don't leave it half-true. Ed.1's winner was an AI-agents product; our AI story must be live, not parked.
+- [x] **DECIDE: ALLaM on the deploy** (~~P1~~ **P0** per ed.1 calibration) — ✅ 2026-07-05 **LIVE**: `/v1/insights` → `generated_by: allam:allam-2-7b` on tabaqa-api.vercel.app. Root cause was Groq's 6k tokens/MINUTE free tier + a 3000-token ask: fixed in `4bf9c20` (600-token clamp, 429 retry, failed_generation salvage, `TABAQA_ENRICH_LLM=0` on the deploy so the visible narrative never starves) + `/health?llm_check=1` runtime probe. ⚠️ Demo-day: ~4 narrative calls/min on free tier — consider Groq Dev Tier before Jul 16; warm-lambda cache makes repeat views of the same applicant instant.
 - [ ] **DECIDE: AI insights layer on the deploy** (P2) — needs `ANTHROPIC_API_KEY` + `anthropic` in slim reqs; ship it or park it — a broken panel is worse than no panel.
 - [ ] **Architecture slide** (P1) — one diagram: 6-stage pipeline, where rules decide vs where the LLM assists. (Feeds the deck; make once, reuse.)
 - [ ] **Pre-demo API smoke** (P0, Jul 15) — `/health` keyed:true, one live scored request, playground key issuance — scripted so it takes 5 minutes on venue wifi.
