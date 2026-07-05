@@ -9,6 +9,7 @@ import { ScoreWaterfall } from './ScoreWaterfall'
 import { RecoursePanel } from './RecoursePanel'
 import { ComplianceReceipt } from './ComplianceReceipt'
 import { ConfidenceBadge, BenchmarkPanel } from './ScoreExtras'
+import { InfoTip } from '../ui/InfoTip'
 import modelCard from '../../data/model_card.json'
 import { dualDate } from '../../lib/dates'
 
@@ -266,7 +267,7 @@ export function RevealScreen({
           >
             <span className="dot" />
             {tx('Revealed', 'مكشوف')}: <b><span dir="ltr">+{fmt(inc.reveal_delta)}</span> {SAR}</b> ·{' '}
-            {tx('verified share', 'النسبة الموثّقة')} <b>{pct(inc.verified_share)}</b>
+            {tx('verified share', 'النسبة الموثّقة')} <b>{pct(inc.verified_share)}</b><InfoTip k="verified_share" />
           </div>
 
           <div
@@ -348,6 +349,7 @@ export function ScoreScreen({ result, onOpenModel }: { result: ScoreResult; onOp
         </div>
         <div className={`risk-pill ${riskCls}`}>
           {riskLabel} · <span dir="ltr">PD {pct(result.pd)}</span>
+          <InfoTip k="pd" />
         </div>
         <ConfidenceBadge confidence={result.confidence} />
       </div>
@@ -373,7 +375,7 @@ function ValidationStrip({ validation, onOpenModel }: { validation?: Validation 
     <div className="score-validation" title={validation.note ?? undefined}>
       <span className="sv-badge">✓ {tx('Proven on real defaults', 'مُثبَت على تعثّرات حقيقية')}</span>
       <span className="sv-metrics">
-        <b dir="ltr">+{modelCard.lift.auc.toFixed(2)} AUC</b>
+        <b dir="ltr">+{modelCard.lift.auc.toFixed(2)} AUC</b><InfoTip k="lift" />
         {' '}{tx('over bureau-only', 'فوق رؤية المكتب')} ·{' '}
         {tx('replicated on a 2nd country', 'مُكرَّر في بلد ثانٍ')}
         {accts ? <> · <span dir="ltr">{accts}</span> {tx('real accounts', 'حساب حقيقي')}</> : null}
@@ -559,7 +561,7 @@ export function AffordScreen({ result }: { result: ScoreResult }) {
           </div>
           <div className="afford-grid">
             <Stat label={tx('Monthly installment', 'القسط الشهري')} value={`${fmt(out.installment)} ${SAR}`} />
-            <Stat label={tx('DBR before', 'نسبة الدين قبل')} value={pct(out.dbr_before)} />
+            <Stat label={<>{tx('DBR before', 'نسبة الدين قبل')}<InfoTip k="dbr" /></>} value={pct(out.dbr_before)} />
             <Stat label={tx('DBR after', 'نسبة الدين بعد')} value={pct(out.dbr_after)} />
             <Stat label={tx('Max financing', 'أقصى تمويل')} value={`${fmt(out.max_financing)} ${SAR}`} />
           </div>
@@ -619,7 +621,7 @@ function Field({
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: import('react').ReactNode; value: string }) {
   return (
     <div className="stat">
       <div className="stat-label">{label}</div>

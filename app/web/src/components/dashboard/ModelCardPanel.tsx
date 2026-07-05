@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { animate } from 'framer-motion'
 import { useTx } from '../../lib/tx'
+import { InfoTip } from '../ui/InfoTip'
 import card from '../../data/model_card.json'
 
 /**
@@ -262,7 +263,7 @@ export function ModelCardPanel() {
               )}</span>
             </div>
           </div>
-          <Chip variant="ok">{tx('Real data', 'بيانات حقيقية')} · <span dir="ltr">Berka {intFmt(c.n_accounts)} · {pct1(c.bad_rate)}</span> {tx('default', 'تعثّر')}</Chip>
+          <Chip variant="ok">{tx('Real data', 'بيانات حقيقية')} · <span dir="ltr">Berka {intFmt(c.n_accounts)} · {pct1(c.bad_rate)}</span> {tx('default', 'تعثّر')}<InfoTip k="bad_rate" /></Chip>
         </div>
 
         {/* ── the 30-second layer: what a skimming judge must walk away with ── */}
@@ -276,23 +277,23 @@ export function ModelCardPanel() {
         {/* ── KPI row: the four numbers that matter, always visible ────── */}
         <div className="kpi-grid">
           <div className="kpi-card hot">
-            <span className="kpi-label">{tx('Out-of-sample AUC', 'AUC خارج العينة')}</span>
+            <span className="kpi-label">{tx('Out-of-sample AUC', 'AUC خارج العينة')}<InfoTip k="auc" /></span>
             <span className="kpi-value" dir="ltr">{c.full.auc.toFixed(3)}</span>
             <Chip variant="ok"><span dir="ltr">+{c.lift.auc.toFixed(2)}</span> {tx('vs bureau', 'مقابل المكتب')}</Chip>
-            <span className="kpi-cap">{tx('5-fold CV · 95% CI excludes zero', 'تحقّق خماسي · فاصل الثقة لا يشمل الصفر')}</span>
+            <span className="kpi-cap">{tx('5-fold CV · 95% CI excludes zero', 'تحقّق خماسي · فاصل الثقة لا يشمل الصفر')}<InfoTip k="ci" /></span>
           </div>
           <div className="kpi-card">
-            <span className="kpi-label">{tx('Thin-file lift', 'رفع محدودي السجل')}</span>
+            <span className="kpi-label">{tx('Thin-file lift', 'رفع محدودي السجل')}<InfoTip k="thin_file" /></span>
             <span className="kpi-value" dir="ltr">{c.thin_file.baseline_auc.toFixed(2)}→{c.thin_file.full_auc.toFixed(2)}</span>
             <span className="kpi-cap">{tx('where the bureau is nearly blind', 'حيث يكاد المكتب لا يرى')}</span>
           </div>
           <div className="kpi-card">
-            <span className="kpi-label">{tx('Replication', 'التكرار')}</span>
+            <span className="kpi-label">{tx('Replication', 'التكرار')}<InfoTip k="lift" /></span>
             <span className="kpi-value" dir="ltr">+{(c.cross_check?.lift.auc ?? 0).toFixed(3)}</span>
             <span className="kpi-cap">{tx('UCI Taiwan · 30,000 real accounts', 'تايوان UCI · ٣٠ ألف حساب حقيقي')}</span>
           </div>
           <div className="kpi-card">
-            <span className="kpi-label">{tx('Synthesizer fidelity', 'أمانة المولِّد')}</span>
+            <span className="kpi-label">{tx('Synthesizer fidelity', 'أمانة المولِّد')}<InfoTip k="tstr" /></span>
             <span className="kpi-value" dir="ltr">{pct0(c.corpus?.retention ?? 0)}</span>
             <span className="kpi-cap">{tx('train-synthetic → test-real', 'تدريب اصطناعي ← اختبار حقيقي')}</span>
           </div>
@@ -392,7 +393,7 @@ function PerformanceTab() {
           note={<>{tx('at equal approval volume', 'عند نفس حجم الموافقات')} ({pct0(c.swap_set.approval_rate)})</>} />
         <div className="mc-swap-head">
           <StatDelta from={pct1(c.swap_set.baseline_approved_bad_rate)} to={pct1(c.swap_set.full_approved_bad_rate)} good />
-          <span className="mc-swap-cap">{tx('realized default rate in the approved pool', 'معدل التعثّر الفعلي في المقبولين')} · <b dir="ltr">−{pct0(reduction)}</b></span>
+          <span className="mc-swap-cap">{tx('realized default rate in the approved pool', 'معدل التعثّر الفعلي في المقبولين')} · <b dir="ltr">−{pct0(reduction)}</b><InfoTip k="swap_set" /></span>
         </div>
         <div className="mc-swap">
           <div className="mc-swap-card">
@@ -422,7 +423,7 @@ function PerformanceTab() {
         </div>
         <div className="mc-block">
           <SectionHead en="Feature strength · Information Value" ar="قوة الميزات · قيمة المعلومات"
-            note={tx('IV > 0.1 = useful', 'IV > 0.1 = مفيدة')} />
+            note={<>{tx('IV > 0.1 = useful', 'IV > 0.1 = مفيدة')}<InfoTip k="iv" /></>} />
           <div className="ins-rows">
             {c.information_value.map((f) => {
               const [en, ar] = FEATURE_LABEL[f.name] ?? [f.name, f.name]
@@ -492,7 +493,7 @@ function ReplicationTab() {
               <span className="mc-arrow">→</span>
               <span className="mc-to">+ {tx('Amount dynamics', 'ديناميكا المبالغ')} {cc.bureau_incremental.full.auc.toFixed(3)}</span>
             </span>
-            <span className="mc-swap-cap"><span dir="ltr">{cc.bureau_incremental.lift.auc >= 0 ? '+' : ''}{cc.bureau_incremental.lift.auc.toFixed(3)} AUC</span> — {tx('zero, and that is the point', 'صفر، وهذا هو المقصود')}</span>
+            <span className="mc-swap-cap"><span dir="ltr">{cc.bureau_incremental.lift.auc >= 0 ? '+' : ''}{cc.bureau_incremental.lift.auc.toFixed(3)} AUC</span> — {tx('zero, and that is the point', 'صفر، وهذا هو المقصود')}<InfoTip k="negative_control" /></span>
           </div>
           <p className="mv-claim">
             {tx(
@@ -698,7 +699,7 @@ function GovernanceTab() {
 
       {psi && (
         <div className="mc-block">
-          <SectionHead en="Population stability — drift-monitor demonstration" ar="استقرار التوزيع — عرض مراقب الانزياح" note={psi.method} />
+          <SectionHead en="Population stability — drift-monitor demonstration" ar="استقرار التوزيع — عرض مراقب الانزياح" note={<>{psi.method}<InfoTip k="psi" /></>} />
           <div className="drift-grid" style={{ gridTemplateColumns: `1.4fr repeat(${psi.scenarios.length}, 1fr)` }}>
             <span className="drift-h" />
             {psi.scenarios.map((s) => (

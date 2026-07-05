@@ -1158,6 +1158,18 @@ table.ledger tr:last-child td{border-bottom:0}
   animation:shimmer 1.3s linear infinite;border-radius:14px}
 @keyframes shimmer{to{background-position:-200% 0}}
 
+/* U3 · tap-to-explain */
+.tip-btn{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;
+  border:1px solid currentColor;opacity:.42;font-size:9.5px;font-weight:800;font-style:normal;
+  font-family:inherit;background:none;color:inherit;cursor:pointer;vertical-align:2%;
+  margin-inline-start:5px;padding:0;line-height:1;flex:none}
+.tip-btn:hover,.tip-btn[aria-expanded="true"]{opacity:.95}
+.tip-pop{position:fixed;z-index:1200;background:#0c1226;color:#fff;border-radius:12px;
+  padding:11px 14px;font-size:12.5px;line-height:1.6;font-weight:500;text-align:start;
+  box-shadow:0 12px 34px rgba(12,18,38,.3);letter-spacing:0}
+.tip-pop b{display:block;font-size:11.5px;margin-bottom:4px;opacity:.75;font-weight:700;
+  text-transform:none;letter-spacing:.02em}
+
 /* ── Financial-intelligence panel (the "deep meaning") ───────────────────── */
 .ins-panel{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;
   padding:22px;overflow:hidden}

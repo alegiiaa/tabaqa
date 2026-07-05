@@ -1,5 +1,6 @@
 import { useTx } from '../../lib/tx'
 import type { ScoreConfidence, Benchmark, FeaturePercentile } from '../../lib/api'
+import { InfoTip } from '../ui/InfoTip'
 
 /**
  * D3 · Score confidence — an honest data-sufficiency band. A score built on 6 months
@@ -53,6 +54,7 @@ export function ConfidenceBadge({ confidence }: { confidence?: ScoreConfidence |
         <span className="conf-dot" />
         <span className="conf-level">{levelLabel}</span>
         <span className="conf-range" dir="ltr">{low}–{high} <span className="faint">(±{band})</span></span>
+        <InfoTip k="confidence" />
       </div>
       <div className="conf-drivers faint">
         <span dir="ltr">{months_observed}</span> {tx('mo history', 'شهر سجل')} ·{' '}
