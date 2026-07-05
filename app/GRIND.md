@@ -19,6 +19,8 @@
 
 **The standing rule:** after the ③ freeze patches below, *no new Data or Innovation work*. Every remaining hour goes to ④ UX and 📦 Packaging. The failure mode is winning Data 5/5 and losing the hackathon on UX.
 
+**Ed.1 winner calibration (verified 2026-07-05, x.com/aiob_ai/status/1951758243455221767):** 1st place SAR 250k = **QuantumBoard/QuantumAgents** by team Aiob — an agentic-AI dashboard demoed in a ~60s video, whose own winning post says *"MVP · البيانات حقيقيه ولحظيه · الدقه تحتاج اختبارات ومزيد من التطوير"* (real live data; accuracy untested, "working on it"). **Revealed jury preferences: a working live demo on real data + an AI-agents story + a 60-second show beat validated accuracy.** Consequences: (1) the demo/video leads, rigor is Q&A armor — never open with statistics; (2) the ALLaM decision below is upgraded to P0 — the jury demonstrably rewards AI-forward builds and ALLaM is the *Saudi national model*, perfect Alinma/Tuwaiq optics; (3) our first 60 video seconds must carry everything, like theirs did.
+
 ---
 
 ## ③ Data — freeze patches (P0, today, ~30 min total) then FROZEN
@@ -51,7 +53,7 @@ Done, don't reopen: animated reveal · bilingual EN/AR RTL + Hijri ledger dates 
 
 Done, don't reopen: live web + API on Vercel · Supabase keys + metering verified live · smoke_test zero-dep repro · direction-locked scorecard lineage · universal ingestion (Arabic/EN headers, Hijri, D360 fingerprints) · `/developers` + `API_REFERENCE.md` hosted.
 
-- [ ] **DECIDE: ALLaM on the deploy** (P1, 15 min) — set `GROQ_API_KEY` in Vercel env → the Saudi-national-model story becomes live, or consciously park it and demo locally. Don't leave it half-true.
+- [ ] **DECIDE: ALLaM on the deploy** (~~P1~~ **P0** per ed.1 calibration, 15 min) — set `GROQ_API_KEY` in Vercel env → the Saudi-national-model story becomes live, or consciously park it and demo locally. Don't leave it half-true. Ed.1's winner was an AI-agents product; our AI story must be live, not parked.
 - [ ] **DECIDE: AI insights layer on the deploy** (P2) — needs `ANTHROPIC_API_KEY` + `anthropic` in slim reqs; ship it or park it — a broken panel is worse than no panel.
 - [ ] **Architecture slide** (P1) — one diagram: 6-stage pipeline, where rules decide vs where the LLM assists. (Feeds the deck; make once, reuse.)
 - [ ] **Pre-demo API smoke** (P0, Jul 15) — `/health` keyed:true, one live scored request, playground key issuance — scripted so it takes 5 minutes on venue wifi.
