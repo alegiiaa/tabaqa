@@ -1,7 +1,32 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
 const API = 'https://tabaqa-api.vercel.app'
+
+/** One ping on mount — the hero says "live" because it just checked, not because we claim it. */
+function useApiLive(): boolean | null {
+  const [live, setLive] = useState<boolean | null>(null)
+  useEffect(() => {
+    let on = true
+    fetch(`${API}/health`).then((r) => on && setLive(r.ok)).catch(() => on && setLive(false))
+    return () => { on = false }
+  }, [])
+  return live
+}
+
+/** Highlight the sidebar link of the section currently in view. */
+function useScrollSpy(ids: readonly string[]): string {
+  const [active, setActive] = useState(ids[0])
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => { for (const e of entries) if (e.isIntersecting) setActive(e.target.id) },
+      { rootMargin: '-15% 0px -75% 0px' },
+    )
+    ids.forEach((id) => { const el = document.getElementById(id); if (el) obs.observe(el) })
+    return () => obs.disconnect()
+  }, [ids])
+  return active
+}
 
 function Code({ lang, children }: { lang: string; children: string }) {
   const [copied, setCopied] = useState(false)
@@ -196,13 +221,16 @@ function Playground() {
 }
 
 const NAV = [
-  ['overview', 'Overview'], ['quickstart', 'Quickstart'], ['playground', 'Playground'],
+  ['overview', 'Overview'], ['playground', 'Playground'],
   ['auth', 'Authentication'], ['score', 'Score'],
   ['insights', 'Insights'], ['affordability', 'Affordability'], ['assistant', 'Assistant'],
   ['model', 'Data model'], ['errors', 'Errors'], ['validation', 'How it’s validated'],
 ] as const
+const NAV_IDS = NAV.map(([id]) => id)
 
 export function DevelopersPage() {
+  const live = useApiLive()
+  const active = useScrollSpy(NAV_IDS)
   return (
     <div className="dv">
       <header className="dv-top">
@@ -215,30 +243,61 @@ export function DevelopersPage() {
 
       <div className="dv-wrap">
         <aside className="dv-side">
-          {NAV.map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}
+          {NAV.map(([id, label]) => (
+            <a key={id} href={`#${id}`} className={active === id ? 'on' : ''}>{label}</a>
+          ))}
           <div className="dv-side-foot">Base URL<code>{API}</code></div>
         </aside>
 
         <main className="dv-main">
-          <section id="overview">
-            <h1>Tabaqa API</h1>
-            <p className="dv-lead">
-              The credit-intelligence layer for Saudi open banking — as an API. Send a person's
-              bank + wallet transactions; get back <strong>verified income</strong>, a
-              <strong> 1–99 score</strong>, a risk flag, a SAMA-compliant affordability decision,
-              and a plain-language financial read.
-            </p>
-            <div className="dv-facts">
-              <div><span>Base URL</span><code>{API}</code></div>
-              <div><span>Content type</span><code>application/json</code></div>
-              <div><span>Auth</span><code>anonymous demo · Bearer key</code></div>
-              <div><span>Console</span><a href={`${API}/docs`} target="_blank" rel="noreferrer">/docs ↗</a></div>
+          <section id="overview" className="dv-hero">
+            <div className="dv-hero-l">
+              <div className="dv-hero-eyebrow">
+                <span>Tabaqa API</span>
+                {live !== null && (
+                  <span className={`dv-live ${live ? 'ok' : 'down'}`}>
+                    <i />{live ? 'API live — this page just checked' : 'API unreachable — check your network'}
+                  </span>
+                )}
+              </div>
+              <h1>The credit decision,<br />in <em>one call</em></h1>
+              <p className="dv-lead">
+                The credit-intelligence layer for Saudi open banking — as an API. Send a person's
+                bank + wallet transactions; get back <strong>verified income</strong>, a
+                <strong> 1–99 score</strong>, a risk flag, a SAMA-compliant affordability decision,
+                and a plain-language financial read.
+              </p>
+              <div className="dv-facts">
+                <div><span>Base URL</span><code>{API}</code></div>
+                <div><span>Content type</span><code>application/json</code></div>
+                <div><span>Auth</span><code>anonymous demo · Bearer key</code></div>
+                <div><span>Console</span><a href={`${API}/docs`} target="_blank" rel="noreferrer">/docs ↗</a></div>
+              </div>
+              <p className="dv-note">
+                Call it anonymously to try it, or issue a <strong>self-serve sandbox key</strong> below and
+                send it as <code>Authorization: Bearer …</code> for attributed, rate-limited access. The
+                scoring engine is stateless, so keys gate <em>access and rate</em>, never state.
+              </p>
             </div>
-            <p className="dv-note">
-              Call it anonymously to try it, or issue a <strong>self-serve sandbox key</strong> below and
-              send it as <code>Authorization: Bearer …</code> for attributed, rate-limited access. The
-              scoring engine is stateless, so keys gate <em>access and rate</em>, never state.
-            </p>
+            <div className="dv-hero-r">
+              <div className="dv-hero-cap">The whole integration — five lines</div>
+              <Code lang="bash">{`curl -s ${API}/v1/score \\
+  -H 'Content-Type: application/json' \\
+  -d '{"connection_id":"con_8842"}'`}</Code>
+              <Code lang="json">{`{
+  "tabaqa_score": 82,
+  "risk_flag": "low",
+  "income": {
+    "true_monthly_income": 10000,  // the reveal
+    "bank_only_income": 4000,      // what a bank alone sees
+    "verified_share": 0.92
+  },
+  "reasons": ["regular_income", "wallet_income_verified"]
+}`}</Code>
+              <p className="dv-muted">Sample connections: <code>con_8842</code>, <code>con_gig_driver</code>,
+                <code> con_sme_owner</code>, <code>con_thin_file</code> — or <a href="#playground">run it in the
+                playground ↓</a></p>
+            </div>
           </section>
 
           <section id="playground">
@@ -262,31 +321,6 @@ export function DevelopersPage() {
             <p className="dv-muted">Send the key as <code>Authorization: Bearer &lt;key&gt;</code> (or
               <code>X-API-Key: &lt;key&gt;</code>). Keys are stored hashed — the plaintext is shown only once
               at issuance. Need a live key? <Link to="/#access">Request access →</Link></p>
-          </section>
-
-          <section id="quickstart">
-            <h2>60-second quickstart</h2>
-            <p>Score the demo applicant <code>con_8842</code> — one call returns the reveal, score,
-              labelled transactions, and the financial-intelligence read.</p>
-            <Code lang="bash">{`curl -s ${API}/v1/score \\
-  -H 'Content-Type: application/json' \\
-  -d '{"connection_id":"con_8842"}'`}</Code>
-            <Code lang="json">{`{
-  "tabaqa_score": 82,
-  "pd": 0.041,
-  "risk_flag": "low",
-  "income": {
-    "true_monthly_income": 10000,   // the reveal
-    "bank_only_income": 4000,       // what a bank alone sees
-    "reveal_delta": 6000,
-    "verified_share": 0.92
-  },
-  "reasons": ["regular_income", "wallet_income_verified", "zero_nsf"],
-  "insights": { "summary_line": "Fahd A. shows SAR 10,000/mo …" },
-  "transactions": [ { "merchant": "Jahez", "pfc_primary": "INCOME" } ]
-}`}</Code>
-            <p className="dv-muted">Sample connections: <code>con_8842</code>, <code>con_gig_driver</code>,
-              <code>con_sme_owner</code>, <code>con_thin_file</code>.</p>
           </section>
 
           <section id="score">

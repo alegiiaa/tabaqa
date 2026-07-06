@@ -1407,26 +1407,53 @@ body:has(.tour-card) .ds-content{padding-bottom:210px}
 .dv-logo{font-weight:700;font-size:17px;color:var(--text);text-decoration:none}
 .dv-logo span{color:var(--blue);font-size:13px;font-weight:600;margin-inline-start:6px}
 .dv-top-links{display:flex;align-items:center;gap:16px}
-.dv-top-links a{color:var(--muted);font-size:13.5px;font-weight:600;text-decoration:none}
-.dv-top-links a:hover{color:var(--blue)}
+/* :not(.btn) — plain-link colors must never repaint the CTA button's white text */
+.dv-top-links a:not(.btn){color:var(--muted);font-size:13.5px;font-weight:600;text-decoration:none}
+.dv-top-links a:not(.btn):hover{color:var(--blue)}
 .dv-wrap{display:grid;grid-template-columns:220px minmax(0,860px);gap:40px;max-width:1140px;margin:0 auto;padding:32px 28px 80px}
-@media(max-width:840px){.dv-wrap{grid-template-columns:1fr;gap:20px}.dv-side{display:none}}
+/* .dv .dv-side beats the base display:flex below regardless of source order;
+   minmax(0,1fr) stops wide <pre> content from blowing out the column */
+@media(max-width:840px){
+  .dv-wrap{grid-template-columns:minmax(0,1fr);gap:20px}
+  .dv .dv-side{display:none}
+}
 .dv-side{position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:2px;height:max-content}
-.dv-side a{color:var(--muted);font-size:13.5px;font-weight:500;text-decoration:none;padding:7px 11px;border-radius:9px}
+.dv-side a{color:var(--muted);font-size:13.5px;font-weight:500;text-decoration:none;padding:7px 11px;border-radius:9px;
+  border-inline-start:2px solid transparent}
 .dv-side a:hover{background:var(--card);color:var(--text)}
+.dv-side a.on{background:var(--blue-soft);color:var(--blue-deep);font-weight:600;border-inline-start-color:var(--blue)}
 .dv-side-foot{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--faint);display:flex;flex-direction:column;gap:5px}
 .dv-side-foot code{font-family:var(--mono);font-size:11.5px;color:var(--blue);text-transform:none;letter-spacing:0;word-break:break-all}
 
 .dv-main section{margin-bottom:48px;scroll-margin-top:90px}
 .dv-main h1{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:0 0 12px}
+
+/* hero: the 5-line integration IS the headline */
+.dv-hero{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,1fr);gap:38px;align-items:start;padding-top:10px}
+@media(max-width:960px){.dv-hero{grid-template-columns:minmax(0,1fr);gap:22px}}
+.dv-hero-eyebrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.dv-hero-eyebrow>span:first-child{font-family:var(--mono);font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--blue);font-weight:600}
+.dv-live{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;
+  border-radius:999px;padding:4px 11px}
+.dv-live.ok{color:var(--ok);background:var(--ok-soft);border:1px solid rgba(15,157,99,.25)}
+.dv-live.down{color:#b42318;background:#fdf0f0;border:1px solid #f6cccc}
+.dv-live i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:dv-pulse 1.8s infinite}
+@keyframes dv-pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.dv-live i{animation:none}}
+.dv-hero h1{font-size:40px;line-height:1.12;margin-bottom:14px}
+.dv-hero h1 em{font-style:normal;color:var(--blue)}
+.dv-hero-cap{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);font-weight:600;margin-bottom:10px}
+.dv-hero-r .dv-code{box-shadow:0 22px 54px -24px rgba(12,24,64,.45)}
 .dv-main h2{font-size:23px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px;padding-top:8px}
 .dv-main h4{font-size:14px;font-weight:700;margin:18px 0 8px;color:var(--muted)}
 .dv-lead{font-size:16.5px;line-height:1.65;color:var(--muted);max-width:70ch}
 .dv-main p{line-height:1.65;color:var(--muted);margin:0 0 12px}
 .dv-main strong{color:var(--text)} .dv-main em{color:var(--text);font-style:italic}
 .dv-main code{font-family:var(--mono);font-size:12.5px;background:var(--card-2);padding:1px 6px;border-radius:6px;color:var(--blue-deep);word-break:break-word}
-.dv-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}
+.dv-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:18px 0}
 .dv-facts>div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
 .dv-facts span{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
 .dv-facts code,.dv-facts a{font-family:var(--mono);font-size:12.5px;color:var(--blue);background:none;padding:0;text-decoration:none}
