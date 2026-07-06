@@ -6,6 +6,7 @@ import { sourceLabel } from '../../lib/institutions'
 import { MerchantLogo } from './MerchantLogo'
 import { AccountCard } from './AccountCard'
 import { ScoreWaterfall } from './ScoreWaterfall'
+import { DecisionCockpit } from './DecisionCockpit'
 import { RecoursePanel } from './RecoursePanel'
 import { ComplianceReceipt } from './ComplianceReceipt'
 import { ConfidenceBadge, BenchmarkPanel } from './ScoreExtras'
@@ -16,27 +17,31 @@ import { dualDate } from '../../lib/dates'
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`
 
-type Tab = 'reveal' | 'score' | 'ledger' | 'afford'
+export type Tab = 'reveal' | 'score' | 'ledger' | 'afford' | 'memo'
 
 export function Result({
   result,
   name,
   source,
   onBack,
+  initialTab,
 }: {
   result: ScoreResult
   name: string
   source: string
   onBack: () => void
+  /** 'memo' when a credit officer re-opens a saved file — decision first, theatre later. */
+  initialTab?: Tab
 }) {
   const { tx, dir } = useTx()
-  const [tab, setTab] = useState<Tab>('reveal')
+  const [tab, setTab] = useState<Tab>(initialTab ?? 'reveal')
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'reveal', label: tx('① The reveal', '① الكشف') },
     { id: 'score', label: tx('② The score', '② الدرجة') },
     { id: 'ledger', label: tx('③ The ledger', '③ السجل') },
     { id: 'afford', label: tx('④ Affordability', '④ القدرة على السداد') },
+    { id: 'memo', label: tx('⑤ Decision memo', '⑤ مذكرة القرار') },
   ]
   const back = dir === 'rtl' ? '→' : '←'
 
@@ -71,6 +76,7 @@ export function Result({
         {tab === 'score' && <ScoreScreen result={result} />}
         {tab === 'ledger' && <LedgerScreen txns={result.transactions} />}
         {tab === 'afford' && <AffordScreen result={result} />}
+        {tab === 'memo' && <DecisionCockpit result={result} name={name} onOpenAfford={() => setTab('afford')} />}
       </div>
     </div>
   )

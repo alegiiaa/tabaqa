@@ -24,7 +24,7 @@ const SAR_FEATURES = new Set(['min_balance', 'avg_balance'])
 const INT_FEATURES = new Set(['nsf_count', 'months_observed'])
 const PCT_FEATURES = new Set(['verified_income_share'])
 
-function featureValue(feature: string | undefined, features?: Features | null): string | null {
+export function featureValue(feature: string | undefined, features?: Features | null): string | null {
   if (!feature || !features) return null
   const v = (features as unknown as Record<string, unknown>)[feature]
   if (typeof v !== 'number' || !isFinite(v)) return null
@@ -135,7 +135,7 @@ export function ScoreWaterfall({ result }: { result: ScoreResult }) {
   )
 }
 
-function featureLabel(code: ReasonCode | undefined, tx: (en: string, ar: string) => string): string {
+export function featureLabel(code: ReasonCode | undefined, tx: (en: string, ar: string) => string): string {
   if (!code) return ''
   const m = code.feature ? FEATURE_LABEL[code.feature] : undefined
   return m ? tx(m[0], m[1]) : code.label

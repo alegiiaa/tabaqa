@@ -17,7 +17,7 @@ const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 type View =
   | { kind: 'list' }
   | { kind: 'new' }
-  | { kind: 'result'; result: ScoreResult; name: string; source: string }
+  | { kind: 'result'; result: ScoreResult; name: string; source: string; initialTab?: 'memo' }
 
 /** The lender-side CRM: score other people (upload / form / persona) and keep a history. */
 export function Applicants() {
@@ -87,7 +87,9 @@ export function Applicants() {
       } else {
         result = await api.scoreForm(a.input)
       }
-      setView({ kind: 'result', result, name: a.name, source: tx('saved', 'محفوظ') })
+      // A saved file re-opened by an officer starts on the decision memo —
+      // the reveal theatre already played the first time it was scored.
+      setView({ kind: 'result', result, name: a.name, source: tx('saved', 'محفوظ'), initialTab: 'memo' })
     } catch {
       setPersistMsg(tx(
         'Couldn’t re-score this applicant right now. Check your connection and tap the card again.',
@@ -133,6 +135,7 @@ export function Applicants() {
           result={view.result}
           name={view.name}
           source={view.source}
+          initialTab={view.initialTab}
           onBack={() => setView({ kind: 'list' })}
         />
       )}
