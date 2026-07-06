@@ -81,7 +81,7 @@ Done, don't reopen: F1 Compliance Receipt (A4 + QR verify) · F2 live sandbox ke
 ## 📦 Packaging & delivery (Jul 9–15 — where the remaining points live)
 
 - [ ] **Pitch deck, ≤6 slides** (P0, Jul 9) — spine: shock → reveal → data proof ("this isn't our theory": FinRegLab/BIS + our three populations) → deploys-at-Alinma → monetization → close. Reuse ② and ⑤ slides.
-- [ ] **2-min recorded video** (P0, Jul 9–10) — built around the reveal cold-open; model card on screen; smoke-test flex; clean narration. Record AFTER U5/U3 land so nothing flickers.
+- ~~**2-min recorded video**~~ — DROPPED by user decision 2026-07-06; the live demo + deck carry the show. (Phone screen-recording of the reveal stays in the venue fallback kit as wifi insurance.)
 - [ ] **Mock-judge dry run #1** (P0, Jul 10) — a real person + the live site + `JUDGE_SCRIPT.md` + a stopwatch. Capture every stumble; they become Jul 11–13 fixes.
 - [ ] **Q&A drill س١–س٨** (P0, Jul 14) — spoken, timed, one number per breath; landmine list from `EVIDENCE.md` (numbers we must NOT cite).
 - [ ] **Mock-judge dry run #2 + full freeze** (P0, Jul 15) — after this, only rehearsal, no code.

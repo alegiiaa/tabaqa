@@ -137,7 +137,7 @@ a new document, it's a distraction wearing a strategy costume.
 |---|---|---|
 | ~~Jul 6–8~~ | ✅ **DONE Jul 6, two days early** — U4 judge tour · U2 Decision Cockpit · 60-sec path stopwatched local+prod (cold-start prefetch fix) · P9b browser eyeball | The whole ④ UX P1 sprint (④+⑤) |
 | **Jul 7 →** | **Pitch deck ≤6 slides** (shock → reveal → data proof → deploys-at-Alinma → monetization → close) — pulled forward; building it also produces the ② architecture + ⑤ monetization slides | The gate deliverable (📦) |
-| **Jul 7–8** | **2-min video** — reveal cold-open, recorded now that nothing flickers (push first: tour + cockpit must be live) | The gate deliverable (📦) |
+| ~~Jul 7–8~~ | ~~2-min video~~ — DROPPED (user decision Jul 6); the live demo + deck carry the show; phone screen-recording of the reveal stays as wifi insurance | — |
 | **Jul 8–9** | **Mock-judge dry run #1** — real person, live site, stopwatch (pulled forward from Jul 10) | Every stumble gets FIVE fix days instead of three |
 | **Jul 10–13** | Fix dry-run findings · ② tie-offs (pre-demo smoke script — the stopwatch rig is 80% of it) · Groq Dev Tier decision · P2 polish (U6 a11y, U7) only if dry | Convert findings into points |
 | **Jul 14** | ① competitor re-check · **Q&A drill س١–س٨**, spoken, timed | Q&A armor goes muscle-memory |
