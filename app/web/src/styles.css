@@ -1170,6 +1170,33 @@ table.ledger tr:last-child td{border-bottom:0}
 .tip-pop b{display:block;font-size:11.5px;margin-bottom:4px;opacity:.75;font-weight:700;
   text-transform:none;letter-spacing:.02em}
 
+/* U4 · judge guided tour — bottom-docked coach card; below .tip-pop (1200)
+   so tap-to-explain popovers stay readable above it during step ② */
+.tour-card{position:fixed;z-index:1100;left:50%;transform:translateX(-50%);
+  bottom:max(14px,env(safe-area-inset-bottom));width:min(430px,calc(100vw - 20px));
+  background:#0c1226;color:#fff;border-radius:16px;padding:15px 18px 13px;
+  box-shadow:0 18px 50px rgba(8,12,30,.45);animation:tour-in .35s ease both}
+@keyframes tour-in{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.tour-card{animation:none}}
+.tour-cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-bottom:6px}
+[dir=rtl] .tour-cap{letter-spacing:0;text-transform:none}
+.tour-title{font-family:var(--mono);font-size:15.5px;font-weight:600;margin-bottom:4px}
+.tour-body{font-size:13.5px;line-height:1.55;opacity:.88}
+.tour-row{display:flex;align-items:center;gap:8px;margin-top:12px}
+.tour-dots{display:flex;gap:5px;margin-inline-end:auto}
+.tour-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28)}
+.tour-dot.on{background:#5fa8ff}
+.tour-btn{font-family:var(--mono);font-size:12.5px;border:0;border-radius:999px;
+  padding:7px 14px;cursor:pointer;min-height:32px}
+.tour-btn.pri{background:#fff;color:#0c1226;font-weight:600}
+.tour-btn.pri:hover{background:#e8f0ff}
+.tour-btn.ghost{background:transparent;color:rgba(255,255,255,.75)}
+.tour-btn.ghost:hover{color:#fff}
+/* while the tour is up, let the page scroll everything clear of the fixed card
+   (on phones the card would otherwise sit exactly over the reveal CTA) */
+body:has(.tour-card) .ds-content{padding-bottom:210px}
+
 /* ── Financial-intelligence panel (the "deep meaning") ───────────────────── */
 .ins-panel{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;
   padding:22px;overflow:hidden}

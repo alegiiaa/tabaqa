@@ -9,6 +9,7 @@ import { Applicants } from './Applicants'
 import { RevealScreen, ScoreScreen, LedgerScreen, AffordScreen } from './Result'
 import { ModelCardPanel } from './ModelCardPanel'
 import { ErrorState } from './ErrorState'
+import { JudgeTour, markTourSeen, tourSeen } from './Tour'
 
 const MY_CONNECTION = 'con_8842' // the signed-in user's own accounts (demo protagonist)
 const DEFAULT_PICKS: Picks = { bank: 'alinma', wallet: 'barq' }
@@ -58,6 +59,7 @@ export function Dashboard() {
   const [my, setMy] = useState<ScoreResult | null>(null)
   const [err, setErr] = useState<unknown>(null)
   const [loadNonce, setLoadNonce] = useState(0) // bump to retry a failed load
+  const [tour, setTour] = useState(false)
 
   // If we land already-connected (e.g. a page refresh), reload the profile fresh:
   // demo → re-score the canonical connection; own-data → re-score the saved
@@ -87,6 +89,17 @@ export function Dashboard() {
     () => (picks.mode === 'own_data' ? my : (my ? rethemeResult(my, picks) : null)),
     [my, picks],
   )
+
+  // U4 · auto-open the judge tour on the first loaded visit (once per browser);
+  // wait for the profile so step ① never lands on a skeleton.
+  useEffect(() => {
+    if (themed && !tourSeen()) setTour(true)
+  }, [themed])
+
+  const closeTour = () => {
+    markTourSeen()
+    setTour(false)
+  }
 
   function onConnected(r: ScoreResult, p: Picks, inp?: StatementInput) {
     setMy(r)
@@ -134,24 +147,36 @@ export function Dashboard() {
     : { connectionId: MY_CONNECTION }
 
   return (
-    <DashboardLayout
-      active={section}
-      onNavigate={setSection}
-      nav={nav}
-      title={meta.title}
-      subtitle={meta.sub}
-      onReconnect={reconnect}
-    >
-      {section === 'applicants' ? (
-        <Applicants />
-      ) : section === 'model' ? (
-        <ModelCardPanel />
-      ) : needsMine && !themed ? (
-        err ? <ErrorState error={err} onRetry={retryLoad} /> : <LoadingScreen />
-      ) : themed ? (
-        <SectionBody section={section} result={themed} onNavigate={setSection} conn={insightsConn} />
-      ) : null}
-    </DashboardLayout>
+    <>
+      <DashboardLayout
+        active={section}
+        onNavigate={setSection}
+        nav={nav}
+        title={meta.title}
+        subtitle={meta.sub}
+        onReconnect={reconnect}
+        actions={
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => setTour(true)}
+            title={tx('Replay the 3-step guided tour', 'إعادة الجولة الإرشادية')}
+          >
+            ✦ {tx('Tour', 'جولة')}
+          </button>
+        }
+      >
+        {section === 'applicants' ? (
+          <Applicants />
+        ) : section === 'model' ? (
+          <ModelCardPanel />
+        ) : needsMine && !themed ? (
+          err ? <ErrorState error={err} onRetry={retryLoad} /> : <LoadingScreen />
+        ) : themed ? (
+          <SectionBody section={section} result={themed} onNavigate={setSection} conn={insightsConn} />
+        ) : null}
+      </DashboardLayout>
+      {tour && <JudgeTour onNavigate={setSection} onClose={closeTour} />}
+    </>
   )
 }
 
