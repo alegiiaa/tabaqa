@@ -74,20 +74,32 @@ export function Connect({
     ['Reconciling & verifying income…', 'مطابقة الدخل والتحقق منه…'],
   ]
 
-  // Prefetch the demo profile in the background as soon as the user starts
-  // connecting. In own-data mode the result comes from submitOwnData instead.
-  // On failure: back to idle with a friendly banner — never a stuck spinner.
-  useEffect(() => {
-    if (mode !== 'demo' || stage !== 'pulling' || fetched.current) return
+  // Prefetch the demo profile the moment this screen mounts — the serverless
+  // API's cold start (10s+ on the first hit of a session) is absorbed while
+  // the judge is still reading, not after they press the button. Failures
+  // before the user commits stay silent (the click path retries); failures
+  // while they're watching the spinner surface the friendly banner — never a
+  // stuck spinner. In own-data mode the result comes from submitOwnData.
+  const stageRef = useRef(stage)
+  stageRef.current = stage
+  const prefetch = () => {
+    if (fetched.current) return
     fetched.current = true
     api.scoreConnection(MY_CONNECTION).then(setResult).catch(() => {
       fetched.current = false
+      if (stageRef.current !== 'pulling') return // silent — nobody is waiting yet
       setErr(tx(
         'We couldn’t reach the scoring service. Check your connection and try again.',
         'تعذّر الوصول إلى خدمة التسجيل. تحقق من اتصالك وحاول مرة أخرى.',
       ))
       setStage('idle')
     })
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { prefetch() }, [])
+  useEffect(() => {
+    if (mode !== 'demo' || stage !== 'pulling') return
+    prefetch() // retry path if the mount prefetch failed silently
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, mode])
 
@@ -127,6 +139,10 @@ export function Connect({
   async function submitOwnData(statement: StatementInput) {
     setErr(null)
     setStepIdx(0)
+    // Discard the prefetched demo profile — the reveal must wait for THIS
+    // statement's score, and a later demo attempt must refetch.
+    fetched.current = false
+    setResult(null)
     setStage('pulling')
     try {
       const r = await api.scoreStatement(statement)
