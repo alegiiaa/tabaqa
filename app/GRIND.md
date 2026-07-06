@@ -7,17 +7,18 @@
 
 ---
 
-## Read of the board (2026-07-05)
+## Read of the board (2026-07-06 evening — refreshed after the UX sprint)
 
 | # | Criterion | State | Verdict |
 |---|-----------|-------|---------|
 | ① | Innovation | COMPETITION.md verified; inversion + fusion + sufficiency band = white space | **CLOSED — defend, don't build** |
-| ② | Technical | Live web + API + keys/metering; offline repro; direction-locked scorecard | **Strong — tie off loose ends only** |
-| ③ | Data | 3 real populations, negative control, layered claim — pushed `1fda1d4`, live | **CLOSED after today's freeze patches** |
-| ④ | UX | Reveal + bilingual RTL + Hijri live; loading/tooltips/tour/cockpit missing | **WEAKEST — this is the grind** |
-| ⑤ | Feasibility | F1 receipt + F2 keys + F5 ROI + F6 inclusion all live | **Strong — pitch assets remain** |
+| ② | Technical | Live web + API + keys/metering + ALLaM; offline repro; cold-start prefetch | **Strong — smoke script + Groq-tier decision left** |
+| ③ | Data | 3 real populations, negative control, layered claim; P9a–c done | **❄️ FORMALLY FROZEN `fefb87d`** |
+| ④ | UX | Tour + cockpit + tooltips + loading + mobile + ≪60s paths + 1-page print — ALL LIVE | **✅ P0+P1 COMPLETE Jul 6, two days early** |
+| ⑤ | Feasibility | F1 receipt + F2 keys + F5 ROI + F6 inclusion + decision memo all live | **Strong — deck slides ④⑤ cover the two "slides remain"** |
+| 📦 | Packaging | **Deck v1 BUILT + LIVE** (tabaqa.vercel.app/deck.html) — awaiting user review; video DROPPED (user, Jul 6) | **The remaining points live here + in rehearsal** |
 
-**The standing rule:** after the ③ freeze patches below, *no new Data or Innovation work*. Every remaining hour goes to ④ UX and 📦 Packaging. The failure mode is winning Data 5/5 and losing the hackathon on UX.
+**The standing rule:** the codebase is done — nothing left on this board can break the demo. Every remaining hour goes to 📦 packaging and **rehearsal**. The failure mode is a 92%-done product with an unrehearsed 3 minutes.
 
 **Ed.1 winner calibration (verified 2026-07-05, x.com/aiob_ai/status/1951758243455221767):** 1st place SAR 250k = **QuantumBoard/QuantumAgents** by team Aiob — an agentic-AI dashboard demoed in a ~60s video, whose own winning post says *"MVP · البيانات حقيقيه ولحظيه · الدقه تحتاج اختبارات ومزيد من التطوير"* (real live data; accuracy untested, "working on it"). **Revealed jury preferences: a working live demo on real data + an AI-agents story + a 60-second show beat validated accuracy.** Consequences: (1) the demo/video leads, rigor is Q&A armor — never open with statistics; (2) the ALLaM decision below is upgraded to P0 — the jury demonstrably rewards AI-forward builds and ALLaM is the *Saudi national model*, perfect Alinma/Tuwaiq optics; (3) our first 60 video seconds must carry everything, like theirs did.
 
@@ -94,13 +95,13 @@ Done, don't reopen: F1 Compliance Receipt (A4 + QR verify) · F2 live sandbox ke
 
 | Date | Focus |
 |------|-------|
-| **Sat Jul 5** | ③ freeze patches (P9a–c) → start U5 |
-| **Sun–Tue Jul 6–8** | ④ UX sprint: U5 → U3 → U4 → U2 → 60-sec path → mobile pass |
-| **Wed Jul 9** | 📦 deck + start video |
-| **Thu Jul 10** | 📦 finish video → **dry run #1** |
-| **Fri–Sun Jul 11–13** | fix dry-run findings · ② tie-offs · ⑤ slides · (P2 items only if clear) |
-| **Mon Jul 14** | ① competitor re-check · Q&A drill |
-| **Tue Jul 15** | dry run #2 · venue kit · pre-demo API smoke · **FULL FREEZE** |
+| ~~Sat Jul 5~~ | ✅ ③ freeze patches (P9a–c) · U5 · U3 · mobile pass |
+| ~~Sun Jul 6~~ | ✅ U4 tour · P9b · U2 cockpit · 60-sec path (+cold-start fix) · **deck v1 built + live** · 1-page print fix · all pushed |
+| **Mon Jul 7** | **USER: review deck** (tabaqa.vercel.app/deck.html) → wording fixes → deck P0 checked · book the mock judge · (Claude: smoke script + judge one-pager) |
+| **Tue–Wed Jul 8–9** | **Dry run #1** — real person, live site, stopwatch (pulled forward from Jul 10) |
+| **Thu–Sun Jul 10–13** | Fix dry-run findings · ② architecture backup-slide · Groq Dev Tier decision · P2 polish (U6/U7) only if dry |
+| **Mon Jul 14** | ① competitor re-check · **Q&A drill س١–س٨** spoken + timed |
+| **Tue Jul 15** | Dry run #2 · venue kit (print receipt/report/one-pager/QR cards + phone recording of the reveal) · pre-demo API smoke · **FULL FREEZE** |
 | **Jul 16–18** | 🏆 AMAD |
 
 ---
