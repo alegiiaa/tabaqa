@@ -55,7 +55,7 @@ number, and the one spoken sentence.
 | **We serve** | Everything **live, judges drive it themselves**: `/demo` (no signup) on tabaqa.vercel.app · real API on tabaqa-api.vercel.app with **sandbox keys + metering** (`/developers` docs, 5-line integration) · **ALLaM** (`allam-2-7b` — the Saudi national model) generating the credit narrative in production · universal ingestion (Arabic/EN headers, Hijri dates, real bank export fingerprints) · offline `smoke_test.py` runs the whole pipeline with **zero dependencies**. |
 | **The number** | 5 lines of API to integrate. |
 | **The sentence** | "A reproducible, transparent engine — deployed live, keys in your hand, every point traceable to a reason code — narrated by ALLaM, the Saudi national model." |
-| **Status** | ✅ Strong — tie-offs only (architecture slide, pre-demo smoke). |
+| **Status** | ✅ Strong — tie-offs only (architecture slide, pre-demo smoke script — the stopwatch/verify rig already covers most of it). Groq Dev Tier decision open (~4 ALLaM narratives/min on free tier). |
 
 ### ③ Data — "real analysis or 'we used AI'?"
 | | |
@@ -63,20 +63,20 @@ number, and the one spoken sentence.
 | **We serve** | The in-app **Model Card + Replication tab** — three real populations, one self-published negative control: **Berka** (real defaults, two independent sources): wallet layer lifts AUC **+0.203**, approved-pool default 7.6%→2.9% · **UCI Taiwan**: the falsification test — zero lift on single-source data (proof we don't manufacture numbers) · **AlfaBattle**: **963,811 real applications**, lift +0.117 at full scale · 1M-account synthetic corpus, TSTR 96% retained. Independent literature as armor: BIS 0.76 vs 0.64, FinRegLab, Fannie Mae. |
 | **The number** | Speak **+0.20** only; the card carries the rest. |
 | **The sentence** | "Three real populations, one negative control we published ourselves — the mechanism is proven, the magnitudes are re-fit on the bank's own book." |
-| **Status** | ✅ FROZEN — never open with statistics; this is Q&A armor (س١–س٨). |
+| **Status** | ✅ FORMALLY FROZEN Jul 6 (P9a–c done; Replication tab eyeballed EN+AR in a real browser) — never open with statistics; this is Q&A armor (س١–س٨). |
 
 ### ④ UX — "does it feel like a real product?"  ⚠️ current sprint
 | | |
 |---|---|
-| **We serve** | A **bank-grade bilingual app**: Arabic-first RTL + Hijri-native ledger · animated reveal · designed cards + merchant logos · tap-to-explain on every dense number · uniform loading/error states (never flickers "broken") · mobile-safe · printed Arabic attestation report + QR `/verify`. Remaining: judge guided tour (U4), Decision Cockpit (U2), <60s new-applicant path. |
+| **We serve** | A **bank-grade bilingual app**: Arabic-first RTL + Hijri-native ledger · animated reveal · designed cards + merchant logos · tap-to-explain on every dense number · uniform loading/error states (never flickers "broken") · mobile-safe · **judge guided tour** (3-step coach card: reveal → score → lend) · **⑤ Decision-memo cockpit** (the credit-officer one-screen) · every new-applicant path stopwatched ≪60s (API cold start absorbed by a Connect-mount prefetch) · printed Arabic attestation report + QR `/verify`. |
 | **The number** | 40 seconds from wallet-connect to decision. |
 | **The sentence** | "Bilingual, bank-grade, Hijri-native — a lender sees the reveal and a decision in one screen." |
-| **Status** | 🔨 THE GRIND (Jul 6–8). This is where the remaining points live. |
+| **Status** | ✅ P0+P1 COMPLETE (Jul 6, two days early — U5 · U3 · U4 · U2 · mobile · 60-sec all shipped & browser-verified EN/AR/mobile). P2 polish (a11y, reveal micro-polish) only if slack after packaging. |
 
 ### ⑤ Feasibility — "could Alinma deploy this tomorrow?"
 | | |
 |---|---|
-| **We serve** | The **compliance receipt** in the judge's hand (A4, 5 computed checks, QR → live `/verify`) · SAMA tiered DBR enforced in-engine · the no-new-license route: read-only AIS on consent, data-processor *inside* the licensee, no PIS · ROI block (−61% bad rate → ×30 return) · FSDP inclusion meter (37% thin-file; 9.4%→20% SME-credit KPI) · monetization: per-decision API pricing, tiered like Masdr. |
+| **We serve** | The **compliance receipt** in the judge's hand (A4, 5 computed checks, QR → live `/verify`) · the **Decision-memo screen** — reveal delta → gauge → verdict → SAMA numbers with the circular citation → signed reasons, the one screen a credit officer files · SAMA tiered DBR enforced in-engine · the no-new-license route: read-only AIS on consent, data-processor *inside* the licensee, no PIS · ROI block (−61% bad rate → ×30 return) · FSDP inclusion meter (37% thin-file; 9.4%→20% SME-credit KPI) · monetization: per-decision API pricing, tiered like Masdr. |
 | **The number** | Default rate −61% at equal approval volume. |
 | **The sentence** | "Deployable inside Alinma tomorrow — read-only AIS on consent, SAMA-DBR-compliant, no new license, and the compliance officer gets a filable receipt." |
 | **Status** | ✅ Strong — two slides remain (deploys-tomorrow, monetization). |
@@ -135,13 +135,11 @@ a new document, it's a distraction wearing a strategy costume.
 
 | When | Ship | Why it scores |
 |---|---|---|
-| **Jul 6–7** | **U4 · Judge guided tour** — skippable 3-step overlay (reveal → score → lend) | Kills "what do I click" in a timed review (④) |
-| **Jul 7–8** | **U2 · Decision Cockpit** — one screen: reveal delta → gauge → decision → affordability → reasons (recompose existing components) | The credit-officer money screen (④+⑤) |
-| **Jul 8** | **60-second new-applicant path** — stopwatch the real flow, fix the slowest step · + the 2-min **P9b** browser eyeball (EN/AR Replication tab) | Judges will drive it themselves (④) |
-| **Jul 9** | **Pitch deck ≤6 slides** (shock → reveal → data proof → deploys-at-Alinma → monetization → close) | The gate deliverable (📦) |
-| **Jul 9–10** | **2-min video** — reveal cold-open, recorded now that U5/U3 mean nothing flickers | The gate deliverable (📦) |
-| **Jul 10** | **Mock-judge dry run #1** — real person, live site, stopwatch | Every stumble becomes a Jul 11–13 fix |
-| **Jul 11–13** | Fix dry-run findings · ② tie-offs (architecture slide, pre-demo smoke script) · ⑤ slides | Convert findings into points |
+| ~~Jul 6–8~~ | ✅ **DONE Jul 6, two days early** — U4 judge tour · U2 Decision Cockpit · 60-sec path stopwatched local+prod (cold-start prefetch fix) · P9b browser eyeball | The whole ④ UX P1 sprint (④+⑤) |
+| **Jul 7 →** | **Pitch deck ≤6 slides** (shock → reveal → data proof → deploys-at-Alinma → monetization → close) — pulled forward; building it also produces the ② architecture + ⑤ monetization slides | The gate deliverable (📦) |
+| **Jul 7–8** | **2-min video** — reveal cold-open, recorded now that nothing flickers (push first: tour + cockpit must be live) | The gate deliverable (📦) |
+| **Jul 8–9** | **Mock-judge dry run #1** — real person, live site, stopwatch (pulled forward from Jul 10) | Every stumble gets FIVE fix days instead of three |
+| **Jul 10–13** | Fix dry-run findings · ② tie-offs (pre-demo smoke script — the stopwatch rig is 80% of it) · Groq Dev Tier decision · P2 polish (U6 a11y, U7) only if dry | Convert findings into points |
 | **Jul 14** | ① competitor re-check · **Q&A drill س١–س٨**, spoken, timed | Q&A armor goes muscle-memory |
 | **Jul 15** | **Dry run #2 · venue fallback kit · pre-demo API smoke → FULL FREEZE** | After this: rehearsal only, zero code |
 
@@ -163,4 +161,4 @@ a new document, it's a distraction wearing a strategy costume.
 - `DATA_DEFENSE.md` — the devil's-advocate hardening of the Data axis.
 - `app/ALGORITHM.md` — how scoring works, judge-Q&A depth.
 
-*Created 2026-07-06 · 10 days to AMAD (Jul 16–18) · Current focus: ④ UX sprint (U4 tour → U2 cockpit → 60-sec path), then 📦 deck + video Jul 9.*
+*Created 2026-07-06 · status refreshed 2026-07-06 evening — ④ UX sprint COMPLETE two days early · 10 days to AMAD (Jul 16–18) · Current focus: push to prod, then 📦 deck + video (pulled forward to Jul 7).*
