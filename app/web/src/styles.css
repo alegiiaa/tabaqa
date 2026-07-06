@@ -1694,7 +1694,12 @@ body:has(.tour-card) .ds-content{padding-bottom:210px}
   .rpt-toolbar{display:none}
   .no-print{display:none!important}
   .rpt-wrap{background:#fff;padding:0}
-  .rpt-page{box-shadow:none;width:100%;min-height:0;height:297mm;overflow:hidden}  /* exactly one A4 */
+  /* One page on every printer path. A hard 297mm sheet overflows to page 2 the
+     moment the OS adds its own margins/headers (iOS "Save as PDF" always does,
+     and US-Letter paper is 279mm to begin with). 250mm keeps the Watheeq
+     full-page rhythm (footer is pinned with margin-top:auto) with slack for
+     any margin scheme; height:auto lets it grow only if content ever does. */
+  .rpt-page{box-shadow:none;width:100%;min-height:250mm;height:auto;overflow:hidden;break-inside:avoid}
   body{background:#fff}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   @page{size:A4;margin:0}
