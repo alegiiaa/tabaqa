@@ -26,9 +26,9 @@
 ## ③ Data — freeze patches (P0, today, ~30 min total) then FROZEN
 
 - [x] **P9a · Scoping sentence on the three-population series** — ReplicationTab currently lets +0.203→+0.131→+0.117 read as one effect. Add one sentence (EN+AR): Berka = the mechanism (two independent sources), UCI = the falsification test (zero on single-source — the negative control), AlfaBattle = scoreability at scale. Closes the devil's last door *in the artifact*. ✅ 2026-07-05, build green
-- [ ] **P9b · Eyeball the Replication tab in a real browser** — EN and AR — the negative-control block shipped verified by `curl`, not by eyes. (CSS base styles confirmed OK statically 2026-07-05; this is the 2-min visual confirmation.)
+- [x] **P9b · Eyeball the Replication tab in a real browser** — EN and AR — the negative-control block shipped verified by `curl`, not by eyes. (CSS base styles confirmed OK statically 2026-07-05; this is the 2-min visual confirmation.) ✅ 2026-07-06 headless-Chromium screenshots, EN+AR both render correctly. Finding (accepted, not a defect): `model_card.json`-sourced strings (attenuation note, external-validity claim, population findings) are EN-only on the AR page — the technical Q&A armor stays English; UI copy is bilingual.
 - [x] **P9c · س٨ one-breath spoken version** — the full three-layer answer has 5 numbers; delivery rule is one number per breath. Add a compressed spoken lead (keep 0.76 vs 0.64 as the only spoken figure); the card carries the rest. ✅ 2026-07-05, AR+EN in JUDGE_SCRIPT.md
-- [ ] **FREEZE ③** — after the three boxes above, Data work is banned until after the event. (D9 wallet-stunt stays parked. F7 fraud overlay stays parked.)
+- [x] **FREEZE ③** — after the three boxes above, Data work is banned until after the event. (D9 wallet-stunt stays parked. F7 fraud overlay stays parked.) ❄️ 2026-07-06
 
 Already done (for orientation, don't reopen): Berka ablation +0.203 · 1M corpus + TSTR 96% · UCI D6 replication + **D6b negative control (zero, published)** · AlfaBattle 963,811 at scale · harden pass P1–P8 · Saudi anchor ×0.819 · layered claim + honest baselines live · س١–س٨ written.
 
@@ -40,7 +40,7 @@ Done, don't reopen: animated reveal · bilingual EN/AR RTL + Hijri ledger dates 
 
 - [x] **U5 · Uniform loading/empty/skeleton states** (P0, S) — extend the `LoadingScreen` pattern to every screen; branded navy shimmer. A prototype that never flickers "broken" reads as shipped. *Do first.* ✅ 2026-07-05 `f18113d` — full audit, 5 judge-path gaps + FileReader.onerror fixed; all error copy bilingual + actionable
 - [x] **U3 · Tap-to-explain tooltips** (P0, S) — every dense number (PD, IV, DBR, verified share, AUC, PSI) gets a plain-AR/EN tooltip from a static copy map. A judge is never confused in live review. ✅ 2026-07-05 `834b5c1` — InfoTip primitive + 15-term glossary, 14 wire points
-- [ ] **U4 · Judge guided tour** (P1, S) — skippable 3-step overlay: ① reveal → ② score → ③ lend against it. Kills "what do I click" in a timed review.
+- [x] **U4 · Judge guided tour** (P1, S) — skippable 3-step overlay: ① reveal → ② score → ③ lend against it. Kills "what do I click" in a timed review. ✅ 2026-07-06 — coach card that navigates the app itself (no fragile spotlight anchors); auto-opens once per browser after the profile loads, ✦ Tour header replay; verified in headless Chromium: EN walk, AR RTL, mobile 390px (content pads clear of the card so the reveal CTA stays pressable)
 - [ ] **U2 · Decision Cockpit** (P1, M) — one screen a credit officer could paste into a memo: reveal delta → gauge → decision → affordability → top reasons. Recompose existing components.
 - [ ] **New-applicant path under 60 seconds** (P1) — time the real flow (upload/form → score); fix the slowest step. Judges will drive it themselves.
 - [x] **Mobile/responsive sanity pass** (P1, S) — judges may open the link on a phone. ✅ 2026-07-05 `4015c3e` — Opus audit: no A-class break; applied the B-class fixes (grid step-downs, drift-matrix scroll, header wrap, 44px touch targets, inline upload warnings); leftovers are C-polish only (report-page type scale ≤560px)
