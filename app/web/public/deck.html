@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>طبقة · Tabaqa — AMAD 2026</title>
+<link rel="icon" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  @font-face{
+    font-family:'Bukra';
+    src:url('/fonts/29LTBukra-Bold.woff2') format('woff2'),url('/fonts/29LTBukra-Bold.woff') format('woff');
+    font-weight:700;font-display:swap;
+  }
+  :root{
+    --navy:#070b18; --navy-2:#0c1226; --card:rgba(255,255,255,.045);
+    --line:rgba(255,255,255,.12); --line-soft:rgba(255,255,255,.07);
+    --text:#f4f6fb; --muted:rgba(244,246,251,.62); --faint:rgba(244,246,251,.38);
+    --blue:#3b82f6; --blue-2:#60a5fa; --blue-deep:#1d4ed8;
+    --ok:#34d399; --bad:#f87171; --gold:#fbbf24;
+    --ar:'IBM Plex Sans Arabic',system-ui,sans-serif;
+    --disp:'Bukra','IBM Plex Sans Arabic',sans-serif;
+    --mono:'DM Mono','IBM Plex Sans Arabic',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--navy);color:var(--text);font-family:var(--ar);overflow:hidden}
+
+  /* ── stage: one 1280×720 slide, scaled to the window ── */
+  #stage{position:fixed;inset:0;display:grid;place-items:center}
+  .slide{
+    width:1280px;height:720px;flex:none;position:absolute;
+    background:
+      radial-gradient(1100px 600px at 85% -10%, rgba(37,99,235,.16), transparent 60%),
+      radial-gradient(900px 500px at 8% 110%, rgba(29,78,216,.12), transparent 55%),
+      linear-gradient(180deg,var(--navy-2),var(--navy));
+    padding:64px 76px 56px;display:none;flex-direction:column;
+  }
+  .slide.on{display:flex;animation:in .45s ease both}
+  @keyframes in{from{opacity:0;transform:var(--tf,none) translateY(10px)}to{opacity:1;transform:var(--tf,none)}}
+  @media (prefers-reduced-motion:reduce){.slide.on{animation:none}}
+
+  /* ── shared vocabulary ── */
+  .eyebrow{font-family:var(--mono);font-size:14px;letter-spacing:.14em;color:var(--blue-2);
+    text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  .eyebrow::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent)}
+  h1{font-family:var(--disp);font-size:58px;line-height:1.22;font-weight:700;letter-spacing:0}
+  h1 em{font-style:normal;color:var(--blue-2)}
+  .sub{font-size:21px;line-height:1.75;color:var(--muted);margin-top:16px;max-width:900px}
+  .sub b{color:var(--text);font-weight:600}
+  .en{font-family:'Inter',sans-serif;direction:ltr;text-align:left}
+  .foot{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+    padding-top:18px;border-top:1px solid var(--line-soft)}
+  .foot .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:14px;color:var(--faint)}
+  .foot .brand img{height:22px}
+  .foot .kicker{font-size:15px;color:var(--muted);max-width:760px;line-height:1.65}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;
+    padding:6px 14px;font-size:14px;color:var(--muted)}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+
+  /* ① the shock */
+  .s1 h1{font-size:74px;margin-top:26px}
+  .s1 .file{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+  .s1 .file span{border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-size:18px;color:var(--muted)}
+  .s1 .file b{color:var(--text)}
+  .s1 .verdict{margin-top:34px;font-size:24px;color:var(--muted)}
+  .s1 .verdict b{color:var(--bad);font-weight:700}
+  .s1 .market{display:flex;align-items:baseline;gap:18px;margin-top:10px}
+  .s1 .market .big{font-family:var(--mono);font-size:88px;font-weight:500;color:var(--blue-2);line-height:1}
+  .s1 .market .why{font-size:18px;color:var(--muted);line-height:1.6;max-width:430px}
+
+  /* ② the reveal */
+  .s2{flex-direction:row;gap:44px;align-items:stretch}
+  .s2 .txt{flex:1;display:flex;flex-direction:column;min-width:0}
+  .s2 .shots{width:470px;flex:none;position:relative}
+  .s2 .frame{position:absolute;inset:0;border-radius:18px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 30px 80px rgba(0,0,0,.5);background:#fff}
+  .s2 .frame .bar{height:30px;background:#0c1226;display:flex;align-items:center;gap:6px;padding:0 12px}
+  .s2 .frame .bar i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.22)}
+  .s2 .frame .bar span{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.55);margin-inline-start:8px;direction:ltr}
+  .s2 .frame img{width:100%;height:calc(100% - 30px);object-fit:cover;object-position:top}
+  .s2 .beats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:30px}
+  .s2 .beat{background:var(--card);border:1px solid var(--line-soft);border-radius:14px;padding:14px 18px}
+  .s2 .beat .v{font-family:var(--mono);font-size:30px;font-weight:500}
+  .s2 .beat .v .arr{color:var(--blue-2)}
+  .s2 .beat .k{font-size:14px;color:var(--muted);margin-top:3px}
+  .s2 .beat.flip .v b{color:var(--ok)} .s2 .beat.flip .v s{color:var(--bad);text-decoration-thickness:2px}
+
+  /* ③ the proof */
+  .s3 .pops{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px}
+  .s3 .pop{background:var(--card);border:1px solid var(--line-soft);border-radius:16px;padding:20px 22px}
+  .s3 .pop .flag{font-family:var(--mono);font-size:13px;color:var(--faint);letter-spacing:.08em;display:flex;justify-content:space-between}
+  .s3 .pop .metric{font-family:var(--mono);font-size:42px;font-weight:500;color:var(--blue-2);margin-top:10px}
+  .s3 .pop.zero .metric{color:var(--gold)}
+  .s3 .pop .what{font-size:15.5px;color:var(--muted);line-height:1.65;margin-top:8px}
+  .s3 .pop .what b{color:var(--text)}
+  .s3 .armor{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+  .s3 .armor span{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:15px;color:var(--muted)}
+  .s3 .armor b{color:var(--text)}
+
+  /* ④ deploys tomorrow */
+  .s4{flex-direction:row;gap:44px;align-items:stretch}
+  .s4 .txt{flex:1;display:flex;flex-direction:column;min-width:0}
+  .s4 .checks{margin-top:26px;display:flex;flex-direction:column;gap:13px}
+  .s4 .check{display:flex;gap:13px;align-items:flex-start;font-size:18.5px;line-height:1.55}
+  .s4 .check .tick{color:var(--ok);font-family:var(--mono);flex:none;margin-top:2px}
+  .s4 .check b{color:var(--text)} .s4 .check{color:var(--muted)}
+  .s4 .shots{width:470px;flex:none;position:relative;display:flex;align-items:center}
+  .s4 .frame{width:100%;border-radius:18px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 30px 80px rgba(0,0,0,.5);background:#f6f8fc}
+  .s4 .frame img{width:100%;height:auto;display:block}
+  .s4 .stamp{position:absolute;bottom:52px;inset-inline-start:-14px;background:#0c1226;border:1px solid var(--line);
+    border-radius:12px;padding:10px 16px;font-family:var(--mono);font-size:14px;color:var(--ok);box-shadow:0 12px 34px rgba(0,0,0,.5)}
+
+  /* ⑤ business */
+  .s5 .cols{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;margin-top:30px}
+  .s5 .price{display:flex;flex-direction:column;gap:12px}
+  .s5 .tier{display:flex;justify-content:space-between;align-items:baseline;background:var(--card);
+    border:1px solid var(--line-soft);border-radius:13px;padding:13px 18px;font-size:17px}
+  .s5 .tier .t{color:var(--text);font-weight:600}
+  .s5 .tier .p{font-family:var(--mono);color:var(--muted);font-size:15px;direction:ltr}
+  .s5 .roi{display:flex;flex-direction:column;gap:14px}
+  .s5 .roi .row{display:flex;align-items:baseline;gap:14px}
+  .s5 .roi .v{font-family:var(--mono);font-size:40px;font-weight:500;color:var(--blue-2);min-width:170px;direction:ltr;text-align:left}
+  .s5 .roi .row:first-child .v{color:var(--ok)}
+  .s5 .roi .k{font-size:16.5px;color:var(--muted);line-height:1.55}
+  .s5 .roi .k b{color:var(--text)}
+
+  /* ⑥ the close */
+  .s6{justify-content:center;text-align:center;align-items:center}
+  .s6 > div:first-child{margin-top:auto}
+  .s6 h1{font-size:56px;max-width:1000px}
+  .s6 .ask{margin-top:36px;font-size:26px;color:var(--muted)}
+  .s6 .ask b{color:var(--text);border-bottom:3px solid var(--blue);padding-bottom:3px}
+  .s6 .demo{margin-top:44px;display:inline-flex;align-items:center;gap:12px;border:1px solid var(--line);
+    border-radius:999px;padding:14px 28px;font-family:var(--mono);font-size:20px;direction:ltr}
+  .s6 .demo .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .s6 .foot{width:100%}
+
+  /* ── nav chrome ── */
+  #dots{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+  #dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);cursor:pointer;transition:.2s}
+  #dots i.on{background:var(--blue-2);transform:scale(1.25)}
+  #count{position:fixed;bottom:14px;inset-inline-end:20px;font-family:var(--mono);font-size:12px;color:var(--faint);z-index:5;direction:ltr}
+
+  /* ── print: one slide per landscape page ── */
+  @media print{
+    html,body{overflow:visible;background:var(--navy)}
+    #stage{position:static;display:block}
+    .slide{display:flex !important;position:relative;transform:none !important;page-break-after:always;
+      width:1280px;height:720px;animation:none}
+    #dots,#count{display:none}
+    @page{size:1280px 720px;margin:0}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ① الصدمة -->
+  <section class="slide s1 on">
+    <div class="eyebrow">AMAD 2026 · لجنة الائتمان تنعقد الآن</div>
+    <h1>من يوافق على <em>فهد؟</em></h1>
+    <div class="file">
+      <span><b>فهد</b> · ٢٦ سنة · سائق توصيل</span>
+      <span>راتب بنكي <b class="num">4,000</b> ر.س</span>
+      <span>السجل الائتماني: <b>غير موجود</b></span>
+    </div>
+    <div class="verdict">رفضتموه للتو — <b>وكذلك يفعل كل بنك.</b></div>
+    <div class="market">
+      <div class="big num">11M</div>
+      <div class="why">سعودي بالغ لا يمكن تقييمه ائتمانيًا — <b style="color:var(--text)">79%</b> يملكون حسابًا بنكيًا، وبالكاد <b style="color:var(--text)">57%</b> يملكون ملفًا ائتمانيًا. بياناتهم موجودة؛ النظام لا يقرؤها.</div>
+    </div>
+    <div class="foot">
+      <div class="kicker">طبقة تقرأ ما هو موجود أصلًا — البنك <b style="color:var(--text)">والمحفظة</b> — وتحوّله إلى قرار ائتماني موثّق وقابل للتفسير.</div>
+      <div class="brand en"><img src="/tabaqa-mark-white.png" alt="" onerror="this.style.display='none'" />Tabaqa · Score the unscorable</div>
+    </div>
+  </section>
+
+  <!-- ② الكشف -->
+  <section class="slide s2">
+    <div class="txt">
+      <div class="eyebrow">الأطروحة → الكشف · عرض حي، بلا وعود</div>
+      <h1>سجلّه في مكان لا تنظرون إليه — <em>محفظته.</em></h1>
+      <div class="beats">
+        <div class="beat"><div class="v num">4,000 <span class="arr">←</span> 10,000</div><div class="k">الدخل الشهري الموثّق، ر.س — بأختام تحقّق ثلاثية</div></div>
+        <div class="beat"><div class="v num">82</div><div class="k">درجة طبقة — كل نقطة لها سبب مقروء · صندوق زجاجي</div></div>
+        <div class="beat flip"><div class="v"><s>رفض</s> ← <b>موافقة</b></div><div class="k">وفحص نسبة الالتزام وفق ساما يمرّ بالأخضر</div></div>
+        <div class="beat"><div class="v num">40 <small style="font-size:16px">ثانية</small></div><div class="k">نفس فهد. نفس اللجنة. القرار انعكس أمامكم.</div></div>
+      </div>
+      <div class="foot" style="border:0;padding-top:24px">
+        <span class="chip"><span class="dot"></span> حيّ الآن — بلا تسجيل<span class="en num" style="color:var(--text)">tabaqa.vercel.app/demo</span></span>
+      </div>
+    </div>
+    <div class="shots">
+      <div class="frame">
+        <div class="bar"><i></i><i></i><i></i><span>tabaqa.vercel.app/demo</span></div>
+        <img src="/deck/reveal-ar.png" alt="الكشف — 4,000 إلى 10,000" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ الدليل -->
+  <section class="slide s3">
+    <div class="eyebrow">دقيقة الثقة · ليست نظريتنا</div>
+    <h1>مُثبتة على <em>تعثّرات حقيقية</em> — في ثلاثة مجتمعات</h1>
+    <div class="pops">
+      <div class="pop">
+        <div class="flag"><span>التشيك · Berka</span><span class="en num">682</span></div>
+        <div class="metric num">+0.20 AUC</div>
+        <div class="what">طبقة المحفظة فوق رؤية المكتب — على مقترضين حقيقيين تعثّروا فعلًا. <b>الآلية نفسها.</b></div>
+      </div>
+      <div class="pop zero">
+        <div class="flag"><span>تايوان · UCI</span><span class="en num">30,000</span></div>
+        <div class="metric num">صفر</div>
+        <div class="what"><b>الضابط السلبي — نشرناه بأنفسنا:</b> على مصدر بيانات واحد لا يظهر أي رفع. منهجيتنا لا تُصنّع أرقامًا.</div>
+      </div>
+      <div class="pop">
+        <div class="flag"><span>روسيا · AlfaBattle</span><span class="en num">963,811</span></div>
+        <div class="metric num">+0.12 AUC</div>
+        <div class="what">طلب حقيقي مُوسوم — <b>الأثر يصمد على نطاق صناعي.</b></div>
+      </div>
+    </div>
+    <div class="armor">
+      <span><b>فاني ماي</b> تموّل من لا سجل له بالتدفق النقدي — اليوم</span>
+      <span>بنك التسويات الدولية: <b class="num en">0.76</b> مقابل <b class="num en">0.64</b></span>
+      <span>معايرة سعودية: الإحصاء · التأمينات · ساما</span>
+    </div>
+    <div class="foot">
+      <div class="kicker">نتحدث برقم واحد: <b style="color:var(--text)">+0.20</b>. البقية تعيش داخل المنتج — بطاقة نموذج كاملة يفتحها المحكّم بنفسه.</div>
+      <div class="brand en">Tabaqa · Real defaults, real scale</div>
+    </div>
+  </section>
+
+  <!-- ④ داخل الإنماء غدًا -->
+  <section class="slide s4">
+    <div class="txt">
+      <div class="eyebrow">قابلية التنفيذ · لا رخصة جديدة، لا انتظار</div>
+      <h1>داخل مصرف الإنماء — <em>غدًا</em></h1>
+      <div class="checks">
+        <div class="check"><span class="tick">✓</span><span><b>قراءة فقط، بموافقة العميل</b> — AIS عبر تراخيص ساما للمصرفية المفتوحة (فعّالة منذ مارس 2026)</span></div>
+        <div class="check"><span class="tick">✓</span><span><b>معالج بيانات داخل المرخَّص له</b> — لا رخصة جديدة، لا حركة أموال</span></div>
+        <div class="check"><span class="tick">✓</span><span><b>سقوف ساما داخل المحرك</b> — نسبة الالتزام تُفحص في كل قرار، والمخرَج إيصال امتثال بـ QR يؤرشفه موظف الالتزام</span></div>
+        <div class="check"><span class="tick">✓</span><span><b>علّام يكتب السرد الائتماني</b> — النموذج الوطني السعودي، يعمل الآن على خوادمنا</span></div>
+        <div class="check"><span class="tick">✓</span><span><b>الدمج: 5 أسطر API</b> — مفاتيح تجريبية في يد المحكّم اليوم</span></div>
+      </div>
+    </div>
+    <div class="shots">
+      <div class="frame"><img src="/deck/memo-ar.png" alt="مذكرة القرار" /></div>
+      <div class="stamp">موافقة · متوافق مع ساما · قابل للتحقق</div>
+    </div>
+  </section>
+
+  <!-- ⑤ النموذج التجاري -->
+  <section class="slide s5">
+    <div class="eyebrow">النموذج التجاري · لماذا يدفع البنك؟</div>
+    <h1>البنك يدفع لكل <em>قرار</em> — ويسترد أضعافه</h1>
+    <div class="cols">
+      <div class="roi">
+        <div class="row"><div class="v num">−61%</div><div class="k"><b>معدل التعثر</b> عند نفس حجم الموافقات (7.6% ← 2.9% على تعثّرات حقيقية) — خسائر أقل من النصف</div></div>
+        <div class="row"><div class="v num">9.4→20%</div><div class="k"><b>مستهدف برنامج تطوير القطاع المالي</b> لإقراض المنشآت الصغيرة 2030 — بنكنا المضيف يُقاس عليه</div></div>
+        <div class="row"><div class="v num">+32%</div><div class="k"><b>تمارا رفعت موافقاتها</b> بربط الحسابات البنكية — السوق أثبت أن الآلية تُربح؛ نبني ما لم يبنوه</div></div>
+      </div>
+      <div class="price">
+        <div class="tier"><span class="t">لكل قرار</span><span class="p">API متدرّج — Bronze ← Platinum</span></div>
+        <div class="tier"><span class="t">اشتراك المموّل</span><span class="p">لوحة الضبط + المراقبة + إعادة المعايرة</span></div>
+        <div class="tier"><span class="t">مشاركة الأثر</span><span class="p">خيار ربط بالأداء على المحفظة</span></div>
+        <div class="tier" style="border-color:rgba(96,165,250,.4)"><span class="t">نافذة الأولوية</span><span class="p">تراخيص ساما: مارس 2026 — الآن</span></div>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="kicker">عميل مرفوض اليوم = عميل مربح غدًا — <b style="color:var(--text)">بنفس البيانات التي يملكها البنك أصلًا.</b></div>
+      <div class="brand en">Tabaqa · Per-decision pricing</div>
+    </div>
+  </section>
+
+  <!-- ⑥ الختام -->
+  <section class="slide s6">
+    <div>
+      <div class="eyebrow" style="justify-content:center">الختام</div>
+      <h1>فهد لم يتغيّر اليوم — <em>نظرة النظام له هي التي تغيّرت.</em></h1>
+      <div class="ask">نطلب شيئًا واحدًا: <b>بنك شريك لأول تجربة.</b> والقرار — كما رأيتم — يأخذ 40 ثانية.</div>
+      <div class="demo"><span class="dot"></span>tabaqa.vercel.app/demo</div>
+    </div>
+    <div class="foot">
+      <div class="kicker">١١ مليون فهد يحصلون على السجل الذي يستحقونه — والبنوك على عملاء كانوا أمامها طوال الوقت.</div>
+      <div class="brand en"><img src="/tabaqa-mark-white.png" alt="" onerror="this.style.display='none'" />طبقة · Tabaqa</div>
+    </div>
+  </section>
+
+</div>
+
+<div id="dots"></div>
+<div id="count">1 / 6</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')]
+  const dots = document.getElementById('dots')
+  const count = document.getElementById('count')
+  slides.forEach((_, i) => {
+    const d = document.createElement('i')
+    d.onclick = () => go(i)
+    dots.appendChild(d)
+  })
+  let cur = 0
+  function fit() {
+    const s = Math.min(innerWidth / 1280, innerHeight / 720)
+    slides.forEach((el) => { el.style.transform = `scale(${s})`; el.style.setProperty('--tf', `scale(${s})`) })
+  }
+  function go(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i))
+    slides.forEach((el, j) => el.classList.toggle('on', j === cur))
+    ;[...dots.children].forEach((d, j) => d.classList.toggle('on', j === cur))
+    count.textContent = `${cur + 1} / ${slides.length}`
+  }
+  addEventListener('keydown', (e) => {
+    // RTL deck: ArrowLeft advances, ArrowRight goes back; space/enter advance.
+    if (['ArrowLeft', ' ', 'Enter', 'PageDown'].includes(e.key)) go(cur + 1)
+    if (['ArrowRight', 'Backspace', 'PageUp'].includes(e.key)) go(cur - 1)
+    if (e.key === 'Home') go(0)
+    if (e.key === 'End') go(slides.length - 1)
+  })
+  addEventListener('click', (e) => { if (!e.target.closest('#dots')) go(cur + 1) })
+  addEventListener('resize', fit)
+  fit(); go(0)
+</script>
+</body>
+</html>
