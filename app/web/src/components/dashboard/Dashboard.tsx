@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import { useTx } from '../../lib/tx'
-import { api, type ScoreResult, type StatementInput } from '../../lib/api'
+import { api, type AssistantAction, type ScoreResult, type StatementInput } from '../../lib/api'
 import { DashboardLayout, type NavSpec, type Section } from './DashboardLayout'
 import { Connect, type Picks } from './Connect'
+import { CommandBar } from './CommandBar'
 import { MyMoney } from './MyMoney'
 import { Applicants } from './Applicants'
 import { RevealScreen, ScoreScreen, LedgerScreen, AffordScreen } from './Result'
@@ -101,6 +102,31 @@ export function Dashboard() {
     setTour(false)
   }
 
+  // Ask-Tabaqa grounded facts: the applicant's REAL numbers, and the ONLY numbers
+  // the copilot's LLM may use — enforced server-side by the grounding firewall.
+  const copilotFacts = useMemo(() => {
+    if (!themed) return null
+    return {
+      score: themed.tabaqa_score,
+      score_scale: 'score is 1-99, higher is better',
+      risk_flag: themed.risk_flag,
+      bank_only_income_sar: themed.income.bank_only_income,
+      true_verified_income_sar: themed.income.true_monthly_income,
+      hidden_income_revealed_sar: themed.income.reveal_delta,
+      verified_income_share: themed.income.verified_share,
+      months_observed: themed.confidence?.months_observed,
+      top_reasons: themed.reason_codes.slice(0, 5).map((c) => ({ label: c.label, points: c.points, polarity: c.polarity })),
+      recourse: themed.recourse ?? undefined,
+      sama_dbr_cap_pct: { employee: 33.33, retiree: 25 },
+    }
+  }, [themed])
+
+  // The copilot acts inside the app only: navigate sections / open the docs.
+  function handleAction(a: AssistantAction) {
+    if (a.type === 'navigate' && a.section) setSection(a.section as Section)
+    else if (a.type === 'open' && a.target === 'developers') window.open('/developers', '_blank')
+  }
+
   function onConnected(r: ScoreResult, p: Picks, inp?: StatementInput) {
     setMy(r)
     setPicks(p)
@@ -119,7 +145,14 @@ export function Dashboard() {
     setConnected(false)
   }
 
-  if (!connected) return <Connect onConnected={onConnected} />
+  if (!connected) {
+    return (
+      <>
+        <Connect onConnected={onConnected} />
+        <CommandBar section="connect" connected={false} onAction={handleAction} />
+      </>
+    )
+  }
 
   const nav: NavSpec[] = [
     { id: 'home', label: tx('Dashboard', 'الرئيسية'), cap: tx('My money', 'أموالي') },
@@ -175,6 +208,8 @@ export function Dashboard() {
           <SectionBody section={section} result={themed} onNavigate={setSection} conn={insightsConn} />
         ) : null}
       </DashboardLayout>
+      {/* Both are bottom-docked — while the tour coaches, the copilot yields the stage. */}
+      {!tour && <CommandBar section={section} connected onAction={handleAction} facts={copilotFacts} />}
       {tour && <JudgeTour onNavigate={setSection} onClose={closeTour} />}
     </>
   )

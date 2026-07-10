@@ -234,9 +234,9 @@ def _groq_structured(model, system, prompt, schema, max_tokens) -> Optional[dict
         return None
 
 
-def _groq_chat(model, system, messages, max_tokens) -> Optional[str]:
+def _groq_chat(model, system, messages, max_tokens, temperature=0.7) -> Optional[str]:
     msgs = ([{"role": "system", "content": system}] if system else []) + list(messages)
-    return (_groq_raw(model, msgs, max_tokens=max_tokens, temperature=0.7, json_mode=False)
+    return (_groq_raw(model, msgs, max_tokens=max_tokens, temperature=temperature, json_mode=False)
             or None)
 
 
@@ -264,14 +264,16 @@ def structured(
     return data
 
 
-def chat(*, model: str, system: str, messages: list[dict], max_tokens: int = 600) -> Optional[str]:
+def chat(*, model: str, system: str, messages: list[dict], max_tokens: int = 600,
+         temperature: float = 0.7) -> Optional[str]:
     """Plain conversational completion → assistant text, or None if disabled/errored.
 
     ``messages`` is the running [{role, content}] history. Not cached (each turn is
     unique). Used by the in-app assistant; degrades to a scripted fallback on None.
+    (``temperature`` applies to the Groq path; Anthropic chat keeps its default.)
     """
     prov = _active()
     if prov is None:
         return None
-    return (_groq_chat(model, system, messages, max_tokens) if prov == "groq"
+    return (_groq_chat(model, system, messages, max_tokens, temperature) if prov == "groq"
             else _anthropic_chat(model, system, messages, max_tokens))

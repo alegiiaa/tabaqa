@@ -26,8 +26,12 @@ const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(
  * deterministic guide when no key is set.
  */
 export function CommandBar({
-  section, connected, onAction,
-}: { section: string; connected: boolean; onAction: (a: AssistantAction) => void }) {
+  section, connected, onAction, facts,
+}: {
+  section: string; connected: boolean; onAction: (a: AssistantAction) => void
+  /** The applicant's real scoring output — the only numbers the LLM may use (firewalled server-side). */
+  facts?: Record<string, unknown> | null
+}) {
   const { tx, lang } = useTx()
   const [input, setInput] = useState('')
   const [open, setOpen] = useState(false)
@@ -56,6 +60,24 @@ export function CommandBar({
     const t = setTimeout(() => setNudge(true), 1400)
     return () => clearTimeout(t)
   }, [])
+
+  // Seed the hero question from the applicant's REAL numbers once facts arrive
+  // (never mid-conversation, and re-worded on language switch).
+  useEffect(() => {
+    if (!facts || messages.current.length) return
+    const f = facts as any
+    const score = f?.score
+    if (score == null) return
+    // Already-prime profiles have no "reach Y" gap — ask for the why instead.
+    const target = f?.recourse?.already_prime ? null : f?.recourse?.target_score
+    setChips([
+      target != null && target > score
+        ? tx(`Why is my score ${score} — and how do I reach ${target}?`, `ليش درجتي ${score}؟ ووش أسوي عشان أوصل ${target}؟`)
+        : tx(`Why is my score ${score} — what lifted it?`, `ليش درجتي ${score}؟ ووش اللي رفعها؟`),
+      tx('How much can I borrow?', 'كم يمكنني أن أقترض؟'),
+      tx('How is my income verified?', 'كيف يتم توثيق دخلي؟'),
+    ])
+  }, [facts, tx])
   useEffect(() => () => clearInterval(timerRef.current), [])
 
   const SECTION_LABEL: Record<string, string> = {
@@ -78,7 +100,7 @@ export function CommandBar({
     messages.current = [...messages.current, { role: 'user', content: q }]
     setInput(''); setOpen(true); setLoading(true); setReply(null); setActing(null); setRetry(null)
     try {
-      const r = await api.assistant(messages.current, { section, connected })
+      const r = await api.assistant(messages.current, { section, connected, facts: facts ?? undefined })
       messages.current = [...messages.current, { role: 'assistant', content: r.reply }]
       setReply(r.reply)
       if (r.suggestions?.length) setChips(r.suggestions)
@@ -136,7 +158,7 @@ export function CommandBar({
         </button>
       )}
 
-      {open && (reply || loading || acting) && (
+      {open && (reply || loading || acting || chips.length > 0) && (
         <div className="cmd-card">
           <button className="cmd-card-x" onClick={() => setOpen(false)} aria-label="Close">✕</button>
           <div className="cmd-card-head"><span className="cmd-orb"><span /></span>{tx('Tabaqa Copilot', 'مساعد Tabaqa')}</div>
@@ -149,7 +171,7 @@ export function CommandBar({
             </button>
           )}
           {acting && <div className="cmd-acting">{acting}</div>}
-          {!loading && reply && !retry && chips.length > 0 && (
+          {!loading && !retry && chips.length > 0 && (
             <div className="cmd-chips">
               {chips.slice(0, 3).map((c, i) => <button key={i} className="cmd-chip" onClick={() => send(c)}>{c}</button>)}
             </div>
@@ -179,7 +201,7 @@ export function CommandBar({
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onFocus={dismissNudge}
+            onFocus={() => { dismissNudge(); setOpen(true) }}
             placeholder={tx('Ask Tabaqa anything…', 'اسأل Tabaqa أي شيء…')}
             aria-label={tx('Ask Tabaqa', 'اسأل Tabaqa')}
           />
