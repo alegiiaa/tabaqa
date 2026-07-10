@@ -15,6 +15,23 @@ import { JudgeTour, markTourSeen, tourSeen } from './Tour'
 const MY_CONNECTION = 'con_8842' // the signed-in user's own accounts (demo protagonist)
 const DEFAULT_PICKS: Picks = { bank: 'alinma', wallet: 'barq' }
 
+/** The Ask-Tabaqa fact set for one scored person — see copilotFacts below. */
+function buildCopilotFacts(r: ScoreResult) {
+  return {
+    score: r.tabaqa_score,
+    score_scale: 'score is 1-99, higher is better',
+    risk_flag: r.risk_flag,
+    bank_only_income_sar: r.income.bank_only_income,
+    true_verified_income_sar: r.income.true_monthly_income,
+    hidden_income_revealed_sar: r.income.reveal_delta,
+    verified_income_share: r.income.verified_share,
+    months_observed: r.confidence?.months_observed,
+    top_reasons: r.reason_codes.slice(0, 5).map((c) => ({ label: c.label, points: c.points, polarity: c.polarity })),
+    recourse: r.recourse ?? undefined,
+    sama_dbr_cap_pct: { employee: 33.33, retiree: 25 },
+  }
+}
+
 /** Re-brand the demo accounts + transactions to the institutions the user picked. */
 function rethemeResult(result: ScoreResult, picks: Picks): ScoreResult {
   const swap = (src: string) =>
@@ -102,24 +119,16 @@ export function Dashboard() {
     setTour(false)
   }
 
-  // Ask-Tabaqa grounded facts: the applicant's REAL numbers, and the ONLY numbers
-  // the copilot's LLM may use — enforced server-side by the grounding firewall.
+  // Ask-Tabaqa grounded facts: the on-screen person's REAL numbers, and the ONLY
+  // numbers the copilot's LLM may use — enforced server-side by the grounding
+  // firewall. In the Applicants section the copilot grounds on whoever the
+  // lender is looking at (the committee show's Yousef beat); elsewhere, on the
+  // signed-in profile.
+  const [applicantResult, setApplicantResult] = useState<ScoreResult | null>(null)
   const copilotFacts = useMemo(() => {
-    if (!themed) return null
-    return {
-      score: themed.tabaqa_score,
-      score_scale: 'score is 1-99, higher is better',
-      risk_flag: themed.risk_flag,
-      bank_only_income_sar: themed.income.bank_only_income,
-      true_verified_income_sar: themed.income.true_monthly_income,
-      hidden_income_revealed_sar: themed.income.reveal_delta,
-      verified_income_share: themed.income.verified_share,
-      months_observed: themed.confidence?.months_observed,
-      top_reasons: themed.reason_codes.slice(0, 5).map((c) => ({ label: c.label, points: c.points, polarity: c.polarity })),
-      recourse: themed.recourse ?? undefined,
-      sama_dbr_cap_pct: { employee: 33.33, retiree: 25 },
-    }
-  }, [themed])
+    const src = section === 'applicants' ? applicantResult : themed
+    return src ? buildCopilotFacts(src) : null
+  }, [section, applicantResult, themed])
 
   // The copilot acts inside the app only: navigate sections / open the docs.
   function handleAction(a: AssistantAction) {
@@ -199,7 +208,7 @@ export function Dashboard() {
         }
       >
         {section === 'applicants' ? (
-          <Applicants />
+          <Applicants onActiveResult={setApplicantResult} />
         ) : section === 'model' ? (
           <ModelCardPanel />
         ) : needsMine && !themed ? (

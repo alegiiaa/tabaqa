@@ -100,6 +100,11 @@ def _summarize(fixture: dict, persona_id: str, role: str) -> dict:
     }
 
 
+# The committee show's cast leads the gallery: Omar (the obvious yes), Mansour
+# (the trap — bank sees ~0), Yousef (the honest decline with a recourse path).
+_STAGE_ORDER = ["seg_stable_salaried", "gig_driver", "seg_irregular_income"]
+
+
 def list_personas() -> list[dict]:
     """Headline summaries for the gallery, computed once via the real pipeline."""
     out: list[dict] = []
@@ -108,6 +113,8 @@ def list_personas() -> list[dict]:
         out.append(_summarize(fahd, "salaried_gig", "Salaried + gig (the reveal)"))
     for pid, (role, form) in _PERSONA_FORMS.items():
         out.append(_summarize(_synth(pid, form), pid, role))
+    rank = {pid: i for i, pid in enumerate(_STAGE_ORDER)}
+    out.sort(key=lambda p: rank.get(p["id"], len(_STAGE_ORDER)))
     return out
 
 
