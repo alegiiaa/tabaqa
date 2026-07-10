@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTx } from '../../lib/tx'
 import type { StatementInput } from '../../lib/api'
 import { num, SAMPLE_CSV } from '../../lib/csv'
-import { detectStatement, mergeStatements, type DetectedStatement } from '../../lib/adapters'
+import { detectStatement, mergeStatements, type ConfidenceReason, type DetectedStatement } from '../../lib/adapters'
 import { SAMPLE_EXPORTS, SAMPLE_EXPORT_CONTEXT } from '../../lib/sampleStatements'
 import { institution } from '../../lib/institutions'
 
@@ -43,6 +43,20 @@ export function StatementUpload({
   const pasted = useMemo(() => (csv.trim() ? detectStatement(csv) : null), [csv])
   const detected = pasted ? [...files, pasted] : files
   const totalRows = detected.reduce((n, f) => n + f.rows.length, 0)
+
+  // Refuse-don't-guess: a guessed mapping never scores silently — the user
+  // reviews the detected columns and confirms first. Any input change re-arms.
+  const lowConf = detected.filter((f) => f.rows.length > 0 && f.confidence === 'low')
+  const [confirmed, setConfirmed] = useState(false)
+  useEffect(() => setConfirmed(false), [files, csv])
+  const needsConfirm = lowConf.length > 0 && !confirmed
+
+  const REASON_LABEL: Record<ConfidenceReason, [string, string]> = {
+    header: ['column headers were guessed, not matched', 'تم تخمين عناوين الأعمدة ولم تُطابَق'],
+    description: ['no description column found', 'لم يُعثر على عمود الوصف'],
+    skipped: ['many rows failed to parse', 'تعذّر تحليل عدد كبير من الصفوف'],
+    direction: ['cannot tell money-in from money-out (all amounts positive)', 'يتعذّر تمييز الوارد من الصادر (كل المبالغ موجبة)'],
+  }
 
   function loadSampleExports() {
     setFiles(SAMPLE_EXPORTS.map((f) => detectStatement(f.text, { fileName: f.fileName })))
@@ -142,6 +156,13 @@ export function StatementUpload({
                     <span className="upl-file-meta" dir="ltr">
                       {f.rows.length} {tx('rows', 'صف')}{f.formatLabel ? ` · ${f.formatLabel}` : ''}
                     </span>
+                    {f.integrity && (
+                      <span className={`upl-integrity ${f.integrity.passed ? 'ok' : 'bad'}`}>
+                        {f.integrity.passed
+                          ? `✓ ${tx('balance chain verified', 'سلامة الرصيد مُطابقة')}`
+                          : `✗ ${tx('balance chain broken', 'سلسلة الرصيد غير مُطابقة')}`}
+                      </span>
+                    )}
                     {f.warnings.length > 0 && <span className="upl-file-warn">!</span>}
                     <button
                       className="upl-file-x"
@@ -152,6 +173,14 @@ export function StatementUpload({
                   {/* warnings inline — title= tooltips never show on touch */}
                   {f.warnings.length > 0 && (
                     <div className="upl-file-warns">{f.warnings.join(' · ')}</div>
+                  )}
+                  {f.integrity && !f.integrity.passed && (
+                    <div className="upl-file-warns">
+                      {tx(
+                        `running balance fails to reconcile at ${f.integrity.breaks} of ${f.integrity.pairs} transitions — the file may have been edited`,
+                        `الرصيد المتحرك لا يتطابق في ${f.integrity.breaks} من ${f.integrity.pairs} انتقال — قد يكون الملف قد عُدّل`,
+                      )}
+                    </div>
                   )}
                 </div>
               )
@@ -169,6 +198,13 @@ export function StatementUpload({
         <div className="faint small">
           {totalRows} {tx('rows parsed', 'صف تم تحليله')}
           {pasted?.formatLabel ? <span dir="ltr"> · {pasted.formatLabel}</span> : null}
+          {pasted?.integrity ? (
+            <span className={`upl-integrity ${pasted.integrity.passed ? 'ok' : 'bad'}`}>
+              {pasted.integrity.passed
+                ? `✓ ${tx('balance chain verified', 'سلامة الرصيد مُطابقة')}`
+                : `✗ ${tx('balance chain broken', 'سلسلة الرصيد غير مُطابقة')}`}
+            </span>
+          ) : null}
           {pasted?.warnings.length ? <span className="upl-warn-text"> · {pasted.warnings.join(' · ')}</span> : null}
         </div>
       </div>
@@ -188,8 +224,42 @@ export function StatementUpload({
           <input className="ti" placeholder={tx('Bank opening', 'رصيد البنك الافتتاحي')} value={bankOpening} onChange={(e) => setBankOpening(e.target.value)} />
           <input className="ti" placeholder={tx('Wallet opening', 'رصيد المحفظة الافتتاحي')} value={walletOpening} onChange={(e) => setWalletOpening(e.target.value)} />
         </div>
-        <button className="btn btn-primary full" onClick={submit} disabled={busy || totalRows === 0}>
-          {busy ? tx('Scoring…', 'جارٍ التقييم…') : (submitLabel ?? tx('Reveal & score', 'اكشف وقيّم'))}
+        {needsConfirm && (
+          <div className="upl-review">
+            <b>{tx('Check the columns before scoring', 'راجع الأعمدة قبل التقييم')}</b>
+            {lowConf.map((f, i) => (
+              <div className="upl-review-file" key={i}>
+                <span className="upl-review-name">{f.fileName ?? tx('Pasted statement', 'الكشف الملصوق')}</span>
+                <ul>
+                  {f.confidenceReasons.map((r) => <li key={r}>{tx(...REASON_LABEL[r])}</li>)}
+                </ul>
+                {Object.keys(f.mapping).length > 0 && (
+                  <div className="upl-review-map" dir="ltr">
+                    {Object.entries(f.mapping).map(([field, header]) => (
+                      <span key={field} className="upl-review-chip">{field} ← {header || '?'}</span>
+                    ))}
+                  </div>
+                )}
+                {f.rows.slice(0, 2).map((r, j) => (
+                  <div className="upl-review-row mono" dir="ltr" key={j}>
+                    {r.date} · {(r.amount ?? 0) > 0 ? '+' : ''}{r.amount ?? 0} · {r.description.slice(0, 40)}
+                  </div>
+                ))}
+              </div>
+            ))}
+            <p className="faint small">
+              {tx('Tabaqa refuses to guess: a wrong column mapping would produce a confidently wrong score.',
+                'ترفض Tabaqa التخمين: تعيين خاطئ للأعمدة يعني درجة خاطئة بثقة زائفة.')}
+            </p>
+            <button className="btn btn-ghost btn-sm" onClick={() => setConfirmed(true)}>
+              ✓ {tx('The columns are right — proceed', 'الأعمدة صحيحة — تابع')}
+            </button>
+          </div>
+        )}
+        <button className="btn btn-primary full" onClick={submit} disabled={busy || totalRows === 0 || needsConfirm}>
+          {busy ? tx('Scoring…', 'جارٍ التقييم…')
+            : needsConfirm ? tx('Confirm columns first', 'أكّد الأعمدة أولًا')
+            : (submitLabel ?? tx('Reveal & score', 'اكشف وقيّم'))}
         </button>
       </div>
     </div>

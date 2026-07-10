@@ -200,6 +200,49 @@ def build_masdr_from_context(ctx: dict | None) -> dict:
     return masdr
 
 
+def statement_integrity(rows: list[dict], amount_convention: str = "signed") -> dict | None:
+    """Running-balance integrity: a genuine export's balance column must reconcile
+    with the transaction arithmetic — ``balance[i] == balance[i-1] ± amount[i]``.
+    Editing a single row in Excel breaks the chain on both sides, so this is the
+    computed answer to "what stops me tampering with my CSV?".
+
+    Checked per source in FILE order (statements are oldest- or newest-first —
+    both directions are tried, the better one counted). Strict: any break fails.
+    Returns ``None`` when fewer than 2 consecutive balance-bearing pairs exist.
+    """
+    def signed(r: dict) -> float | None:
+        if amount_convention == "debit_credit" or (r.get("amount") is None and (r.get("debit") is not None or r.get("credit") is not None)):
+            credit, debit = _to_float(r.get("credit")), _to_float(r.get("debit"))
+            if credit:
+                return abs(credit)
+            if debit:
+                return -abs(debit)
+            return None
+        return _to_float(r.get("amount"))
+
+    by_source: dict[str, list[tuple[float, float]]] = {}
+    for r in rows or []:
+        bal, amt = _to_float(r.get("balance")), signed(r)
+        if bal is None or amt is None:
+            continue
+        by_source.setdefault(str(r.get("source") or "bank"), []).append((amt, bal))
+
+    pairs = breaks = 0
+    for events in by_source.values():
+        n = len(events) - 1
+        if n < 1:
+            continue
+        fwd = sum(1 for i in range(1, len(events))
+                  if abs(events[i][1] - (events[i - 1][1] + events[i][0])) <= 0.011)
+        rev = sum(1 for i in range(1, len(events))
+                  if abs(events[i - 1][1] - (events[i][1] + events[i - 1][0])) <= 0.011)
+        pairs += n
+        breaks += n - max(fwd, rev)
+    if pairs < 2:
+        return None
+    return {"checked": True, "passed": breaks == 0, "pairs": pairs, "breaks": breaks}
+
+
 def build_fixture_from_statement(
     statement: dict,
     *,
@@ -225,8 +268,12 @@ def build_fixture_from_statement(
     masdr = build_masdr_from_context(ctx)
 
     connection_id = connection_id or ctx.get("connection_id") or f"con_{_iban(name)[2:10]}"
+    applicant: dict[str, Any] = {"id": f"applicant_{connection_id}", "name": name, "connection_id": connection_id}
+    integrity = statement_integrity(rows, str(ctx.get("amount_convention") or "signed"))
+    if integrity is not None:
+        applicant["statement_integrity"] = integrity
     return {
-        "applicant": {"id": f"applicant_{connection_id}", "name": name, "connection_id": connection_id},
+        "applicant": applicant,
         "accounts": accounts,
         "masdr": masdr,
         "transactions": txns,

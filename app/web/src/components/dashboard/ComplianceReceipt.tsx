@@ -67,6 +67,21 @@ export function ComplianceReceipt({
     },
   ]
 
+  // Statement uploads with a balance column get a 6th COMPUTED check: the engine
+  // re-derives the running-balance chain — an edited row breaks it and prints ✗.
+  const integ = result.applicant?.statement_integrity as
+    | { checked: boolean; passed: boolean; pairs: number; breaks: number }
+    | undefined
+  if (integ?.checked) {
+    checks.push({
+      ok: integ.passed,
+      label: tx('Statement integrity verified', 'سلامة كشف الحساب محقّقة'),
+      detail: integ.passed
+        ? `${tx('running balance re-computed across', 'أُعيد احتساب الرصيد المتحرك عبر')} ${integ.pairs} ${tx('transitions — all reconcile', 'انتقالًا — الكل مُطابق')}`
+        : `${tx('balance chain fails at', 'سلسلة الرصيد تفشل في')} ${integ.breaks}/${integ.pairs} ${tx('transitions — possible tampering', 'انتقال — احتمال تعديل يدوي')}`,
+    })
+  }
+
   const name = (result.applicant?.name as string) || tx('Applicant', 'المتقدّم')
 
   // One stable receipt per computed decision: ref, token and QR are memoised on

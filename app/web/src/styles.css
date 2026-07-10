@@ -774,6 +774,16 @@ table.ledger tr:last-child td{border-bottom:0}
   cursor:pointer;padding:2px 4px;border-radius:6px}
 .upl-file-x:hover{color:var(--text);background:var(--line)}
 .upl-warn-text{color:#a86500}
+.upl-integrity{flex:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.upl-integrity.ok{background:#eefaf3;color:#0a7d3e}
+.upl-integrity.bad{background:#fdecec;color:#b3261e}
+.upl-review{border:1px solid #f0d9a8;background:#fffaf0;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:12.5px}
+.upl-review>b{color:#7a5200}
+.upl-review-file ul{margin:4px 0;padding-inline-start:18px;color:#7a5200}
+.upl-review-name{font-weight:700}
+.upl-review-map{display:flex;flex-wrap:wrap;gap:4px}
+.upl-review-chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11px}
+.upl-review-row{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mode-side{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
 .side-title{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);margin-top:6px}
 .ti{font-family:inherit;font-size:14px;color:var(--text);background:#fff;border:1px solid var(--line-2);

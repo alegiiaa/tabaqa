@@ -19,7 +19,9 @@ const pct1 = (x: number) => `${(x * 100).toFixed(1)}%`
 const DECISION_AR: Record<string, string> = { APPROVE: 'موافقة', REVIEW: 'مراجعة', DECLINE: 'رفض' }
 const DECISION_CLS: Record<string, string> = { APPROVE: 'ok', REVIEW: 'warn', DECLINE: 'bad' }
 
-/** The five checks, fixed order — must match the `ck` bitstring the panel issues. */
+/** The checks, fixed order — must match the `ck` bitstring the panel issues.
+ *  The 6th (statement integrity) only exists for balance-bearing uploads, so the
+ *  doc renders exactly `ck.length` entries. */
 const CHECKS: { ar: string; en: string; detail: (f: ReceiptFacts) => string }[] = [
   {
     ar: 'نسبة الدين ضمن سقف ساما',
@@ -45,6 +47,13 @@ const CHECKS: { ar: string; en: string; detail: (f: ReceiptFacts) => string }[] 
     ar: 'دون تنفيذ مدفوعات',
     en: 'No payment initiation (no PIS)',
     detail: () => 'بنية اطلاع فقط — لا يمكن تحريك الأموال',
+  },
+  {
+    ar: 'سلامة كشف الحساب محقّقة',
+    en: 'Statement integrity verified',
+    detail: (f) => (f.ck[5] === '1'
+      ? 'أُعيد احتساب الرصيد المتحرك من الكشف نفسه — السلسلة مُطابقة بالكامل'
+      : 'سلسلة الرصيد المتحرك غير مُطابقة — احتمال تعديل يدوي على الملف'),
   },
 ]
 
@@ -97,7 +106,7 @@ export function ComplianceReceiptDoc() {
               <div className="rpt-meta">
                 <span><b>المرجع</b> <span className="mono">{facts.r}</span></span>
                 <span><b>تاريخ الإصدار</b> <span className="mono">{facts.ts}</span>{d.hijri ? <> · {d.hijri}</> : null}</span>
-                <span className="rpt-verified">✓ {passed}/{CHECKS.length} ضوابط مستوفاة</span>
+                <span className="rpt-verified">✓ {passed}/{facts.ck.length} ضوابط مستوفاة</span>
               </div>
             </div>
 
@@ -113,7 +122,7 @@ export function ComplianceReceiptDoc() {
 
             {/* the checklist — the artifact itself */}
             <div className="cmpd-table">
-              {CHECKS.map((c, i) => {
+              {CHECKS.slice(0, facts.ck.length).map((c, i) => {
                 const ok = facts.ck[i] === '1'
                 return (
                   <div className="cmpd-row" key={i}>

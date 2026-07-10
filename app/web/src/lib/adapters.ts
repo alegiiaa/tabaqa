@@ -20,6 +20,13 @@ export type CanonField =
   | 'date' | 'description' | 'amount' | 'debit' | 'credit'
   | 'balance' | 'type' | 'source' | 'counterparty_iban' | 'currency'
 
+export interface StatementIntegrity {
+  checked: boolean
+  passed: boolean
+  pairs: number
+  breaks: number
+}
+
 export interface DetectedStatement {
   rows: StatementRowInput[]
   /** Matched institutions.ts id ("alinma", "urpay", …) or null when unknown. */
@@ -33,6 +40,45 @@ export interface DetectedStatement {
   skipped: number
   dateRange: [string, string] | null
   fileName?: string
+  /** Running-balance chain verification — null when no usable balance column.
+   *  Mirrors pipeline/ingest_csv.py:statement_integrity (server recomputes for the receipt). */
+  integrity?: StatementIntegrity | null
+  /** 'low' → the mapping was guessed, not matched — the UI must have the user
+   *  confirm the columns before scoring. Refuse-don't-guess: a designed refusal
+   *  beats a silently wrong score. */
+  confidence: 'high' | 'low'
+  confidenceReasons: ConfidenceReason[]
+}
+
+export type ConfidenceReason = 'header' | 'description' | 'skipped' | 'direction'
+
+/** Running-balance integrity: balance[i] must equal balance[i-1] ± amount[i].
+ *  Tried in both file directions (oldest- and newest-first exports); strict —
+ *  a single edited row breaks the chain and fails the whole file. */
+export function checkIntegrity(rows: StatementRowInput[]): StatementIntegrity | null {
+  const bySource = new Map<string, { amt: number; bal: number }[]>()
+  for (const r of rows) {
+    if (r.balance === undefined || r.amount === undefined) continue
+    const k = r.source || 'bank'
+    if (!bySource.has(k)) bySource.set(k, [])
+    bySource.get(k)!.push({ amt: r.amount, bal: r.balance })
+  }
+  let pairs = 0
+  let breaks = 0
+  for (const ev of bySource.values()) {
+    const n = ev.length - 1
+    if (n < 1) continue
+    let fwd = 0
+    let rev = 0
+    for (let i = 1; i < ev.length; i++) {
+      if (Math.abs(ev[i].bal - (ev[i - 1].bal + ev[i].amt)) <= 0.011) fwd++
+      if (Math.abs(ev[i - 1].bal - (ev[i].bal + ev[i - 1].amt)) <= 0.011) rev++
+    }
+    pairs += n
+    breaks += n - Math.max(fwd, rev)
+  }
+  if (pairs < 2) return null
+  return { checked: true, passed: breaks === 0, pairs, breaks }
 }
 
 // ── digit + header normalization ─────────────────────────────────────────────
@@ -290,6 +336,7 @@ export function detectStatement(
   const empty: DetectedStatement = {
     rows: [], institutionId: null, kind: null, formatLabel: '', mapping: {},
     warnings, skipped: 0, dateRange: null, fileName: opts.fileName,
+    confidence: 'low', confidenceReasons: ['header'],
   }
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0)
   if (!lines.length) { warnings.push('empty file'); return empty }
@@ -396,8 +443,16 @@ export function detectStatement(
   })
 
   if (skipped) warnings.push(`${skipped} row(s) skipped (unparseable date/amount or blank description)`)
-  if (!hasDC && !hasType && rows.length > 2 && rows.every((r) => (r.amount ?? 0) > 0))
+  const allPositive = !hasDC && !hasType && rows.length > 2 && rows.every((r) => (r.amount ?? 0) > 0)
+  if (allPositive)
     warnings.push('all amounts are positive — add a debit column or type column if some rows are outflows')
+
+  // Refuse-don't-guess: collect the reasons this mapping can't be trusted blind.
+  const confidenceReasons: ConfidenceReason[] = []
+  if (bestScore < 2) confidenceReasons.push('header')
+  if (headerMap.description === undefined) confidenceReasons.push('description')
+  if (rows.length + skipped > 0 && skipped / (rows.length + skipped) > 0.3) confidenceReasons.push('skipped')
+  if (allPositive) confidenceReasons.push('direction')
 
   // format fingerprint for the UI chip
   const arabicHeaders = Object.values(mapping).some((h) => /[؀-ۿ]/.test(h ?? ''))
@@ -424,6 +479,9 @@ export function detectStatement(
     skipped,
     dateRange: dates.length ? [dates[0], dates[dates.length - 1]] : null,
     fileName: opts.fileName,
+    integrity: checkIntegrity(rows),
+    confidence: confidenceReasons.length ? 'low' : 'high',
+    confidenceReasons,
   }
 }
 
