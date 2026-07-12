@@ -7,7 +7,8 @@ import { Connect, type Picks } from './Connect'
 import { CommandBar } from './CommandBar'
 import { MyMoney } from './MyMoney'
 import { Applicants } from './Applicants'
-import { RevealScreen, ScoreScreen, LedgerScreen, AffordScreen } from './Result'
+import { RevealScreen, ScoreScreen, LedgerScreen } from './Result'
+import { Marketplace } from './Marketplace'
 import { ModelCardPanel } from './ModelCardPanel'
 import { ErrorState } from './ErrorState'
 import { JudgeTour, markTourSeen, tourSeen } from './Tour'
@@ -167,7 +168,7 @@ export function Dashboard() {
     { id: 'home', label: tx('Dashboard', 'الرئيسية'), cap: tx('My money', 'أموالي') },
     { id: 'income', label: tx('Income & score', 'الدخل والدرجة') },
     { id: 'ledger', label: tx('Ledger', 'السجل') },
-    { id: 'financing', label: tx('Financing', 'التمويل') },
+    { id: 'financing', label: tx('Financing', 'التمويل'), cap: tx('Marketplace', 'سوق التمويل') },
     { id: 'applicants', label: tx('Applicants', 'المتقدمون'), cap: tx('Lender tools', 'أدوات المموّل') },
     { id: 'model', label: tx('Model validation', 'التحقق من النموذج') },
   ]
@@ -176,7 +177,7 @@ export function Dashboard() {
     home: { title: tx('Dashboard', 'الرئيسية'), sub: tx('Your verified money picture — bank + wallet.', 'صورتك المالية الموثّقة — البنك + المحفظة.') },
     income: { title: tx('Income & score', 'الدخل والدرجة'), sub: tx('Bank-only vs. your true verified income, and why.', 'دخل البنك مقابل دخلك الحقيقي الموثّق، ولماذا.') },
     ledger: { title: tx('Ledger', 'السجل'), sub: tx('Unified bank + wallet activity, labelled.', 'نشاط موحّد للبنك والمحفظة، موسوم.') },
-    financing: { title: tx('Financing', 'التمويل'), sub: tx('How much you can safely borrow on your real income.', 'كم يمكنك أن تقترض بأمان بناءً على دخلك الحقيقي.') },
+    financing: { title: tx('Financing marketplace', 'سوق التمويل'), sub: tx('Every offer your verified income unlocks — across lenders, ranked for you.', 'كل العروض التي يفتحها دخلك الموثّق — عبر الجهات التمويلية، مرتّبة لك.') },
     applicants: { title: tx('Applicants', 'المتقدمون'), sub: tx('Score other people for lending decisions.', 'قيّم أشخاصًا آخرين لاتخاذ قرارات الإقراض.') },
     model: { title: tx('Model validation', 'التحقق من النموذج'), sub: tx('How the Tabaqa score performs on real default outcomes.', 'كيف يؤدي نموذج طبقة على نتائج تعثّر حقيقية.') },
   }
@@ -230,7 +231,7 @@ function SectionBody({
   if (section === 'home') return <MyMoney result={result} onNavigate={onNavigate} conn={conn} />
   if (section === 'income') return <IncomeScreen result={result} onOpenModel={() => onNavigate('model')} />
   if (section === 'ledger') return <LedgerScreen txns={result.transactions} />
-  return <AffordScreen result={result} />
+  return <Marketplace result={result} onNavigate={onNavigate} />
 }
 
 // Holds the score section back until the reveal has played — no spoilers

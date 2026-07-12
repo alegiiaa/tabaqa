@@ -1206,6 +1206,8 @@ table.ledger tr:last-child td{border-bottom:0}
 /* while the tour is up, let the page scroll everything clear of the fixed card
    (on phones the card would otherwise sit exactly over the reveal CTA) */
 body:has(.tour-card) .ds-content{padding-bottom:210px}
+/* the docked copilot bar reserves scroll room too — bottom-edge buttons stay clickable */
+body:has(.cmd) .ds-content{padding-bottom:130px}
 
 /* ── U2 · decision cockpit (⑤ Decision memo) ──────────────────────────────── */
 .memo{display:flex;flex-direction:column;gap:16px}
@@ -2068,3 +2070,65 @@ html[dir=rtl] .mm-hero{background-position:center left}
 /* upload warnings readable on touch (title= is hover-only) */
 .upl-file-warns{font-size:11.5px;color:#a86500;background:#fff8ec;
   border:1px solid #f3e0b8;border-radius:8px;padding:6px 10px;margin-top:2px}
+
+/* ─────────────────  financing marketplace (mkt)  ───────────────── */
+.mkt{display:flex;flex-direction:column;gap:18px}
+.mkt-search{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;
+  display:flex;flex-direction:column;gap:13px}
+.mkt-max-toggle{align-self:flex-start;margin-top:6px;font-size:12px;padding:5px 11px;border-radius:8px;
+  border:1px solid var(--line-2);background:var(--card);color:var(--muted);cursor:pointer}
+.mkt-max-toggle.on{color:var(--blue-deep);background:var(--blue-soft);border-color:rgba(37,99,235,.35)}
+.mkt-reveal{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--bg-soft);
+  display:flex;flex-direction:column;gap:8px}
+.mkt-reveal-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}
+.mkt-reveal-row.muted{color:var(--muted)}
+.mkt-reveal-row.hot b{color:var(--ok);font-size:16px}
+.mkt-reveal-row b{font-family:var(--mono)}
+.mkt-reveal-note{font-size:12px;border-top:1px dashed var(--line-2);padding-top:8px}
+.mkt-maxline{font-size:15px;padding:14px 18px;border-radius:14px;background:var(--ok-soft);
+  border:1px solid rgba(15,157,99,.3)}
+.mkt-maxline b{font-family:var(--mono);color:var(--ok)}
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.mkt-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;
+  padding:18px;display:flex;flex-direction:column;gap:12px}
+.mkt-card.best{border:2px solid var(--ok);box-shadow:0 10px 30px rgba(15,157,99,.13)}
+.mkt-ribbon{position:absolute;top:-11px;inset-inline-start:14px;background:var(--ok);color:#fff;
+  font-size:11px;padding:3px 10px;border-radius:99px;letter-spacing:.02em}
+.mkt-lender{display:flex;align-items:center;gap:10px}
+.mkt-lender-txt{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.mkt-lender-txt b{font-size:14px}
+.mkt-mono{width:36px;height:36px;border-radius:10px;color:#fff;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:16px;flex:none}
+.mkt-mono.lg{width:48px;height:48px;border-radius:13px;font-size:21px}
+.mkt-install .v{font-family:var(--mono);font-size:27px;letter-spacing:-.01em}
+.mkt-install .u{color:var(--muted);font-size:12.5px;margin-inline-start:5px}
+.mkt-rows{display:flex;flex-direction:column;gap:6px}
+.mkt-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px}
+.mkt-row .mono{font-family:var(--mono)}
+.mkt-reduced{font-size:11.5px;color:#a86500;background:#fff8ec;border:1px solid #f3e0b8;
+  border-radius:8px;padding:4px 9px}
+.mkt-apply{justify-content:center;margin-top:auto}
+.mkt-empty{padding:26px;border:1px dashed var(--line-2);border-radius:14px;color:var(--muted);text-align:center}
+.mkt-locked{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.mkt-locked-head{font-size:12px;color:var(--muted);padding:10px 16px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line)}
+.mkt-locked-row{display:flex;align-items:center;gap:9px;padding:11px 16px;font-size:13px;flex-wrap:wrap}
+.mkt-locked-row+.mkt-locked-row{border-top:1px solid var(--line)}
+.mkt-lock{opacity:.6}
+.mkt-lock-why{font-size:12px}
+.mkt-unlock{margin-inline-start:auto;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+  color:var(--blue-deep);background:var(--blue-soft);border:1px solid rgba(37,99,235,.3)}
+.mkt-disclaim{font-size:11.5px;line-height:1.7}
+.mkt-adv summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6px 2px}
+.mkt-adv[open] summary{margin-bottom:12px}
+.mkt-app{display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+.mkt-app-head{display:flex;align-items:center;gap:14px}
+.mkt-app-head h2{font-size:19px}
+.mkt-app .afford-grid{width:100%}
+.mkt-app .cmp{width:100%}
+.mkt-send{align-self:stretch;justify-content:center}
+.mkt-sent{width:100%;display:flex;flex-direction:column;gap:10px}
+@media (max-width:640px){
+  .mkt-grid{grid-template-columns:1fr}
+  .mkt-unlock{margin-inline-start:0}
+}
