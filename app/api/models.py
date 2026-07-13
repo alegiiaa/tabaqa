@@ -107,6 +107,37 @@ class AffordabilityRequest(BaseModel):
         return self
 
 
+class OffersRequest(BaseModel):
+    """Service ④ — run every lender's published policy against one money picture.
+
+    Income source: pass ``connection_id`` (reuse Service ①'s verified income, score
+    and risk) OR supply ``verified_income`` + ``tabaqa_score`` + ``risk_flag`` directly.
+    ``amount: null`` means "the maximum I qualify for".
+    """
+    connection_id: str | None = Field(default=None, examples=["con_8842"])
+    verified_income: float | None = None
+    existing_obligations: float | None = None
+    tabaqa_score: int | None = None
+    risk_flag: str | None = None                    # low | medium | high
+
+    product: str = Field(default="personal", examples=["auto"])   # auto | personal | goods
+    amount: float | None = Field(default=None, examples=[60000],
+                                 description="null → the maximum the applicant qualifies for")
+    tenor_months: int = Field(default=48, examples=[48], ge=1, le=120)
+
+    @model_validator(mode="after")
+    def _income_source(self) -> "OffersRequest":
+        if self.connection_id is None:
+            if self.verified_income is None:
+                raise ValueError("Provide connection_id or verified_income")
+            if self.tabaqa_score is None or self.risk_flag is None:
+                raise ValueError(
+                    "With verified_income, also provide tabaqa_score and risk_flag "
+                    "(lender policies gate on both)"
+                )
+        return self
+
+
 class AccessRequest(BaseModel):
     name: str
     email: str  # plain str — frontend does HTML5 email validation; avoids the
@@ -363,6 +394,85 @@ class AffordabilityResponse(BaseModel):
     bank_only: dict | None = None
     # SAMA responsible-lending policy applied (cap + citation + total-DBR ceiling)
     dbr_policy: dict | None = None
+
+
+class OfferModel(BaseModel):
+    """One lender's priced answer — not a lead, not a callback. A price."""
+    lender_id: str = Field(..., examples=["waha"])
+    lender_name_en: str
+    lender_name_ar: str
+    lender_kind: str                    # bank | digital | finance | micro
+    amount: float = Field(..., examples=[60000])
+    # counter-offer: the requested amount didn't fit the cap, this amount does
+    reduced_from: float | None = Field(default=None, examples=[None])
+    tenor_months: int = Field(..., examples=[48])
+    annual_rate: float = Field(..., examples=[0.069])
+    installment: float = Field(..., examples=[1434])
+    admin_fee: float = Field(..., examples=[600], description="SAMA-capped: min(1%, SAR 5,000)")
+    total_cost: float = Field(..., examples=[69432])
+    dbr_before: float
+    dbr_after: float
+    dbr_cap: float
+    max_financing: float                # ceiling under this lender's policy
+    annuity_factor: float
+    best: bool = False                  # cheapest full-amount offer
+
+
+class LockedOfferModel(BaseModel):
+    """A lender that can't serve this applicant — and exactly why (the unlock path)."""
+    lender_id: str
+    lender_name_en: str
+    lender_name_ar: str
+    reason: str                         # score | risk | dbr | amount_range | income
+    detail: dict = Field(default_factory=dict)
+
+
+class CeilingModel(BaseModel):
+    """The derivation behind the biggest number on screen. Nothing is granted.
+
+    income × SAMA cap − obligations = installment room; × the annuity factor = the
+    most any lender will extend at this tenor.
+    """
+    verified_income: float = Field(..., examples=[10000])
+    obligations: float = Field(..., examples=[800])
+    sama_cap: float = Field(..., examples=[0.3333])
+    max_installment: float = Field(..., examples=[2533])
+    max_financing: float = Field(..., examples=[102963])
+    at_lender: str | None = None
+    tenor_months: int
+
+
+class OffersResponse(BaseModel):
+    offers: list[OfferModel]
+    locked: list[LockedOfferModel] = Field(default_factory=list)
+    # the headline: offers at the full requested amount. On bank-only income this is
+    # often 0 for the same person on the same day — that gap is the product.
+    full_offer_count: int = Field(..., examples=[4])
+    best_max_financing: float
+    ceiling: CeilingModel
+    # the reveal, spoken in offers: what bank-only income alone would have unlocked
+    bank_only: dict | None = None
+    disclaimer: str
+
+
+class LenderPolicyModel(BaseModel):
+    """A lender's PUBLISHED product policy — the criteria a marketplace runs on.
+    Never a proprietary underwriting formula. All demo lenders are fictional."""
+    id: str
+    name_en: str
+    name_ar: str
+    kind: str
+    products: list[str]
+    min_score: int
+    max_risk: str
+    dbr_cap: float
+    min_amount: float
+    max_amount: float
+    min_tenor: int
+    max_tenor: int
+    base_rate: float
+    medium_spread: float
+    admin_fee_pct: float
 
 
 class PersonaModel(BaseModel):

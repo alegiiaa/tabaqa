@@ -57,6 +57,10 @@ function Endpoint({ method, path, children }: { method: string; path: string; ch
 
 // ── live playground ────────────────────────────────────────────────────────
 const EP: { path: string; label: string; body: string }[] = [
+  {
+    path: '/v1/offers', label: 'Offers',
+    body: JSON.stringify({ connection_id: 'con_8842', product: 'auto', amount: 60000, tenor_months: 48 }, null, 2),
+  },
   { path: '/v1/score', label: 'Score', body: JSON.stringify({ connection_id: 'con_8842' }, null, 2) },
   { path: '/v1/insights', label: 'Insights', body: JSON.stringify({ connection_id: 'con_8842' }, null, 2) },
   {

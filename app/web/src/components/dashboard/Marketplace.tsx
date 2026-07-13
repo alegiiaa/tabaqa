@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTx } from '../../lib/tx'
 import type { ScoreResult, AffordabilityResult } from '../../lib/api'
 import {
-  computeOffers, offerInputs, SAMA_CAP_EMPLOYEE,
-  type Offer, type OfferInputs, type OfferSearch, type ProductType,
+  computeCeiling, computeOffers, offerInputs, SAMA_CAP_EMPLOYEE,
+  type Ceiling, type Offer, type OfferInputs, type OfferSearch, type ProductType,
 } from '../../lib/lenders'
 import { ComplianceReceipt } from './ComplianceReceipt'
 import { AffordScreen } from './Result'
@@ -20,8 +20,19 @@ import type { Section } from './DashboardLayout'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const pct1 = (x: number) => `${(x * 100).toFixed(1)}%`
+const pct2 = (x: number) => `${(x * 100).toFixed(2)}%`
 
 const TENORS = [12, 24, 36, 48, 60]
+const AMOUNT_MIN = 2_000 // the smallest amount any lender in the layer writes
+const AMOUNT_STEP = 1_000
+
+/** Slider track: the ceiling sits ~70% along it, so the applicant can drag past it
+ *  and see what happens (counter-offers) instead of hitting an invisible wall. */
+function trackMax(ceiling: number): number {
+  const raw = Math.max(ceiling * 1.4, 20_000)
+  const step = raw > 200_000 ? 50_000 : raw > 50_000 ? 10_000 : 5_000
+  return Math.ceil(raw / step) * step
+}
 
 export function Marketplace({ result, onNavigate }: { result: ScoreResult; onNavigate?: (s: Section) => void }) {
   const { tx } = useTx()
@@ -38,6 +49,22 @@ export function Marketplace({ result, onNavigate }: { result: ScoreResult; onNav
   const bankInp = useMemo(() => offerInputs(result, true), [result])
   const res = useMemo(() => (search ? computeOffers(inp, search) : null), [inp, search])
   const bankRes = useMemo(() => (search ? computeOffers(bankInp, search) : null), [bankInp, search])
+
+  // The ceiling is derived LIVE as the applicant drags — before any offer exists.
+  // No amount ever appears on this screen without the arithmetic that produced it.
+  const ceiling = useMemo(() => computeCeiling(inp, product, tenor), [inp, product, tenor])
+  const track = useMemo(() => trackMax(ceiling.maxFinancing), [ceiling.maxFinancing])
+
+  // A longer tenor buys a bigger ceiling — the honest path when the ask doesn't fit.
+  const longestTenor = TENORS[TENORS.length - 1]
+  const stretched = useMemo(
+    () => (tenor < longestTenor ? computeCeiling(inp, product, longestTenor) : null),
+    [inp, product, tenor, longestTenor],
+  )
+
+  useEffect(() => { setAmount((a) => Math.min(a, track)) }, [track])
+
+  const overCeiling = !maxMode && amount > ceiling.maxFinancing && ceiling.maxFinancing > 0
 
   const products: [ProductType, string][] = [
     ['auto', tx('Car', 'سيارة')],
@@ -73,22 +100,41 @@ export function Marketplace({ result, onNavigate }: { result: ScoreResult; onNav
             ))}
           </div>
         </div>
-        <div className="field">
-          <label>{tx('Amount', 'المبلغ')}</label>
-          <div className="field-wrap">
+        <div className="field mkt-amount">
+          <label>
+            <span>{tx('How much do you need?', 'كم تحتاج؟')}</span>
+            <b className="mkt-amount-val mono" dir="ltr">
+              {maxMode ? fmt(ceiling.maxFinancing) : fmt(amount)} {SAR}
+            </b>
+          </label>
+
+          <div className="mkt-slider-wrap" dir="ltr">
             <input
-              type="number"
-              value={maxMode ? '' : amount}
-              placeholder={maxMode ? tx('maximum I qualify for', 'أقصى ما أستحقه') : ''}
-              disabled={maxMode}
-              onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+              type="range"
+              className={`mkt-slider${overCeiling ? ' over' : ''}`}
+              min={AMOUNT_MIN}
+              max={track}
+              step={AMOUNT_STEP}
+              value={Math.min(maxMode ? ceiling.maxFinancing : amount, track)}
+              onChange={(e) => { setMaxMode(false); setAmount(parseInt(e.target.value, 10)) }}
             />
-            <span className="field-suffix">{SAR}</span>
+            {ceiling.maxFinancing > AMOUNT_MIN && ceiling.maxFinancing < track && (
+              <div
+                className="mkt-ceiling-mark"
+                style={{ left: `${((ceiling.maxFinancing - AMOUNT_MIN) / (track - AMOUNT_MIN)) * 100}%` }}
+              >
+                <span className="mkt-ceiling-flag">
+                  {tx('your ceiling', 'سقفك')} · {fmt(ceiling.maxFinancing)}
+                </span>
+              </div>
+            )}
           </div>
+
           <button type="button" className={`mkt-max-toggle${maxMode ? ' on' : ''}`} onClick={() => setMaxMode((m) => !m)}>
             {maxMode ? '✓ ' : ''}{tx('Show my maximum', 'أعرض أقصى مبلغ لي')}
           </button>
         </div>
+
         <div className="field">
           <label>{tx('Tenor (months)', 'المدة (أشهر)')}</label>
           <div className="afford-seg">
@@ -97,10 +143,33 @@ export function Marketplace({ result, onNavigate }: { result: ScoreResult; onNav
             ))}
           </div>
         </div>
+
         <button className="btn btn-primary" onClick={runSearch}>
           {tx('Search offers', 'ابحث عن العروض')}
         </button>
       </div>
+
+      {/* ── the ceiling, derived on screen — every number traceable, none granted ── */}
+      <CeilingStrip ceiling={ceiling} SAR={SAR} />
+
+      {overCeiling && (
+        <div className="mkt-over">
+          <b>{tx('Above your ceiling.', 'فوق سقفك.')}</b>{' '}
+          {tx('Lenders will counter-offer at', 'ستعرض عليك الجهات مبلغًا بديلًا عند')}{' '}
+          <b dir="ltr">{fmt(ceiling.maxFinancing)} {SAR}</b>
+          {stretched && stretched.maxFinancing > ceiling.maxFinancing && (
+            <>
+              {' — '}
+              {tx('or stretch to', 'أو مدّد إلى')}{' '}
+              <button className="mkt-stretch" onClick={() => setTenor(longestTenor)}>
+                {longestTenor} {tx('months', 'شهرًا')}
+              </button>{' '}
+              {tx('to reach', 'لتصل إلى')}{' '}
+              <b dir="ltr">{fmt(stretched.maxFinancing)} {SAR}</b>
+            </>
+          )}
+        </div>
+      )}
 
       {res && bankRes && (
         <>
@@ -126,6 +195,16 @@ export function Marketplace({ result, onNavigate }: { result: ScoreResult; onNav
             <div className="mkt-maxline">
               {tx('Your verified income qualifies you for up to', 'دخلك الموثّق يؤهلك لتمويل يصل إلى')}{' '}
               <b dir="ltr">{fmt(res.bestMaxFinancing)} {SAR}</b>
+            </div>
+          )}
+
+          {/* ── rejection becomes a path ── */}
+          {search?.amount != null && res.fullOfferCount === 0 && res.offers.length > 0 && (
+            <div className="mkt-path">
+              <b>{tx('No lender fits the full amount — but you are not declined.',
+                'لا توجد جهة تغطي المبلغ كاملًا — لكنك لست مرفوضًا.')}</b>{' '}
+              {tx('These are real counter-offers, with the path to the rest.',
+                'هذه عروض بديلة حقيقية، ومعها الطريق لبقية المبلغ.')}
             </div>
           )}
 
@@ -184,6 +263,42 @@ export function Marketplace({ result, onNavigate }: { result: ScoreResult; onNav
         <AffordScreen result={result} />
       </details>
     </div>
+  )
+}
+
+/**
+ * The whole point of the request screen: the ceiling is *derived*, never granted.
+ * income × SAMA cap − obligations = the installment room; × the annuity factor for
+ * this tenor = the most any lender will extend. It moves live as the applicant drags,
+ * so by the time offers appear they have already watched the arithmetic that made them.
+ */
+function CeilingStrip({ ceiling, SAR }: { ceiling: Ceiling; SAR: string }) {
+  const { tx } = useTx()
+  if (ceiling.income <= 0) return null
+
+  return (
+    <div className="mkt-derive">
+      <Term v={`${fmt(ceiling.income)}`} k={tx('verified income', 'دخلك الموثّق')} />
+      <span className="mkt-op">×</span>
+      <Term v={pct2(ceiling.samaCap)} k={tx('SAMA cap', 'سقف ساما')} />
+      <span className="mkt-op">−</span>
+      <Term v={fmt(ceiling.obligations)} k={tx('your obligations', 'التزاماتك')} />
+      <span className="mkt-op">=</span>
+      <Term v={`${fmt(ceiling.maxInstallment)} / ${tx('mo', 'شهر')}`} k={tx('installment room', 'القسط المتاح')} hot />
+      <span className="mkt-op">×</span>
+      <Term v={`${ceiling.tenor} ${tx('mo', 'شهرًا')}`} k={tx('annuity factor', 'معامل الأقساط')} />
+      <span className="mkt-op">=</span>
+      <Term v={`${fmt(ceiling.maxFinancing)} ${SAR}`} k={tx('your ceiling', 'سقفك')} hot />
+    </div>
+  )
+}
+
+function Term({ v, k, hot }: { v: string; k: string; hot?: boolean }) {
+  return (
+    <span className={`mkt-term${hot ? ' hot' : ''}`}>
+      <b className="mono" dir="ltr">{v}</b>
+      <i>{k}</i>
+    </span>
   )
 }
 

@@ -47,7 +47,45 @@ Sample connections you can score immediately: `con_8842` (salaried + gig),
 
 ---
 
-## The four services
+## The services
+
+### ⓪ `POST /v1/offers` — **the pricing engine**
+
+One verified money picture in, **real offers out**. Every lender's published product
+policy is run against the applicant's income and SAMA installment room. Not a lead,
+not a callback — a price.
+
+Income source: `connection_id` (reuse the score) **or** `verified_income` +
+`tabaqa_score` + `risk_flag` directly. `amount: null` means *"the maximum I qualify for"*.
+
+```bash
+curl -s https://tabaqa-api.vercel.app/v1/offers -H 'Content-Type: application/json' \
+  -d '{"connection_id":"con_8842","product":"auto","amount":60000,"tenor_months":48}'
+```
+
+| Field | Type | Meaning |
+|---|---|---|
+| `product` | `auto` \| `personal` \| `goods` | Which lender products to run. |
+| `amount` | number \| `null` | Requested amount; `null` → the applicant's maximum. |
+| `tenor_months` | int | Requested tenor; clamped into each lender's range. |
+
+**Response:**
+
+| Field | Meaning |
+|---|---|
+| `offers[]` | `{lender_name_en, amount, installment, annual_rate, admin_fee, total_cost, dbr_after, best}` — ranked, cheapest full-amount offer flagged `best`. |
+| `offers[].reduced_from` | **Counter-offer**: the request didn't fit the cap, this amount does. |
+| `locked[]` | Lenders that can't serve this applicant + the exact `reason` (`score` · `risk` · `dbr` · `amount_range`) — the path to the rest. |
+| `full_offer_count` | Offers at the **full** requested amount. The headline number. |
+| `ceiling` | **The derivation.** `verified_income × sama_cap − obligations = max_installment`, `× annuity_factor = max_financing`. No number is granted without its arithmetic. |
+| `bank_only` | **The reveal.** The same search on the income a bank sees alone → for `con_8842`, **0 full offers** against 4. |
+
+The math is a deliberate twin: `lenders.py` serves it, `lenders.ts` runs it in the
+browser for instant search, and the two agree **to the riyal**.
+
+`GET /v1/lenders` returns every lender's published policy (score floor, DBR cap,
+amount/tenor range, rate tiers). All demo lenders are fictional and illustrative;
+the final credit decision always belongs to the licensed lender.
 
 ### ① `POST /v1/score` — verified income + 1–99 score
 

@@ -31,6 +31,7 @@ from scoring import (  # noqa: E402
     score_profile, recommend_recourse, score_confidence, benchmark_features,
 )
 from affordability import affordability  # noqa: E402
+import lenders as lender_layer  # noqa: E402
 import sama  # noqa: E402
 
 from assistant import respond as assistant_respond  # noqa: E402
@@ -48,6 +49,9 @@ from .models import (  # noqa: E402
     InsightsModel,
     KeyRequest,
     KeyResponse,
+    LenderPolicyModel,
+    OffersRequest,
+    OffersResponse,
     PersonaModel,
     ProfileResponse,
     ReasonCodeModel,
@@ -376,6 +380,96 @@ def affordability_route(req: AffordabilityRequest,
         decision=res.decision, annuity_factor=res.annuity_factor, pd=res.pd, reasons=res.reasons,
         verified_income=verified_income, bank_only_income=bank_only, bank_only=bank_block,
         dbr_policy=policy.to_dict(),
+    )
+
+
+@app.get("/v1/lenders", response_model=list[LenderPolicyModel])
+def lenders_route() -> list[dict]:
+    """The lender layer — every demo lender's **published product policy**.
+
+    Score floor, DBR cap, amount/tenor range, rate tiers. This is what a marketplace
+    runs on: real lenders never hand over their underwriting model, but they do publish
+    product criteria. All lenders here are fictional and illustrative.
+    """
+    return [l.to_dict() for l in lender_layer.LENDERS]
+
+
+@app.post("/v1/offers", response_model=OffersResponse)
+def offers_route(req: OffersRequest, ctx: KeyCtx = Depends(api_key)) -> OffersResponse:
+    """Service ④ — **the pricing engine**: one money picture in, real offers out.
+
+    Every lender's published policy is run against the applicant's verified income and
+    SAMA installment room, returning priced offers (amount · installment · rate · fee ·
+    total cost), counter-offers where the request didn't fit, and the locked lenders
+    with the exact reason — the path to the rest.
+
+    Not a lead. Not a callback. A price.
+
+    ``ceiling`` carries the whole derivation (income × SAMA cap − obligations = the
+    installment room; × the annuity factor = the most any lender will extend), so no
+    number here is ever granted without its arithmetic.
+
+    With a ``connection_id`` the response also carries ``bank_only``: the same search
+    run on the income a bank can see alone. For the demo applicant that is **0 full
+    offers** against 4 — same person, same day, same lender policies.
+    """
+    if req.product not in lender_layer.PRODUCTS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unknown product '{req.product}'. Known: {list(lender_layer.PRODUCTS)}",
+        )
+
+    bank_only_block: dict | None = None
+
+    if req.connection_id is not None:
+        result = _profile_for(req.connection_id)
+        inc, feats = result.income, result.features
+        sr = score_profile(feats, inc)
+        rec = recommend_recourse(sr, feats)
+
+        obligations = (req.existing_obligations if req.existing_obligations is not None
+                       else round(feats.recurring_obligation_load * inc.total_income, 2))
+        inp = lender_layer.OfferInputs(
+            income=req.verified_income or inc.total_income,
+            obligations=obligations,
+            score=req.tabaqa_score or sr.tabaqa_score,
+            risk_flag=req.risk_flag or sr.risk_flag,
+            recourse_projected=(None if rec.already_prime else rec.projected_score),
+        )
+
+        # The reveal, spoken in offers: the same engine on bank-visible income alone.
+        if inc.bank_only_income and inc.bank_only_income > 0 and inc.reveal_delta > 0:
+            bank_inp = lender_layer.OfferInputs(
+                income=inc.bank_only_income, obligations=obligations,
+                score=inp.score, risk_flag=inp.risk_flag,
+            )
+            b = lender_layer.compute_offers(bank_inp, req.product, req.amount, req.tenor_months)
+            bank_only_block = {
+                "income": inc.bank_only_income,
+                "full_offer_count": b.full_offer_count,
+                "offer_count": len(b.offers),
+                "max_financing": b.ceiling.max_financing,
+            }
+    else:
+        inp = lender_layer.OfferInputs(
+            income=req.verified_income or 0.0,
+            obligations=req.existing_obligations or 0.0,
+            score=req.tabaqa_score or 0,
+            risk_flag=req.risk_flag or "medium",
+        )
+
+    if inp.income <= 0:
+        raise HTTPException(status_code=422, detail="verified_income must be greater than 0")
+
+    try:
+        res = lender_layer.compute_offers(inp, req.product, req.amount, req.tenor_months)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+    return OffersResponse(
+        **res.to_dict(),
+        bank_only=bank_only_block,
+        disclaimer=lender_layer.DISCLAIMER,
     )
 
 

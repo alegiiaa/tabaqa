@@ -157,6 +157,54 @@ export function offerInputs(r: ScoreResult, bankOnly = false): OfferInputs {
   }
 }
 
+export interface Ceiling {
+  income: number
+  obligations: number
+  samaCap: number
+  maxInstallment: number // samaCap × income − obligations: the regulator-level room
+  maxFinancing: number // the most any lender open to this applicant will extend, at this tenor
+  atLender: LenderPolicy | null
+  tenor: number
+}
+
+/**
+ * The derivation behind the biggest number on screen — mirror of lenders.py Ceiling.
+ * Nothing is granted: income × the SAMA cap − obligations = the installment room, and
+ * that room × the annuity factor = the ceiling. The applicant watches it move.
+ */
+export function computeCeiling(inp: OfferInputs, product: ProductType, tenor: number): Ceiling {
+  let maxFinancing = 0
+  let atLender: LenderPolicy | null = null
+
+  if (inp.income > 0) {
+    for (const lender of LENDERS) {
+      if (!lender.products.includes(product)) continue
+      if (inp.score < lender.minScore) continue
+      if (RISK_ORDER[inp.riskFlag as keyof typeof RISK_ORDER] > RISK_ORDER[lender.maxRisk]) continue
+
+      const cap = Math.min(lender.dbrCap, SAMA_CAP_EMPLOYEE)
+      const rate = lender.baseRate + (inp.riskFlag === 'medium' ? lender.mediumSpread : 0)
+      const t = Math.min(Math.max(tenor, lender.minTenor), lender.maxTenor)
+      const af = annuityFactor(rate, t)
+      const mf = Math.min(Math.max(0, cap * inp.income - inp.obligations) * af, lender.maxAmount)
+      if (mf > maxFinancing) {
+        maxFinancing = mf
+        atLender = lender
+      }
+    }
+  }
+
+  return {
+    income: inp.income,
+    obligations: inp.obligations,
+    samaCap: SAMA_CAP_EMPLOYEE,
+    maxInstallment: Math.max(0, SAMA_CAP_EMPLOYEE * inp.income - inp.obligations),
+    maxFinancing: Math.round(maxFinancing),
+    atLender,
+    tenor,
+  }
+}
+
 export function computeOffers(inp: OfferInputs, search: OfferSearch): OffersResult {
   const offers: Offer[] = []
   const locked: LockedOffer[] = []
