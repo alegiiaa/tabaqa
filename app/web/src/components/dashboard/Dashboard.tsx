@@ -74,7 +74,9 @@ export function Dashboard() {
   const [connected, setConnected] = useState<boolean>(initial.connected)
   const [picks, setPicks] = useState<Picks>(initial.picks)
   const [input, setInput] = useState<StatementInput | null>(initial.input)
-  const [section, setSection] = useState<Section>('home')
+  // Offers-first: the marketplace is the product, so it is also the landing.
+  // The score lives one level down, as an input into the pricing (see ScoreInput).
+  const [section, setSection] = useState<Section>('financing')
   const [my, setMy] = useState<ScoreResult | null>(null)
   const [err, setErr] = useState<unknown>(null)
   const [loadNonce, setLoadNonce] = useState(0) // bump to retry a failed load
@@ -142,7 +144,7 @@ export function Dashboard() {
     setPicks(p)
     setInput(inp ?? null)
     setConnected(true)
-    setSection('home')
+    setSection('financing') // connect → straight to the offers the connection just unlocked
     try {
       localStorage.setItem(flag, JSON.stringify({ picks: p, input: p.mode === 'own_data' ? inp : undefined }))
     } catch { /* ignore */ }
@@ -164,18 +166,20 @@ export function Dashboard() {
     )
   }
 
+  // The nav tells the story the pitch tells: the offers are the product, and
+  // everything under "what prices your offers" is an input into them.
   const nav: NavSpec[] = [
-    { id: 'home', label: tx('Dashboard', 'الرئيسية'), cap: tx('My money', 'أموالي') },
+    { id: 'financing', label: tx('Offers', 'العروض'), cap: tx('Financing marketplace', 'سوق التمويل') },
+    { id: 'home', label: tx('My money', 'أموالي'), cap: tx('What prices your offers', 'ما يُسعّر عروضك') },
     { id: 'income', label: tx('Income & score', 'الدخل والدرجة') },
     { id: 'ledger', label: tx('Ledger', 'السجل') },
-    { id: 'financing', label: tx('Financing', 'التمويل'), cap: tx('Marketplace', 'سوق التمويل') },
     { id: 'applicants', label: tx('Applicants', 'المتقدمون'), cap: tx('Lender tools', 'أدوات المموّل') },
     { id: 'model', label: tx('Model validation', 'التحقق من النموذج') },
   ]
 
   const META: Record<Section, { title: string; sub: string }> = {
-    home: { title: tx('Dashboard', 'الرئيسية'), sub: tx('Your verified money picture — bank + wallet.', 'صورتك المالية الموثّقة — البنك + المحفظة.') },
-    income: { title: tx('Income & score', 'الدخل والدرجة'), sub: tx('Bank-only vs. your true verified income, and why.', 'دخل البنك مقابل دخلك الحقيقي الموثّق، ولماذا.') },
+    home: { title: tx('My money', 'أموالي'), sub: tx('The verified money picture your offers are priced from — bank + wallet.', 'الصورة المالية الموثّقة التي تُسعَّر منها عروضك — البنك + المحفظة.') },
+    income: { title: tx('Income & score', 'الدخل والدرجة'), sub: tx('Bank-only vs. your true verified income — and the score, one input into your pricing.', 'دخل البنك مقابل دخلك الحقيقي الموثّق — والدرجة، أحد مدخلات تسعيرك.') },
     ledger: { title: tx('Ledger', 'السجل'), sub: tx('Unified bank + wallet activity, labelled.', 'نشاط موحّد للبنك والمحفظة، موسوم.') },
     financing: { title: tx('Financing marketplace', 'سوق التمويل'), sub: tx('Every offer your verified income unlocks — across lenders, ranked for you.', 'كل العروض التي يفتحها دخلك الموثّق — عبر الجهات التمويلية، مرتّبة لك.') },
     applicants: { title: tx('Applicants', 'المتقدمون'), sub: tx('Score other people for lending decisions.', 'قيّم أشخاصًا آخرين لاتخاذ قرارات الإقراض.') },
@@ -231,7 +235,45 @@ function SectionBody({
   if (section === 'home') return <MyMoney result={result} onNavigate={onNavigate} conn={conn} />
   if (section === 'income') return <IncomeScreen result={result} onOpenModel={() => onNavigate('model')} />
   if (section === 'ledger') return <LedgerScreen txns={result.transactions} />
-  return <Marketplace result={result} onNavigate={onNavigate} />
+  // The landing: offers are the product — the score rides above them as an input.
+  return (
+    <>
+      <ScoreInput result={result} onNavigate={onNavigate} />
+      <Marketplace result={result} onNavigate={onNavigate} />
+    </>
+  )
+}
+
+/**
+ * The score, put in its place. We are not a scoring company — we are a pricing
+ * engine, so on the marketplace the score is a supporting input (it sets each
+ * lender's minimum bar and, through the risk band, the rate), while the offers
+ * below are the product. It sits above the search so the framing is read before
+ * the first number lands.
+ */
+function ScoreInput({ result, onNavigate }: { result: ScoreResult; onNavigate: (s: Section) => void }) {
+  const { tx } = useTx()
+  const risk =
+    result.risk_flag === 'low' ? tx('Low risk', 'مخاطر منخفضة')
+      : result.risk_flag === 'medium' ? tx('Medium risk', 'مخاطر متوسطة')
+        : tx('High risk', 'مخاطر مرتفعة')
+
+  return (
+    <div className="mkt-input">
+      <span className="mkt-input-score" dir="ltr">{result.tabaqa_score}<small>/99</small></span>
+      <div className="mkt-input-txt">
+        <b>{tx('One input into your pricing', 'أحد مدخلات تسعيرك')}</b>
+        <span className="faint">
+          {tx('Lenders read it for their minimum bar and your rate — your verified income sets the amount. The score is not the product; the offers below are.',
+            'تقرأه الجهات التمويلية لحدّها الأدنى ولنسبتك — أما المبلغ فيحدّده دخلك الموثّق. الدرجة ليست المنتج؛ العروض بالأسفل هي المنتج.')}
+        </span>
+      </div>
+      <span className={`tag ${result.risk_flag === 'low' ? 't-ok' : 't-inf'}`}>{risk}</span>
+      <button className="mm-link" onClick={() => onNavigate('income')}>
+        {tx('How it is computed', 'كيف تُحتسب')} <span className="fwd">→</span>
+      </button>
+    </div>
+  )
 }
 
 // Holds the score section back until the reveal has played — no spoilers
@@ -245,7 +287,11 @@ function IncomeScreen({ result, onOpenModel }: { result: ScoreResult; onOpenMode
       {revealed && (
         <>
           <div style={{ height: 22 }} />
-          <div className="section-head"><h1>{tx('The score', 'الدرجة')}</h1><p>{tx('Every point is explainable — no black box.', 'كل نقطة قابلة للتفسير — دون صندوق أسود.')}</p></div>
+          <div className="section-head">
+            <h1>{tx('The score', 'الدرجة')}</h1>
+            <p>{tx('One input into your pricing — not the product. Every point is explainable, no black box.',
+              'أحد مدخلات تسعيرك — وليس المنتج. كل نقطة قابلة للتفسير، دون صندوق أسود.')}</p>
+          </div>
           <ScoreScreen result={result} onOpenModel={onOpenModel} />
         </>
       )}

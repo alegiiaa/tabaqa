@@ -1,11 +1,12 @@
 /** U4 · judge guided tour — a skippable 3-step coach mark that walks a timed
- * reviewer through the demo's spine: ① the reveal → ② the score → ③ lend
- * against it.
+ * reviewer through the demo's spine: ① the offers → ② the reveal behind them →
+ * ③ apply, with proof. Offers-first, like the app and the pitch: the product is
+ * the financing, and the score is one input into it.
  *
  * Deliberately NOT an anchored spotlight: the card itself navigates the app to
  * the right section on each step, so there is nothing to mis-measure on any
- * viewport, and the page stays fully interactive — step ① asks the judge to
- * press the reveal button with their own hand, which is the moment we sell.
+ * viewport, and the page stays fully interactive — the judge presses the search
+ * and reveal buttons with their own hand, which is the moment we sell.
  */
 import { useEffect, useState } from 'react'
 import { useTx } from '../../lib/tx'
@@ -37,27 +38,27 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    section: 'income',
-    title: ['The reveal', 'الكشف'],
+    section: 'financing',
+    title: ['Offers, not a score', 'عروض، لا درجة'],
     body: [
-      'The bank-only view is a decline. Press “Reveal the wallet layer” — the hidden income appears, every source stamped with how it was verified.',
-      'رؤية البنك وحدها = رفض. اضغط «اكشف طبقة المحفظة» — يظهر الدخل المخفي، وكل مصدر موسوم بطريقة توثيقه.',
+      'This is the marketplace — press “Search offers”. Every lender’s published policy runs against your verified income, and the offers come back ranked. On bank-only income, the same search returns zero full offers.',
+      'هذا سوق التمويل — اضغط «ابحث عن العروض». تُطبَّق سياسة كل جهة تمويلية على دخلك الموثّق، وتعود العروض مرتّبة. وبدخل البنك وحده، البحث نفسه لا يعيد أي عرض كامل.',
     ],
   },
   {
     section: 'income',
-    title: ['The score — a glass box', 'الدرجة — صندوق زجاجي'],
+    title: ['Why those offers exist', 'لماذا وُجدت هذه العروض'],
     body: [
-      'Below the reveal sits the score. Every point comes from a named reason — tap any ⓘ and it explains itself. No black box.',
-      'أسفل الكشف تجد الدرجة. كل نقطة لها سبب مسمّى — المس أي ⓘ لتشرح نفسها. لا صندوق أسود.',
+      'Press “Reveal the wallet layer” — the hidden income appears, every source stamped with how it was verified. Below it sits the score: one input into your pricing, every point from a named reason. No black box.',
+      'اضغط «اكشف طبقة المحفظة» — يظهر الدخل المخفي، وكل مصدر موسوم بطريقة توثيقه. وأسفله الدرجة: أحد مدخلات تسعيرك، وكل نقطة لها سبب مسمّى. لا صندوق أسود.',
     ],
   },
   {
     section: 'financing',
-    title: ['Lend against it', 'الإقراض بناءً عليها'],
+    title: ['Apply — the lender gets proof', 'قدّم الطلب — والجهة تستلم الدليل'],
     body: [
-      'The SAMA affordability check turns the score into a decision a bank can file — with a printable, QR-verifiable receipt.',
-      'فحص الملاءة وفق «ساما» يحوّل الدرجة إلى قرار يمكن للبنك اعتماده — مع إيصال مطبوع يُتحقّق منه عبر رمز QR.',
+      'Pick an offer and apply: the lender receives a SAMA-checked package with a printable, QR-verifiable compliance receipt. The final credit decision always stays with the licensed lender.',
+      'اختر عرضًا وقدّم: تستلم الجهة التمويلية حزمة مفحوصة وفق «ساما» مع إيصال امتثال مطبوع يُتحقّق منه عبر رمز QR. ويبقى القرار الائتماني النهائي دائمًا للجهة المرخّصة.',
     ],
   },
 ]

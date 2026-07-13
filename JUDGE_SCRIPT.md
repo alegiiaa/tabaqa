@@ -4,7 +4,7 @@
 > marketplace powered by its own scoring engine** — one verified money picture in,
 > every lender's published product policy applied to it, ranked offers out. The old
 > "score" story is now the engine room; the offers are the product.
-> **The rule:** memorize the six beat-openers, not the sentences. One number per beat.
+> **The rule:** memorize the seven beat-openers, not the sentences. One number per beat.
 > The silence at 0:20 is non-negotiable. Print this; rehearse aloud; time it.
 > Companion: the printed compliance receipt (the artifact drop) + a phone
 > screen-recording of the 0→4 offers reveal (demo insurance).
@@ -29,7 +29,7 @@
 > وطبقة تقلب الطاولة كاملة: بدل أن يترجّى فهد بنكًا واحدًا خلف نافذة،
 > **السوق كله يتنافس عليه — لحظة أن يصبح دخله الحقيقي مرئيًا وموثّقًا.»**
 
-### ③ الكشف — سوق التمويل، عرض حي بلا شرائح (0:45–1:40)
+### ③ الكشف — سوق التمويل، عرض حي بلا شرائح (0:45–1:30)
 *التطبيق مباشر، بالعربية، `/demo` → قسم «التمويل»: بحث تمويل سيارة ٦٠ ألف.*
 
 > «هذا سوق التمويل. فهد يبحث عن تمويل سيارة — والنظام يريه الحقيقة كاملة:
@@ -43,7 +43,29 @@
 
 > «وكل رقم له سبب مقروء — القسط، النسبة، ولماذا هذا العرض هو الأفضل. **صندوق زجاجي — لا صندوق أسود.»**
 
-### ④ دقيقة الثقة — ثلاث أنفاس، رقم واحد لكل نفس (1:40–2:15)
+### ③-ب السقف — الرقم يُشتقّ، لا يُمنح (1:30–1:50)
+*الشاشة: نعود إلى شريط المبلغ — **السقف مرسوم على المسار نفسه**. اسحب الإصبع أمامهم؛ الحساب يتغيّر تحت الإصبع.*
+
+> «وقبل أن تسألوا: **من وين طلع الرقم؟** اسحبوا معي:
+> **١٠٬٠٠٠ دخل موثّق × ٣٣٫٣٣٪ سقف ساما − ٨٠٠ التزامات = ٢٬٥٣٣ ريالًا قسطًا متاحًا في الشهر،
+> × ٤٨ شهرًا = سقفك: ١٠٢٬٩٦٣ ريال.**
+> ما في رقم على هذه الشاشة بلا مصدر. **الرقم مشتقّ — مو ممنوح.»**
+
+*يسحب فوق السقف — يظهر الخط الكهرماني، وتتحوّل العروض الأربعة إلى عروض بديلة:*
+
+> «وإذا طلب أكثر من سقفه؟ الشاشة **لا تقول "مرفوض"**. تقول: *فوق سقفك — الجهات ستعرض عليك
+> **١٠٢٬٩٦٣**، أو مدّد إلى **٦٠ شهرًا** لتصل إلى **١٢٣٬٧٥٢*** — بضغطة واحدة أمامكم.
+> **لا توجد جهة تغطي المبلغ كاملًا — لكنك لست مرفوضًا.** الرفض صار طريقًا.»
+
+**الجملة التي تُقتبس — احفظها حرفيًا:**
+> «هم يعرضون أرقامًا. **نحن نُظهر من أين جاءت الأرقام.**»
+> *“They show numbers. We show where numbers come from.”*
+
+*ملاحظة للمحكّم اليقظ (إن سأل «ليش الأرخص مو الأكبر؟»): السقف يأتي من **بنك السدرة**، لا مصرف الواحة — الواحة أرخص (٦٫٩٪) لكنه يقيّد الاستقطاع عند **٣٠٪** بدل ٣٣٫٣٣٪، فيخسر أعلى النطاق. سياسات مختلفة تُنتج سقوفًا مختلفة — هذا محرّك حقيقي، لا واجهة.*
+
+*صمّام الضغط: لو ضاق الوقت، انطق سلسلة الاشتقاق والسقف فقط (١٢ ثانية) واترك السحب فوق السقف لجلسة الأسئلة. **لا تضحِّ بكشف ٠→٤ أبدًا.***
+
+### ④ دقيقة الثقة — ثلاث أنفاس، رقم واحد لكل نفس (1:50–2:20)
 > «كيف تصير العروض حقيقية؟ **كل جهة تمويل عندنا سياسة منتج معلنة** — نسب، سقوف، حدود —
 > لا معادلات سرية؛ والعرض **تأهيل مسبق**، والقرار النهائي دائمًا للجهة المرخّصة. والدخول
 > بنفاذ وموافقة صريحة لكل مصدر — بنوك، محافظ، تأمينات.
@@ -52,16 +74,21 @@
 > وحلّلنا السوق السعودي بأرقام رسمية: **أعشار الدخل من الإحصاء، وأجور ١٣ مليون مشترك من
 > التأمينات، وسقوف ساما** — مدمجة في كل عرض تشاهدونه.»
 
-### ⑤ الوثيقة — ورقة في يد المحكّم (2:15–2:45)
+### ⑤ الوثيقة — ورقة في يد المحكّم (2:20–2:47)
 *فهد يضغط «قدّم الطلب» — تظهر حزمة الطلب. سلّم كبير المحكّمين الإيصال المطبوع.*
 
 > «كل طلب يخرج من السوق **ومعه إيصال امتثاله** — الفحوصات محسوبة من قرار فهد نفسه،
 > لا علامات ✓ ثابتة. **امسحوا الرمز.»**
 > *(المحكّم يمسح QR → صفحة التحقق تفتح مباشرة)*
 > «هذه هي الحزمة التي تستقبلها الجهة التمويلية في لوحتها — وموظف الالتزام يؤرشفها كما هي.
-> والمقرض يدخل السوق **بخمسة أسطر API** — وبدون ترخيص جديد: معالج بيانات داخل المرخَّص له.»
+> والمقرض يدخل السوق **بخمسة أسطر API** — وبدون ترخيص جديد: معالج بيانات داخل المرخَّص له.
+> وما تستدعيه هذه الأسطر ليس واجهة — بل **المحرّك نفسه**: `POST /v1/offers` يُخرج العروض،
+> والعروض البديلة، والجهات المقفلة وسببها، **والسقف بكامل اشتقاقه**.
+> **قلنا إننا محرّك تسعير لا واجهة — واليوم الـAPI يقولها بدلًا عنّا.»**
 
-### ⑥ الختام — العودة إلى الإنسان (2:45–3:00)
+*إن نبش المحكّم التقني: `GET /v1/lenders` يُعيد **سياسة المنتج المعلنة** لكل جهة — معايير منتج، لا معادلات اكتتاب. والحساب مكتوب مرتين **عمدًا**: `lenders.py` في الخادم و`lenders.ts` في المتصفح — المتصفح ليبحث فورًا، والخادم ليكون المرجع — وتحقّقنا أنهما **يتطابقان إلى الريال**. العرض الذي شاهدتموه على الشاشة هو حرفيًا العرض الذي يخرج من الـAPI.*
+
+### ⑥ الختام — العودة إلى الإنسان (2:47–3:00)
 > «فهد لم يتغيّر اليوم — **السوق هو الذي صار يراه.**
 > ١١ مليون فهد ما عادوا يترجّون بنكًا واحدًا؛ صاروا **يختارون بين عروض** —
 > والبنوك حصلت على عملاء كانوا أمامها طوال الوقت.
@@ -133,15 +160,32 @@
 
 **EN:** No — and calling the approval "a formality" is legally wrong and we refuse to say it. The credit decision is a regulatory obligation of the licensee and cannot be delegated: they run a real-time SIMAH pull, fraud and AML checks, and a risk appetite that shifts daily. What we deliver is **pre-qualification on the very product criteria the lender published** — conversion rises because the customer only applies to offers he already qualifies for, and the package arrives complete, verified, and carrying its own compliance receipt. The bank decides faster — but the bank always decides.
 
+### س١٢ · «منصات التجميع موجودة من زمان — وش يفرقكم عنها فعليًا؟» ⚠️ سؤال المنتج
+*(الشقيق التنظيمي لهذا السؤال في **س٩** — ذاك جواب الترخيص، وهذا جواب المنتج. لا تخلط بينهما.)*
+
+> «الفرق في **ما ندخله وما نُخرجه**. هم يجمعون **استمارة** ويبيعون **عميلًا محتملًا** — تعبّي بياناتك بيدك، ثم تنتظر مكالمة. نحن نقرأ **بيانات موثّقة من مصدرها** ونحسب **سعرًا**: قسط، ونسبة، ورسوم، وتكلفة كلية — على الشاشة، الآن. ولهذا لا يستطيع أي مجمّع أن يصنع ما شاهدتموه قبل دقيقة: **صفر عروض ثم أربعة.** الاستمارة لا تتغيّر حين تربط محفظتك — الاستمارة هي الاستمارة. الذي تغيّر هو **صورة الدخل**، ولا يقرأها إلا **محرّك**. هم يوزّعون الطلبات؛ نحن نسعّرها. **ما عندهم محرّك.»**
+
+**EN:** The difference is what goes *in* and what comes *out*. They collect a **form** and sell a **lead** — you type your own data, then you wait for a call. We read **verified data at its source** and compute a **price**: installment, rate, fees, total cost — on screen, now. That is why no aggregator can produce what you watched a minute ago: **zero offers, then four.** A form doesn't change when you link a wallet — a form is a form. What changed is the **income picture**, and only an **engine** reads it. They distribute applications; we price them. **They have no engine.**
+
+### س١٣ · «وش يمنع بنكًا كبيرًا من نسخكم بكل بساطة؟» ⚠️ سؤال المستثمر
+> «لا شيء يمنعه من نسخ **الحساب** — والحساب أصلًا مكشوف: اشتقاق السقف مطبوع على الشاشة أمامكم، ونحن الذين نشرناه. لكن **الخندق ليس المعادلة — الخندق شبكة الجهات.** البنك يقدر يبني نفس المحرّك، ثم يعرض به… **عرضًا واحدًا: عرضه هو.** واللحظة التي يضع فيها أربعة منافسين على نفس الشاشة، يكون قد صار **نحن** — ولن يفعلها، لأن نصف الشاشة سيقول لعميله: "غيرنا أرخص". والمتقدّم لا يثق بسوقٍ يملكه أحد المتنافسين فيه. **حيادنا هو المنتج.** وكل جهة تدخل تجعل الجانب الآخر أثمن — وهذا يُبنى بالوقت والعلاقات، لا بأسبوع هندسة.»
+
+**EN:** Nothing stops a bank from copying the **math** — the math is already in the open: the ceiling derivation is printed on the screen, and we're the ones who published it. But **the moat isn't the formula — it's the lender network.** A bank can build the same engine, and then use it to show… **one offer: its own.** The moment it puts four competitors on the same screen, it *has become us* — and it won't, because half that screen would tell its own customer "someone else is cheaper." And an applicant will never trust a marketplace owned by one of the competitors inside it. **Our neutrality is the product.** Every lender that joins makes the other side more valuable — and that is built with time and relationships, not a week of engineering.
+
+### س١٤ · «وش علاقتكم بالبنك بالضبط؟ وش يلزمه يبني عشان يشتغل معكم؟» ⚠️ سؤال البنك
+> «**البنك ما يبني شيئًا — ولا يدمج شيئًا.** هو **يمتدّ إلى طرفنا**، ونحن لا ندخل أنظمته: يمرّر سياسة منتجه المعلنة، ويستقبل الطلبات. والطلب يصله **معبّأً مسبقًا بالضبط بما كان موظّفه سيكتبه بيده** — الدخل، الالتزامات، نسبة الاستقطاع — ومعه **أثر الحساب كاملًا** وإيصال الامتثال. الذي يختفي هو **الإدخال اليدوي**، لا القرار. **معاييره هو. موافقته هو. محرّكنا نحن.** والموافقة **قرار حقيقي**: سحب سِمة، وفحص احتيال، وشهية مخاطر تتغيّر يومًا بيوم — ولا نصفها بغير ذلك أبدًا.»
+
+**EN:** **The bank builds nothing — and integrates nothing.** It **extends to our side**; we never enter its systems: it passes us its published product policy and it receives applications. Each application arrives **pre-filled with exactly what its clerk would have typed** — income, obligations, DBR — plus the **full calculation trace** and the compliance receipt. What disappears is the **manual data entry**, not the decision. **Its criteria. Its approval. Our engine.** And the approval is a **real decision** — a live SIMAH pull, fraud checks, a risk appetite that shifts daily — and we never describe it as anything less. *(التفصيل الرقابي في **س١١**.)*
+
 ---
 
 ## قواعد الإلقاء | Delivery rules
 
-1. احفظ **فواتح المقاطع الستة**، لا الجُمل: «أهلاً بكم في اللجنة» → «المشكلة ليست…» → «هذا سوق التمويل» → «كيف تصير العروض حقيقية» → «امسحوا الرمز» → «فهد لم يتغيّر».
-2. **رقم واحد لكل مقطع**: ١١ مليون → المحفظة → **٠ ثم ٤ عروض** → +0.20 → ٥ أسطر → ٤٠ ثانية. لا تنطق رقمي AUC في نفس الجملة أبدًا.
+1. احفظ **فواتح المقاطع السبعة**، لا الجُمل: «أهلاً بكم في اللجنة» → «المشكلة ليست…» → «هذا سوق التمويل» → **«من وين طلع الرقم؟»** → «كيف تصير العروض حقيقية» → «امسحوا الرمز» → «فهد لم يتغيّر».
+2. **رقم واحد لكل مقطع**: ١١ مليون → المحفظة → **٠ ثم ٤ عروض** → **١٠٢٬٩٦٣** → +0.20 → ٥ أسطر → ٤٠ ثانية. لا تنطق رقمي AUC في نفس الجملة أبدًا. و**سلسلة الاشتقاق تُنطق نفَسًا واحدًا لا أربعة أرقام** — تبدأ من الدخل وتنتهي على السقف وحده.
 3. **الجُمل المحرّمة** (تنسف المصداقية): ~~"يحط هويته بس ونجمع بياناته"~~ → «نفاذ + موافقة صريحة لكل مصدر». ~~"بيانات صحية من صحتي / أمنية من أبشر"~~ → المصادر ثلاثة فقط: بنوك، محافظ، تأمينات. ~~"البنك يعطينا معادلته"~~ → «سياسة منتج معلنة / موافقة مبدئية API». ~~"الرفض شبه معدوم / الموافقة شكلية"~~ → «تأهيل مسبق بنسبة تحويل عالية — والقرار دائمًا للمرخَّص له».
-4. **تأمين العرض**: تسجيل شاشة لكشف الـ٠→٤ عروض على جوالك + الإيصال المطبوع في حقيبتك. لو سقطت الشبكة، المقاطع ٣–٥ تعمل ورقًا وفيديو.
+4. **تأمين العرض**: تسجيل شاشة لكشف الـ٠→٤ عروض **وللسحب فوق السقف** على جوالك + الإيصال المطبوع في حقيبتك. لو سقطت الشبكة، المقاطع ٣–٥ تعمل ورقًا وفيديو.
 5. سؤال «البيانات التشيكية» **فخّ تريده**: العمق المكشوف عند الطلب أقوى عشر مرات من العمق المتطوَّع به.
 6. تمرين إلزامي قبل يوم العرض: **محكّم تجريبي واحد، ٥ دقائق مضبوطة بالساعة، بدون مساعدة منك.** سجّل ما سأل عنه — هذا هو ما سيسأل عنه الحقيقيون.
 
-*Created 2026-07-04 · Rewritten 2026-07-12 (marketplace pivot, commit `bca75e7`) · Companion: `SCALE_PLAN.md` · `DATA_DEFENSE.md` · the printed receipt + `/verify` QR page.*
+*Created 2026-07-04 · Rewritten 2026-07-12 (marketplace pivot, commit `bca75e7`) · Extended 2026-07-13 (③-ب the derived ceiling + `POST /v1/offers` — commit `330e0a2`; س١٢–س١٤) · Companion: `app/PRICING_ENGINE.md` · `SCALE_PLAN.md` · `DATA_DEFENSE.md` · the printed receipt + `/verify` QR page.*

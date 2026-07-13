@@ -62,7 +62,8 @@ export function CommandBar({
   }, [])
 
   // Seed the hero question from the applicant's REAL numbers once facts arrive
-  // (never mid-conversation, and re-worded on language switch).
+  // (never mid-conversation, and re-worded on language switch). The financing
+  // question leads and the score question rides second — offers-first, like the app.
   useEffect(() => {
     if (!facts || messages.current.length) return
     const f = facts as any
@@ -71,18 +72,18 @@ export function CommandBar({
     // Already-prime profiles have no "reach Y" gap — ask for the why instead.
     const target = f?.recourse?.already_prime ? null : f?.recourse?.target_score
     setChips([
+      tx('How much can I borrow?', 'كم يمكنني أن أقترض؟'),
       target != null && target > score
         ? tx(`Why is my score ${score} — and how do I reach ${target}?`, `ليش درجتي ${score}؟ ووش أسوي عشان أوصل ${target}؟`)
         : tx(`Why is my score ${score} — what lifted it?`, `ليش درجتي ${score}؟ ووش اللي رفعها؟`),
-      tx('How much can I borrow?', 'كم يمكنني أن أقترض؟'),
       tx('How is my income verified?', 'كيف يتم توثيق دخلي؟'),
     ])
   }, [facts, tx])
   useEffect(() => () => clearInterval(timerRef.current), [])
 
   const SECTION_LABEL: Record<string, string> = {
-    home: tx('Dashboard', 'الرئيسية'), income: tx('Income & Score', 'الدخل والدرجة'),
-    ledger: tx('Ledger', 'السجل'), financing: tx('Financing', 'التمويل'),
+    home: tx('My money', 'أموالي'), income: tx('Income & Score', 'الدخل والدرجة'),
+    ledger: tx('Ledger', 'السجل'), financing: tx('Offers', 'العروض'),
     applicants: tx('Applicants', 'المتقدمون'),
   }
   function actingText(a: AssistantAction): string {

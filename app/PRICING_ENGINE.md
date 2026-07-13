@@ -348,10 +348,14 @@ The technical *story* to judges: mirrored math (client `lenders.ts` ≡ server `
   commitment features (bill punctuality, spending volatility, savings persistence) add AUC lift
   over the static snapshot? Extends `eval/ablation.py` + model card — the index becomes a
   *measured* pricing input, not a slogan.
-- **(b) The Discovery mirror stat, on OUR data:** bucket accounts by computed Commitment Index,
-  show default rate per bucket — "top-band commitment accounts default N× less, on 963,811 real
-  applications." (Discovery's version: Diamond-status customers are **97% less likely to be in
-  arrears**, 11× deposits. We reproduce the *shape* of that finding on open data.)
+- **(b) The default-rate-by-band stat, on OUR data:** bucket accounts by the computed behavioral
+  band, show default rate per bucket — "top-band accounts default N× less, on 963,811 real
+  applications."
+  > 🚫 **Do NOT anchor this on Discovery's "97% less likely to be in arrears."** That number is
+  > Discovery's own **unaudited marketing** figure, and it is almost certainly a **selection effect,
+  > not a treatment effect** — Diamond customers are *different people*, not *improved* people.
+  > A banking judge lands that in one sentence, and if the number is on our slide we lose the Data
+  > axis with it. See `EVIDENCE.md` landmine #12.
 - **(c)** Wire both into `ModelCardPanel` — derived from the card, never stale.
 
 ### ④ تجربة المستخدم / UX — the five visible changes
@@ -367,14 +371,19 @@ UX principle, quotable: **"they show numbers, we show where numbers come from."*
 
 ### ⑤ قابلية التنفيذ الفعلي / Feasibility — "is it doable in real fintech, live?" YES, with receipts
 
-| Evidence | What it proves | Source |
+> [!warning] **`EVIDENCE.md` is CANONICAL — it supersedes this table.**
+> Every citation below has since been primary-verified (or refuted) and carries a
+> `[P]`/`[S]`/`[SR]`/`[X]` verification label there. **Two numbers that were in this table were
+> WRONG and are corrected below.** Never quote from this table without checking `EVIDENCE.md` first.
+
+| Evidence | What it proves | Status |
 |---|---|---|
-| **Discovery Bank Vitality Money** — dynamic rates live since 2019, ~1.2M customers, borrowing rate flexes up to 7%, Diamond-status **97% less arrears** | Behavior-priced banking works commercially at a real, regulated retail bank | discovery.co.za · EY · UNSGSA · Fortune |
-| **Experian Boost** — 60% of completers raised FICO (avg +12; poor-band 87% / +22); **47% of unscoreables became scoreable**; millions of users | Consumers volunteer behavioral data when it can only help them (our discount-only rule) — and it moves real credit outcomes | experian.com |
-| **Insurance telematics (UBI)** — ~20% of US auto policies; 21M+ US policyholders sharing driving data (2024); discounts 10–30%; 60% open to switching | The exact consent-for-discount social contract is mainstream at scale | Zebra / IoT Insurance Observatory / GlobeNewswire 2025 report |
-| **FinRegLab** — cash-flow variables **as predictive as bureau scores**, independent value, combined model strongest | The data layer under our pricing is empirically validated | finreglab.org |
-| **SAMA rails are live** — AIS licences issued (Lean, Neotek, Mar 2026), AIS Art. 6/10, Art. 96 consent | The regulatory channel for the stream exists in the Kingdom *today* | SAMA (already in EVIDENCE.md chain) |
-| **Market size** — KSA retail + personal finance ~SAR 1.4T (secondary source — label as estimate) | The wedge is large | Ken Research (secondary) |
+| **Discovery Bank Vitality Money** — dynamic rates live since **March 2019**, ~1.2M customers, *"up to 7% less on your credit facility"* (their own words) | Behavior-priced banking works commercially at a real, regulated retail bank | **[P]** for the mechanism. 🚫 **NEVER quote the "97% less arrears" stat** — unaudited, and a selection effect. Landmine #12. |
+| **FinRegLab** (2019 + 2025) — cash-flow variables **at least as predictive as bureau scores**, with **independent** value (not a demographic proxy); **cash-flow + bureau combined performs strongest** | The data layer under our pricing is empirically validated — and *fusion* is what we do | **[P]** — the strongest citation we have. *(Petal was one of the six lenders **inside** this study — the mechanism survived, the balance sheet didn't.)* |
+| **SAMA rails are live** — AIS licences issued (Lean, Neotek, **Mar 26 2026**), Art. 6(10), Art. 96(1) consent | The regulatory channel exists in the Kingdom **today** | **[P]** |
+| **Experian Boost** — 60% of completers raised FICO (avg +12); below-580 band: **87% / +22**; **47% of unscoreables became scoreable** | Consumers **volunteer** data when it can only help them | **[P]** ⚠️ **TRAP — consent evidence ONLY, never a product analogy.** It is consented data raising a *bureau score* — the identity we pivoted away from. *(An earlier "~90% of thin-file users gain" figure in our docs was **wrong**; the source says **85%**.)* |
+| **Insurance telematics (UBI)** — **21M+ US policyholders** shared driving data in 2024 | The consent-for-discount bargain is mainstream at scale | **[S]** ❌ **The "~20% of US auto policies" figure was a CONFLATION and is RETRACTED** — the 14.4% is *global*, the 20.9% is *global pay-as-you-go*. Also concede proactively: the advertised 10–30% discount is **advertised, not realized** — Maryland's regulator found only **31%** of enrolled drivers actually saw a decrease in 2023. |
+| ~~Market size — KSA retail + personal finance ~SAR 1.4T~~ | — | **[X] DO NOT SAY.** Chain of custody is *Ken Research → a WordPress blog*. Barred from every slide and every spoken sentence. Use the wedge + FSDP KPI instead — both primary. |
 
 Feasibility narrative in one breath: *the category is live in production on three continents
 (behavioral bank, permissioned credit data, telematics pricing); the Saudi regulatory rail

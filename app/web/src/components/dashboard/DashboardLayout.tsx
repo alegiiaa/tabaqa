@@ -15,7 +15,8 @@ const ICON: Record<Section, ReactNode> = {
   home: I(<><path d="M4 11l8-7 8 7" /><path d="M6 10v9h12v-9" /></>),
   income: I(<><path d="M3 17l6-6 4 4 8-8" /><path d="M21 7h-5M21 7v5" /></>),
   ledger: I(<><path d="M5 4h14v16H5z" /><path d="M8 8h8M8 12h8M8 16h5" /></>),
-  financing: I(<><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 7h8M8 11h2M14 11h2M8 15h2M14 15h2" /></>),
+  // a price tag — this section is the offers, not a form
+  financing: I(<><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0l-6.2-6.2A2 2 0 0 1 3.8 13V5.8a2 2 0 0 1 2-2H13a2 2 0 0 1 1.4.6l6.2 6.2a2 2 0 0 1 0 2.8z" /><circle cx="8.6" cy="8.6" r="1.3" /></>),
   applicants: I(<><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" /><path d="M16 11a3 3 0 0 0 0-6M21 20c0-2.4-1.5-4.2-4-4.8" /></>),
   model: I(<><path d="M12 3l7 3v5c0 4.6-3.1 7.6-7 9-3.9-1.4-7-4.4-7-9V6z" /><path d="M9 12l2 2 4-4" /></>),
 }

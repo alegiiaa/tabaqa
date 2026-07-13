@@ -162,7 +162,7 @@ export function MyMoney({ result, onNavigate, conn }: { result: ScoreResult; onN
 
         <div className="mm-panel">
           <div className="mm-panel-head">
-            <span className="h">{tx('Why this score', 'لماذا هذه الدرجة')}</span>
+            <span className="h">{tx('Your score · one input into pricing', 'درجتك · أحد مدخلات تسعيرك')}</span>
             <button className="mm-link" onClick={() => onNavigate('income')}>{tx('Full report', 'التقرير الكامل')} <span className="fwd">→</span></button>
           </div>
           <div className="mm-score-row">

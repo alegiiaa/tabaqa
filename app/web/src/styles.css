@@ -2206,3 +2206,22 @@ html[dir=rtl] .mm-hero{background-position:center left}
   .mkt-grid{grid-template-columns:1fr}
   .mkt-unlock{margin-inline-start:0}
 }
+
+/* ── the score, demoted ───────────────────────────────────────────────────
+   A quiet strip above the search: on the marketplace the score is an input
+   into the pricing, never the product. Deliberately smaller and calmer than
+   an offer card — the offers below are the screen's centre of gravity. */
+.mkt-input{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;
+  padding:13px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg-soft);
+  animation:fade .25s ease}
+.mkt-input-score{flex:none;font-family:var(--mono);font-size:21px;font-weight:600;color:var(--ink);
+  background:#fff;border:1px solid var(--line);border-radius:11px;padding:5px 11px}
+.mkt-input-score small{font-size:11px;color:var(--muted);margin-inline-start:2px}
+.mkt-input-txt{display:flex;flex-direction:column;gap:2px;flex:1;min-width:230px}
+.mkt-input-txt b{font-size:13.5px}
+.mkt-input-txt .faint{font-size:12px;line-height:1.6;max-width:76ch}
+.mkt-input .mm-link{flex:none;white-space:nowrap}
+@media (max-width:640px){
+  .mkt-input{gap:10px;padding:12px 14px}
+  .mkt-input-txt{min-width:100%;order:3}
+}
