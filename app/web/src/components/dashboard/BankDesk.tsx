@@ -89,7 +89,10 @@ export function BankDesk() {
         subtitle={META[section].sub}
       >
         {section === 'orders'
-          ? <IncomingOrders orders={orders} onChanged={() => { void poll() }} live={live} via={via} />
+          // `live` needs BOTH: a subscribed realtime channel AND reads actually
+          // served by Supabase — the channel reports SUBSCRIBED even when the
+          // table doesn't exist yet, and the badge must never overclaim.
+          ? <IncomingOrders orders={orders} onChanged={() => { void poll() }} live={live && via === 'supabase'} via={via} />
           : <Applicants />}
       </DashboardLayout>
       {toast && section !== 'orders' && (
