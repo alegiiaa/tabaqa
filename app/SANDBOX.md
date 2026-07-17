@@ -57,6 +57,23 @@ credit report and bank statement. Repeat — a different person every time, 500,
 | `GET /sandbox/v1/wallet/{nin}` | wallet transactions (side-income streams) |
 | `GET /sandbox/v1/employment/{nin}` | employer, sector, service years, verified salary |
 | `GET /sandbox/v1/credit-bureau/{nin}` | grade, payment history, obligations |
+| `GET /sandbox/v1/household/{nin}` | 🗺 roadmap: marital status + dependents — affordability input only |
+| `GET /sandbox/v1/investments/{nin}` | 🗺 roadmap: portfolio holdings + market value (asset strength) |
+| `GET /sandbox/v1/assets/{nin}` | 🗺 roadmap: properties + estimated values (no official API yet) |
+| `GET /sandbox/v1/sehhaty/{nin}` | **HTTP 451** — health data refused by design, with the PDPL rationale |
+
+Roadmap providers are modeled and queryable for every identity but carry
+`"integration": {"status": "roadmap"}` and **never feed the demo decision** — the
+decision engine's inputs stay exactly the five regulator-clean sources above
+(credit-bureau = the SIMAH slot, employment = the GOSI slot, open-banking = AIS).
+Identity now returns **age** (clamped consistent with service years) — age comes
+from identity, deliberately never from health records.
+
+**The whole population as a file:** `python -m api.sandbox export` writes
+`data/synthetic/cohort_500k.csv` — 500,000 rows × 19 columns (identity, employment,
+obligations, grade, household, portfolio, property) in ~10s, UTF-8-BOM so Excel
+renders Arabic. Gitignored; regenerable byte-for-byte. Any row's NIN answers live
+on the API — the file is a view, the API is the source of truth.
 
 Every provider response is wrapped in an envelope:
 
