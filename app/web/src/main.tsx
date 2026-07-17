@@ -6,6 +6,7 @@ import { AuthProvider } from './auth/AuthContext'
 import { RequireAuth } from './auth/RequireAuth'
 import { AuthPage } from './components/AuthPage'
 import { Dashboard } from './components/dashboard/Dashboard'
+import { BankDesk } from './components/dashboard/BankDesk'
 import { BasePage } from './components/BasePage'
 import { DevelopersPage } from './components/DevelopersPage'
 import { CreditReport } from './components/CreditReport'
@@ -14,13 +15,14 @@ import { ReportVerify } from './components/ReportVerify'
 import App from './App'
 import { BankApp } from './components/bank/BankApp'
 import { BankDashboard } from './components/bankdash/BankDashboard'
+import { TabaqaApp } from './components/tapp/TabaqaApp'
 import './styles.css'
 
-// Inside the native iOS shell (Capacitor), the phone IS the bank's app — open
-// straight into it (PRODUCT_SPEC §5: the journey begins and ends in the bank app).
+// Inside the native iOS shell (Capacitor), the phone IS the Tabaqa app — open
+// straight into it (TEAM SPEC 2026-07-17: the journey begins in تطبيق طبقة).
 const isNative = Boolean((window as any).Capacitor?.isNativePlatform?.())
 if (isNative && window.location.pathname === '/') {
-  window.history.replaceState(null, '', '/bank')
+  window.history.replaceState(null, '', '/tabaqa')
 }
 
 createRoot(document.getElementById('root')!).render(
@@ -37,8 +39,12 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/report" element={<CreditReport />} />
             <Route path="/receipt" element={<ComplianceReceiptDoc />} />
             <Route path="/verify" element={<ReportVerify />} />
-            {/* Frictionless judge/demo entry — straight into the app, no sign-up. */}
-            <Route path="/demo" element={<Dashboard />} />
+            {/* The lender's desk — orders from the Tabaqa app + the applicants. */}
+            <Route path="/demo" element={<BankDesk />} />
+            {/* The full consumer dashboard, parked — reachable if a demo needs it. */}
+            <Route path="/demo-full" element={<Dashboard />} />
+            {/* تطبيق طبقة — the consumer app: Nafath (محاكاة) → 7 sources → lender engines → offers. */}
+            <Route path="/tabaqa" element={<TabaqaApp />} />
             {/* The bank's mobile app — Ahmed's تمويل journey, Tabaqa invisible inside. */}
             <Route path="/bank" element={<BankApp />} />
             {/* The bank's own ops view over the applications the engine decided (spec §15). */}
