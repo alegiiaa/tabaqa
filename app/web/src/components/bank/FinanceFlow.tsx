@@ -36,13 +36,49 @@ const ENGINE_STEPS: { t: string; d?: string }[] = [
   { t: 'تجهيز العروض المؤهلة' },
 ]
 
-// Spec §6.4 — the consented sources.
-const CONSENT_SOURCES: { icon: IconName; t: string; d: string }[] = [
-  { icon: 'bank', t: 'حساباتك في المصرف', d: 'الرواتب والحركات في حسابك الجاري' },
-  { icon: 'link', t: 'حساباتك في البنوك الأخرى', d: 'عبر الخدمات المصرفية المفتوحة — قراءة فقط' },
-  { icon: 'wallet', t: 'محفظتك الرقمية', d: 'الدخل الجانبي والتحويلات المنتظمة' },
-  { icon: 'briefcase', t: 'بيانات التوظيف والراتب', d: 'التحقق من جهة العمل والراتب الموثّق' },
-  { icon: 'chart', t: 'السجل الائتماني', d: 'الالتزامات القائمة وتاريخ السداد' },
+// Spec §6.4 — the consented sources. Consent must explain itself: each row
+// expands to answer what a real customer (and a judge) asks before granting
+// access — WHAT is read, FROM WHERE, and HOW (the technology + scope). Nothing
+// is pre-checked; granting happens only on the consent button below the list.
+interface ConsentSourceDef {
+  icon: IconName
+  t: string
+  d: string
+  what: string
+  from: string
+  tech: string
+}
+const CONSENT_SOURCES: ConsentSourceDef[] = [
+  {
+    icon: 'bank', t: 'حساباتك في المصرف', d: 'الرواتب والحركات في حسابك الجاري',
+    what: 'حركات آخر 6 أشهر: إيداعات الراتب، الأقساط المسدَّدة، المصروفات الأساسية',
+    from: 'الأنظمة الأساسية للمصرف نفسه — أنت عميله',
+    tech: 'وصول داخلي مباشر، لا يمرّ بأي طرف ثالث',
+  },
+  {
+    icon: 'link', t: 'حساباتك في البنوك الأخرى', d: 'عبر الخدمات المصرفية المفتوحة — قراءة فقط',
+    what: 'حركات آخر 6 أشهر ومصادر الدخل في حساباتك لدى البنوك الأخرى',
+    from: 'البنك الآخر مباشرة، بعد موافقتك',
+    tech: 'واجهات AIS ضمن إطار المصرفية المفتوحة السعودي — قراءة فقط، دون مشاركة كلمات المرور',
+  },
+  {
+    icon: 'wallet', t: 'محفظتك الرقمية', d: 'الدخل الجانبي والتحويلات المنتظمة',
+    what: 'حركات المحفظة: الدخل الجانبي المتكرر مقابل التحويلات غير المنتظمة',
+    from: 'مزوّد المحفظة، بعد موافقتك',
+    tech: 'واجهة برمجية لدى المزوّد — قراءة فقط',
+  },
+  {
+    icon: 'briefcase', t: 'بيانات التوظيف والراتب', d: 'التحقق من جهة العمل والراتب الموثّق',
+    what: 'جهة العمل، القطاع، المسمى الوظيفي، مدة الخدمة، الراتب الموثّق',
+    from: 'مصدر التوظيف والرواتب الرسمي',
+    tech: 'استعلام تحقّق موثّق لتأكيد الدخل — قراءة فقط',
+  },
+  {
+    icon: 'chart', t: 'السجل الائتماني', d: 'الالتزامات القائمة وتاريخ السداد',
+    what: 'الدرجة الائتمانية، الالتزامات القائمة وأقساطها الشهرية، تاريخ السداد',
+    from: 'مزوّد السجل الائتماني المرخَّص',
+    tech: 'استعلام ائتماني بموافقتك — يُسجَّل بختم زمني في سجل التدقيق',
+  },
 ]
 
 export function FinanceFlow({ onExit }: { onExit: () => void }) {
@@ -129,19 +165,22 @@ export function FinanceFlow({ onExit }: { onExit: () => void }) {
       )}
 
       {stage === 'consent' && (
-        <Screen title="الموافقة على الوصول للبيانات" sub="لنحسب أهليتك، سيصل المصرف — بموافقتك — إلى:" onBack={() => setStage('request')}>
+        <Screen
+          title="الموافقة على الوصول للبيانات"
+          sub="لنحسب أهليتك، سيصل المصرف — بموافقتك — إلى المصادر التالية. اضغط أي مصدر لتعرف ماذا نقرأ، ومن أين، وكيف:"
+          onBack={() => setStage('request')}
+        >
           <div className="bk-consent">
-            {CONSENT_SOURCES.map((s) => (
-              <div key={s.t} className="bk-src">
-                <span className="bk-src-ic"><Ic name={s.icon} size={18} /></span>
-                <span><b>{s.t}</b><small>{s.d}</small></span>
-                <span className="bk-src-ok"><Ic name="check" size={16} stroke={2.6} /></span>
-              </div>
-            ))}
+            {CONSENT_SOURCES.map((s) => <ConsentSource key={s.t} s={s} />)}
           </div>
           <p className="bk-hint">
-            الغرض: تقييم أهليتك للتمويل فقط. الوصول للقراءة فقط، ويمكنك إلغاؤه في أي وقت.
-            تُسجَّل موافقتك بختم زمني ضمن سجل التدقيق.
+            الغرض: تقييم أهليتك للتمويل فقط. الوصول للقراءة فقط، لا تُباع بياناتك ولا
+            تُشارك مع أي جهة أخرى، ويمكنك إلغاء الوصول في أي وقت. تُسجَّل موافقتك بختم
+            زمني ضمن سجل التدقيق.
+          </p>
+          <p className="bk-hint bk-sbx-note">
+            في هذه النسخة التجريبية تُحاكى المصادر عبر Tabaqa Sandbox API — نفس الهيكل
+            ونفس التقنية، دون اتصال بجهات حقيقية.
           </p>
           <button className="bk-cta" onClick={() => setStage('processing')}>
             اسمح بالوصول واحسب أهليتي
@@ -217,6 +256,29 @@ export function FinanceFlow({ onExit }: { onExit: () => void }) {
 }
 
 // ── pieces ───────────────────────────────────────────────────────────────────
+
+// One consented source, expandable in place — the row itself answers the
+// questions ("what do you read? from where? how?") instead of a bare checkmark.
+function ConsentSource({ s }: { s: ConsentSourceDef }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`bk-src${open ? ' open' : ''}`}>
+      <button className="bk-src-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <span className="bk-src-ic"><Ic name={s.icon} size={18} /></span>
+        <span className="bk-src-t"><b>{s.t}</b><small>{s.d}</small></span>
+        <span className="bk-src-scope">قراءة فقط</span>
+        <span className="bk-src-chev" aria-hidden="true">⌄</span>
+      </button>
+      {open && (
+        <dl className="bk-src-details">
+          <dt>ماذا نقرأ</dt><dd>{s.what}</dd>
+          <dt>من أين</dt><dd>{s.from}</dd>
+          <dt>كيف — التقنية</dt><dd>{s.tech}</dd>
+        </dl>
+      )}
+    </div>
+  )
+}
 
 function Screen({ title, sub, tone, onBack, children }: {
   title: string; sub?: string; tone?: 'ok'; onBack?: () => void; children: React.ReactNode
