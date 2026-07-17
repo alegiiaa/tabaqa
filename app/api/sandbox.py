@@ -61,7 +61,9 @@ IDENTITIES: dict[str, dict] = {
 
 # provider slug → (payload file, Arabic label, English label, base latency ms).
 # Latencies mirror the frontend mock transport (connectors.ts) so the processing
-# screen paces identically whichever layer serves the data.
+# screen paces identically whichever layer serves the data. These five FEED THE
+# DECISION — they map to the production integrations a bank can use today:
+# credit-bureau = the SIMAH slot, employment = the GOSI slot, open-banking = AIS.
 PROVIDERS: dict[str, tuple[str, str, str, int]] = {
     "bank-core": ("bank", "الأنظمة الأساسية للمصرف (محاكاة)", "Bank core systems (simulated)", 420),
     "open-banking": ("openbanking", "الخدمات المصرفية المفتوحة — AIS (محاكاة)", "Open banking AIS (simulated)", 650),
@@ -69,6 +71,22 @@ PROVIDERS: dict[str, tuple[str, str, str, int]] = {
     "employment": ("employment", "مصدر التوظيف والرواتب الرسمي (محاكاة)", "Employment & salary registry (simulated)", 300),
     "credit-bureau": ("credit", "مزوّد السجل الائتماني (محاكاة)", "Credit bureau (simulated)", 340),
 }
+
+# Roadmap providers — modeled and queryable per user, but they DO NOT feed the
+# demo decision: their production integrations need agreements/frameworks that
+# do not exist yet (open-finance investments, property registry, civil-registry
+# household data). Kept separate so the decision engine's inputs stay exactly
+# the regulator-clean five above. Health data has no slot at all — see /sehhaty.
+ROADMAP_PROVIDERS: dict[str, tuple[str, str, int]] = {
+    "household": ("السجلات المدنية — الحالة الاجتماعية والمعالون (محاكاة)",
+                  "Civil registry — household (simulated)", 280),
+    "investments": ("محفظة الاستثمار — الأسهم والصناديق (محاكاة)",
+                    "Investment portfolio (simulated)", 360),
+    "assets": ("سجل الأصول والعقارات (محاكاة)",
+               "Asset & property registry (simulated)", 430),
+}
+ROADMAP_NOTE_AR = "تكامل مستقبلي — لا يدخل في قرار النسخة التجريبية الحالية"
+ROADMAP_NOTE_EN = "future integration — not an input to the current demo decision"
 
 DISCLAIMER = (
     "Tabaqa Sandbox: simulated provider responses over real HTTP. Schemas and "
@@ -182,6 +200,75 @@ def _txn(date: str, desc: str, amount: int, kind: str, cat: str) -> dict:
     return {"date": date, "description": desc, "amount": amount, "type": kind, "category": cat}
 
 
+# ── roadmap payloads — keyed by NIN so curated cast and cohort work identically ──
+
+_MARITAL = [("أعزب", 0.34), ("متزوج", 0.58), ("مطلّق", 0.06), ("أرمل", 0.02)]
+_SYMBOLS = ["أرامكو السعودية", "مصرف الراجحي", "سابك", "الاتصالات السعودية",
+            "البنك الأهلي السعودي", "أسمنت اليمامة", "المراعي", "معادن"]
+_PROPERTY_TYPES = [("شقة سكنية", 350_000, 900_000), ("فيلا", 900_000, 2_800_000),
+                   ("أرض", 250_000, 1_500_000), ("محل تجاري", 400_000, 1_800_000)]
+
+
+def roadmap_facts(nin: str) -> dict:
+    """Deterministic household/investments/assets facts for any test NIN."""
+    import random as _random
+    rng = _random.Random(f"tabaqa-roadmap-{nin}")
+    marital = rng.choices([m for m, _w in _MARITAL], weights=[w for _m, w in _MARITAL])[0]
+    dependents = rng.randint(0, 6) if marital == "متزوج" else (rng.randint(0, 2) if marital in ("مطلّق", "أرمل") else 0)
+    holdings = []
+    if rng.random() < 0.30:
+        for sym in rng.sample(_SYMBOLS, rng.randint(1, 4)):
+            shares = rng.randint(20, 1_500)
+            price = round(rng.uniform(18, 95), 2)
+            holdings.append({"security": sym, "shares": shares,
+                             "market_value": round(shares * price, 2)})
+    properties = []
+    if rng.random() < 0.22:
+        for _ in range(rng.choices([1, 2], weights=[85, 15])[0]):
+            kind, lo, hi = rng.choice(_PROPERTY_TYPES)
+            properties.append({"type": kind, "city": rng.choice(["الرياض", "جدة", "الدمام", "مكة", "بريدة"]),
+                               "estimated_value": int(rng.uniform(lo, hi)) // 10_000 * 10_000})
+    return {
+        "marital_status": marital, "dependents": dependents,
+        "holdings": holdings, "portfolio_value": round(sum(h["market_value"] for h in holdings), 2),
+        "properties": properties, "property_value": sum(p["estimated_value"] for p in properties),
+        "age": rng.randint(23, 58),
+    }
+
+
+def _age_for(nin: str, ident: dict) -> int:
+    """Age consistent with career length — you can't have 22 service years at 29."""
+    service = 0
+    if ident["persona"].startswith("cohort_"):
+        service = _cohort_person(int(ident["persona"][7:]))["service_years"]
+    else:
+        rec = PAYLOADS.get(ident["persona"], {}).get("employment", {}).get("record", {})
+        service = int(rec.get("service_years", 0))
+    return max(roadmap_facts(nin)["age"], 21 + service)
+
+
+def _roadmap_payload(provider_slug: str, nin: str, persona: str) -> dict:
+    f = roadmap_facts(nin)
+    meta = {"source": provider_slug, "provider": ROADMAP_PROVIDERS[provider_slug][0],
+            "persona": persona, "simulated": True, "integration": "roadmap"}
+    if provider_slug == "household":
+        # Affordability input ONLY (household size → expense benchmark under the
+        # responsible-lending rules) — never a risk-score feature.
+        return {"meta": meta,
+                "record": {"marital_status": f["marital_status"],
+                           "dependents_count": f["dependents"],
+                           "usage": "تقدير المصروفات الأساسية وفق حجم الأسرة — ليس مدخلًا في درجة المخاطر"}}
+    if provider_slug == "investments":
+        return {"meta": meta,
+                "portfolio": {"holdings": f["holdings"],
+                              "total_market_value": f["portfolio_value"],
+                              "note": "قوة أصول — تدعم الملاءة، ولا تُحتسب دخلًا"}}
+    return {"meta": meta,
+            "registry": {"properties": f["properties"],
+                         "total_estimated_value": f["property_value"],
+                         "note": "التكامل الرسمي مع سجل الأصول غير متاح بعد — بيانات محاكاة للنموذج فقط"}}
+
+
 def _cohort_payload(provider_slug: str, nin: str, p: dict) -> dict:
     """Provider payloads for a cohort member — same shapes as the curated files."""
     import random as _random
@@ -283,7 +370,8 @@ def summary() -> dict:
     """One-line ops view for /health: is the sandbox stocked?"""
     stocked = sum(1 for p in PAYLOADS.values() if len(p) == len(PROVIDERS))
     return {"identities": len(IDENTITIES), "stocked": stocked,
-            "cohort": COHORT_SIZE, "providers": list(PROVIDERS)}
+            "cohort": COHORT_SIZE, "providers": list(PROVIDERS),
+            "roadmap": list(ROADMAP_PROVIDERS)}
 
 
 def _identity(nin: str) -> dict:
@@ -309,11 +397,17 @@ async def _provider_latency(base_ms: int) -> int:
 
 
 def _envelope(provider_slug: str, nin: str, persona: str, latency_ms: int, data: dict) -> dict:
-    _key, label_ar, label_en, _ms = PROVIDERS[provider_slug]
+    if provider_slug in PROVIDERS:
+        _key, label_ar, label_en, _ms = PROVIDERS[provider_slug]
+        integration = None
+    else:
+        label_ar, label_en, _ms = ROADMAP_PROVIDERS[provider_slug]
+        integration = {"status": "roadmap", "note_ar": ROADMAP_NOTE_AR, "note_en": ROADMAP_NOTE_EN}
     return {
         "environment": ENVIRONMENT,
         "simulated": True,
         "provider": {"id": provider_slug, "name_ar": label_ar, "name_en": label_en},
+        **({"integration": integration} if integration else {}),
         "request_id": f"sbx_{uuid.uuid4().hex[:12]}",
         "subject": {"national_id": nin, "persona": persona},
         "consent": {"scope": "read-only", "status": "active",
@@ -346,6 +440,17 @@ def sandbox_home() -> dict:
              "endpoint": f"/sandbox/v1/{slug}/{{national_id}}", "typical_latency_ms": ms}
             for slug, (_k, ar, en, ms) in PROVIDERS.items()
         ],
+        "roadmap_providers": [
+            {"id": slug, "name_ar": ar, "name_en": en,
+             "endpoint": f"/sandbox/v1/{slug}/{{national_id}}",
+             "status": "roadmap", "note_ar": ROADMAP_NOTE_AR, "note_en": ROADMAP_NOTE_EN}
+            for slug, (ar, en, _ms) in ROADMAP_PROVIDERS.items()
+        ],
+        "excluded_by_design": {
+            "endpoint": "/sandbox/v1/sehhaty/{national_id}",
+            "returns": "HTTP 451 Unavailable For Legal Reasons",
+            "note_ar": "البيانات الصحية مستبعدة من المحرك عمدًا — بيانات حساسة بموجب نظام حماية البيانات الشخصية",
+        },
     }
 
 
@@ -394,19 +499,47 @@ async def identity(nin: str) -> dict:
         "national_id": nin,
         "name_ar": ident["name_ar"],
         "name_en": ident["name_en"],
+        # Age comes from IDENTITY, deliberately — never from health records.
+        "age": _age_for(nin, ident),
         "verified": True,
         "sources_available": list(PROVIDERS),
+        "roadmap_sources": list(ROADMAP_PROVIDERS),
     }
+
+
+@router.get("/sehhaty/{nin}")
+@router.get("/health-records/{nin}")
+async def sehhaty(nin: str) -> dict:
+    """Deliberately refused — with the reason, not a bare 404.
+
+    HTTP 451: Unavailable For Legal Reasons. Health data is sensitive personal
+    data under PDPL; using it to price credit invites discrimination and has no
+    place in this engine. This is a design decision, not a missing feature.
+    """
+    raise HTTPException(status_code=451, detail={
+        "refused": True,
+        "reason_ar": "البيانات الصحية بيانات حساسة بموجب نظام حماية البيانات الشخصية، "
+                     "واستخدامها في قرارات التمويل باب للتمييز — استُبعدت من المحرك عمدًا، "
+                     "في النسخة التجريبية وفي الإنتاج على حد سواء.",
+        "reason_en": "Health data is sensitive under Saudi PDPL and using it to price "
+                     "credit invites discrimination. Excluded from this engine by design — "
+                     "in the sandbox and in production alike.",
+    })
 
 
 @router.get("/{provider_slug}/{nin}")
 async def provider_payload(provider_slug: str, nin: str) -> dict:
-    if provider_slug not in PROVIDERS:
+    if provider_slug not in PROVIDERS and provider_slug not in ROADMAP_PROVIDERS:
         raise HTTPException(
             status_code=404,
-            detail=f"Unknown provider '{provider_slug}'. Sandbox providers: {sorted(PROVIDERS)}",
+            detail=f"Unknown provider '{provider_slug}'. Decision inputs: {sorted(PROVIDERS)}; "
+                   f"roadmap (modeled, not decision inputs): {sorted(ROADMAP_PROVIDERS)}",
         )
     ident = _identity(nin)
+    if provider_slug in ROADMAP_PROVIDERS:
+        ms = await _provider_latency(ROADMAP_PROVIDERS[provider_slug][2])
+        return _envelope(provider_slug, nin, ident["persona"], ms,
+                         _roadmap_payload(provider_slug, nin, ident["persona"]))
     if ident["persona"].startswith("cohort_"):
         data = _cohort_payload(provider_slug, nin, _cohort_person(int(ident["persona"][7:])))
     else:
@@ -452,17 +585,24 @@ def _export(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8-sig") as f:  # BOM so Excel reads Arabic
         w = csv.writer(f)
-        w.writerow(["idx", "national_id", "name_ar", "name_en", "sector", "employer",
+        w.writerow(["idx", "national_id", "name_ar", "name_en", "age", "sector", "employer",
                     "monthly_salary_sar", "service_years", "side_income_sar",
                     "obligations_count", "obligations_monthly_sar",
-                    "credit_grade", "serious_delinquency"])
+                    "credit_grade", "serious_delinquency",
+                    "marital_status", "dependents",
+                    "portfolio_value_sar", "properties_count", "property_value_sar"])
         for idx in range(COHORT_SIZE):
             p = _cohort_person(idx)
+            nin = cohort_nin(idx)
+            rf = roadmap_facts(nin)
             grades[p["grade"]] = grades.get(p["grade"], 0) + 1
-            w.writerow([idx, cohort_nin(idx), p["name_ar"], p["name_en"], p["sector"],
+            w.writerow([idx, nin, p["name_ar"], p["name_en"],
+                        max(rf["age"], 21 + p["service_years"]), p["sector"],
                         p["employer"], p["salary"], p["service_years"], p["side_income"],
                         len(p["obligations"]), p["total_obl"], p["grade"],
-                        int(p["delinquent"])])
+                        int(p["delinquent"]),
+                        rf["marital_status"], rf["dependents"],
+                        rf["portfolio_value"], len(rf["properties"]), rf["property_value"]])
             if (idx + 1) % 100_000 == 0:
                 print(f"  {idx + 1:,} rows…")
     size_mb = path.stat().st_size / 1e6
