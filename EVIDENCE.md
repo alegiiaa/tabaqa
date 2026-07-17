@@ -13,6 +13,16 @@
 > New this pass: **Tier 6 — behavior-priced finance is already live**, which is our answer to AMAD's
 > 5th criterion, *قابلية التنفيذ الفعلي في القطاع المالي* ("can this really ship in a bank?").
 
+> **2026-07-16 fold-in — the riyals, and one correction that matters.** The Jul 15 research run
+> (`app/RESEARCH-2026-07-15.md`, 104 agents, 22 confirmed / 3 refuted) supplies the **SAR figures this
+> dossier deliberately refused to guess at** — now sourced to SAMA / FSDP / IMF / GASTAT, in **Tier 4A**.
+> Two consequences you must absorb before speaking:
+> 1. **The wedge is ~6 million, not ~11 million.** Rigorous GASTAT adult (15+) base. **Every doc reconciles
+>    to 6M** — see the reconciliation box under #20. Saying 11M now contradicts our own deck.
+> 2. **"We don't have a market size" is no longer true** — landmine #14 is rewritten, not deleted. The
+>    SAR 1.4T blog figure stays dead; its **primary replacement is SAMA's own SAR 3,186.3bn**.
+> New labels **[P→C]** and **[ILL]** exist because these figures are *computed*, not published. Respect them.
+
 ## HOW TO READ THIS DOC — the honesty labels
 
 Every claim carries its source **and** its verification status. No exceptions. If it has no label, it does not get said.
@@ -20,8 +30,10 @@ Every claim carries its source **and** its verification status. No exceptions. I
 | Label | Meaning | How you may speak it |
 |---|---|---|
 | **[P]** | **PRIMARY-VERIFIED** — fetched from the body that owns the fact (regulator, registry, the paper itself, the company's own press release about itself) | State it as fact. |
+| **[P→C]** | **COMPUTED-FROM-PRIMARY** — arithmetic on primary inputs (added 2026-07-16) | State it **with the arithmetic on the slide**, every input labelled with source + vintage. Never present the output as if a regulator published it. |
 | **[S]** | **SECONDARY** — reputable trade press, analyst house, or law firm | *"Industry research puts it at…"* — never as gospel, never as regulator data. |
 | **[SR]** | **SELF-REPORTED** — a company's own marketing / impact number, unaudited | *"They report…"* — or don't say it at all. |
+| **[ILL]** | **ILLUSTRATIVE** — a scenario resting on an assumption (reduction %, realization %) (added 2026-07-16) | Say **"illustrative"** out loud, in the same breath. **Never "measured."** |
 | **[X]** | **DO NOT SAY** — refuted, unverifiable, or licence-locked | Silence. |
 
 **The rule that governs this file:** *every number is primary-verified, or it does not get said out loud.*
@@ -125,15 +137,77 @@ Then pivot instantly to Tabaqa. **We never pitch Nova, Lean, or anyone else** �
 | # | Source | The verified finding |
 |---|--------|----------------------|
 | 19 | **SAMA Open Banking** | **[P]** Framework **Nov 2, 2022** (AIS v1, PIS v2); Lab launched **Jan 4, 2023**; sandbox TSP approvals (Lean, Feb 2025); **first open-banking licences issued March 26, 2026**. [Framework](https://www.sama.gov.sa/en-US/MediaCenter/News/Pages/news-794.aspx) · [Licensing](https://www.sama.gov.sa/en-US/MediaCenter/News/pages/news-1135.aspx) |
-| 20 | **The wedge** | **[P]** Account ownership **78.84%** (Findex 2024) vs credit-bureau coverage **56.7%** (Doing Business 2020, last official figure; registry 0.0%). ≈ **22 points of banked-but-unscorable Saudis** ≈ **11 million people**. Q&A caveat: different vintages; DB discontinued 2021. [Findex](https://data.worldbank.org/indicator/FX.OWN.TOTL.ZS?locations=SA) · [DB2020](https://www.doingbusiness.org/content/dam/doingBusiness/country/s/saudi-arabia/SAU.pdf) |
+| 20 | **The wedge** — ⚠️ **CORRECTED 2026-07-16: ~6M, not 11M** | **[P]** Account ownership **78.84%** (Findex 2024) vs credit-bureau coverage **56.7%** (Doing Business 2020, last official figure; registry 0.0%) = **22.14 points of banked-but-unscorable Saudis**. **[P→C]** Applied to the **~27.4M adult (15+) base** (GASTAT Population Estimates 2024): **≈ 6.07M people ≈ ~6 million.** Q&A caveat: different vintages (2024 banking vs 2020 bureau); DB discontinued 2021. [Findex](https://data.worldbank.org/indicator/FX.OWN.TOTL.ZS?locations=SA) · [DB2020](https://www.doingbusiness.org/content/dam/doingBusiness/country/s/saudi-arabia/SAU.pdf) · [GASTAT](https://www.stats.gov.sa/documents/20117/2435273/Population+Estimates+Statistics+2024+EN.pdf/9b71e303-5fd9-19cb-9913-850a9d521639) |
 | 21 | **FSDP SME KPI** | **[P]** 5.7% (2019) → target **20% by 2030**, interim 11% by 2025; **actual 9.4%** (Q4 2024, FSDP Annual Report on sama.gov.sa). IFC global MSME gap $5.2T (2025 update: $5.7T). [Charter](https://www.vision2030.gov.sa/media/ud5micju/fsdp_eng.pdf) |
 | 22 | **CFPB credit invisibles** | **[P]** As published (2015): 26M invisible + 19M unscorable ≈ **45M Americans**. ⚠️ 2025 technical revision: 13.5M + 29.7M ≈ 43M combined — cite the ~45M combined figure, know the revision. [2015](https://www.consumerfinance.gov/about-us/newsroom/cfpb-report-finds-26-million-consumers-are-credit-invisible/) · [2025](https://files.consumerfinance.gov/f/documents/cfpb_update-credit-invisibles-estimate_2025-06.pdf) |
 
-> **⚠️ Market sizing — what we do NOT have.** There is **no primary-verified figure** in this dossier for the
-> size of the Saudi retail/personal-finance market. The **"SAR 1.4 trillion"** number circulating in our own
-> notes is **[S] secondary at best** — see landmine **#14**. Do not reach for a market size. **The wedge (#20)
-> and the FSDP KPI (#21) are primary, they are ours, and they are the stronger argument anyway**: we size the
-> problem in *people who cannot be priced today*, not in riyals we cannot source.
+> ### ⚠️ THE 6M / 11M RECONCILIATION — settled 2026-07-16, and it is not optional
+> This dossier said **11 million** until Jul 16. **It is now ~6 million, everywhere.** Both numbers come from the
+> same 22-point wedge — they differ **only in the denominator**: 11M applied the wedge to the *total population*;
+> **6M applies it to the ~27.4M adult (15+) base (GASTAT)**. A credit file is an *adult* artifact, so **6M is the
+> defensible one**, and it is the one a judge can reproduce.
+>
+> **Why this is a Q&A landmine and not a rounding argument:** 11M and 6M cannot both be true on stage. If one doc
+> says 11M and the deck says 6M, a judge who spots it doesn't award us the higher number — **they stop trusting the
+> other 21.** We chose the smaller, harder number. *That choice is itself the credibility.*
+>
+> **Known stragglers still saying 11M** (deck/script assets, outside this dossier's scope — fix before stage):
+> `JUDGE_SCRIPT.md`, `NORTHSTAR.md`, `TEAM_BRIEF.md`, `SCALE_STORY.md`, `KASHF_VS_TABAQA.md`,
+> `app/web/public/deck.html` (+ the iOS copy). **`EVIDENCE.md` and `app/SLIDE_NUMBERS.md` are reconciled.**
+
+---
+
+## TIER 4A — The gap, in riyals *(added 2026-07-16 from `app/RESEARCH-2026-07-15.md`)*
+
+> **This tier reverses a prior refusal.** Until Jul 16 this dossier said "we have no primary market size — don't
+> reach for one." That was correct *when the only candidate was a blog*. It is no longer true: **SAMA and the FSDP
+> publish the pool and the target themselves.** The rule that replaces the refusal: **computed is allowed — but the
+> arithmetic goes ON the slide, every input labelled with source + vintage.** A [P→C] number spoken without its math
+> is just a number we made up.
+
+### The headline — the safest riyal figure we own
+
+| # | Figure | The verified finding | Use for |
+|---|--------|----------------------|---------|
+| 40 | **SAR 338bn — the SME financing gap the Kingdom committed to close** | **[P→C]** The only "gap" number backed by **the government's own published KPI**. FSDP sets SME lending at **20% of bank credit by 2030**; **actual is 9.4%** (Q4 2024) — a **10.6-point gap** on SAMA's Q2-2025 total credit. **The math goes on the slide:**<br>`20.0% × SAR 3,186.3bn = SAR 637.3bn (target)`<br>`9.4% × SAR 3,186.3bn = SAR 299.5bn (today)`<br>`──────────────────────────`<br>`gap = 10.6 pts = SAR 337.8bn ≈ SAR 338bn`<br>Inputs: [FSDP Annual Report 2024](https://www.vision2030.gov.sa/media/wpsn44ab/fsdp_annual-report-2024_-en.pdf) **[P]** · [SAMA Key Economic Developments Q2 2025](https://www.sama.gov.sa/en-US/EconomicReports/DevelopmentReports/Key_Economic_Developments_Q2_2025.pdf) **[P]** | **THE market-gap headline.** *"A Saudi banking judge cannot dismiss the Kingdom's own KPI."* ⚠️ **Counter → rebuttal:** *"You're mixing a Q4-2024 ratio with a Q2-2025 base."* → *"Flagged — but the gap is 10.6 points regardless of vintage; on any 2024–25 base it's **SAR 300–340bn**, and Tabaqa attacks the thin-file scoring gap directly."* |
+
+### The pool — TAM, all SAMA Q2 2025 unless noted
+
+| # | Figure | SAR | Source | Label |
+|---|--------|-----|--------|-------|
+| 41 | Total Saudi bank credit (the outer pool) | **3,186.3 bn** | SAMA Key Economic Developments Q2 2025 (+15.8% YoY) | **[P]** |
+| 42 | Consumer / personal finance (directly addressable) | **469.8 bn** | SAMA Q2 2025 (14.7% of credit) — *excludes mortgages & cards* | **[P]** |
+| 43 | Banking-sector assets | **4,494 bn** | FSDP Annual Report 2024 (end-2024) | **[P]** |
+| 44 | MSME lending outstanding | **351.7 bn** | SAMA (2024) | **[S]** |
+| 45 | Total real-estate loans | **922.2 bn** | SAMA via Arab News (**Q1 2025**) | **[S]** |
+| 46 | **Auto / vehicle finance** (finance-company channel) | **25.16 bn** | SAMA via Arab News (2024, **+18.8% YoY**, 26% of finance-co credit) | **[S]** |
+
+**The paired stage sentence (gap + pool in one breath):**
+> *"Saudi banks hold **SAR 3.19 trillion** of credit, including **SAR 470 billion** of consumer finance — that's the
+> pool Tabaqa plugs into. And the Kingdom has committed to move SME lending from 9.4% to 20%: **SAR 338 billion it
+> must unlock**, with thin-file underwriting as the bottleneck."*
+
+**Vehicle-demo sentence** (the SAR 150k auto demo sits inside this): *"Vehicle finance through Saudi finance companies alone is **SAR 25 billion, growing 19% a year** — our SAR 150,000 auto decision sits inside exactly this fast-growing, document-heavy flow."*
+> ⚠️ SAMA publishes **no clean bank-only auto line** — SAR 25bn is the **non-bank channel only, a conservative floor**. Say so if pressed. Upgrade the **[S]** rows to **[P]** off SAMA's "Annual Performance of Finance Companies" + Monthly Statistical Bulletin before the deck ships.
+
+### The locked-out credit — the wedge, priced
+
+| # | Figure | The verified finding | Use for |
+|---|--------|----------------------|---------|
+| 47 | **~6M unscorable → SAR 55–184bn of consumer credit locked out** | **[P→C], assumption-driven — say "illustrative."** `22.14 pts × ~27.4M adults (GASTAT 2024) = ~6.07M people`. Credit intensity = `SAR 469.8bn ÷ 15.53M scorable adults ≈ SAR 30,250/adult`. **Full parity** = `6.07M × 30,250 ≈ SAR 184bn`; **conservative (30% realization)** ≈ **SAR 55bn**. | **Innovation #1 — the white space, priced.** *"Saudi Arabia banks 79% of adults but only 57% are visible to a credit bureau — that 22-point gap is roughly **6 million banked, invisible-to-scoring adults**, and even at conservative parity it's **SAR 55–180 billion** of consumer credit they can't access today."* ⚠️ **Counter → rebuttal:** *"You're mixing 2024 banking data with 2020 bureau coverage."* → *"Flagged — it's the newest published bureau-coverage figure; the wedge is directionally robust, and Tabaqa scores from consented cash-flow data precisely so bureau lag stops being the gate."* |
+
+### The bank's ROI — avoidable losses
+
+| # | Figure | The verified finding | Use for |
+|---|--------|----------------------|---------|
+| 48 | **~SAR 40bn NPL stock → SAR 4–12bn/yr reducible** | **Stock [P→C]:** `1.5% NPL ratio (SAMA FSR 2024, for 2023; provision coverage 151%) × SAR 2,584bn loan book (SAMA, end-2023) = SAR 38.8bn ≈ SAR 40bn`. Cross-check: `1.5% × IMF-implied SAR 2,670bn (66.7% of GDP, **Table 5**) = SAR 40bn ✓`. **Reduction [ILL]:** cash-flow underwriting cuts roll rates **~30%** (Petal/Plaid, #26) → `10% = ~SAR 4bn · 20% = ~SAR 8bn · 30% = ~SAR 12bn`. | **Data #3 / Feasibility #5 — the bank *makes money* deploying this.** *"Saudi banks carry roughly **SAR 40 billion** of non-performing loans; independent evidence shows cash-flow underwriting cuts roll rates ~30% — even a conservative 10–20% improvement is **SAR 4–8 billion** of avoidable losses a year."* ⚠️ **Counter → rebuttal:** *"NPLs are already low at 1.5% — where's the upside?"* → *"Exactly why the **marginal, thin-file** applicant is where losses concentrate — better underwriting reduces **NEW** defaults among borrowers banks currently reject or misprice, not the existing stock. It's a forward-flow number, labelled illustrative."* ⚠️ **Vintage-match:** 2023 ratio → 2023 loan book. Cite IMF **Table 5**, never "Table 7." NPL vintage is **2023** — ~2 yrs old for a Jul-2026 pitch; refresh from SAMA FSR 2025 / IMF Art. IV 2025 (CR 25/223) if published. |
+
+> **⚠️ What we still do NOT have — know it before stage.** (1) **No primary Saudi cost-to-originate,
+> application-abandonment, or time-to-decision figure exists** — see #49; do not build a Saudi SAR operational-savings
+> number, it needs two unsourced inputs. (2) **SAMA publishes no consumer-finance borrower count and no clean bank-only
+> auto line** — average-ticket and bank auto TAM are *derived, not primary*. (3) Several SAMA/FSDP/IMF PDFs returned
+> **403/404 to automated fetch**; figures were confirmed via search-indexed verbatim text + independent corroboration
+> (SPA, Argaam, Zawya, Arab News). **Re-open every primary link and confirm the number live before the deck ships.**
 
 ---
 
@@ -179,6 +253,7 @@ Every rung below is a row in the table above. This is the answer to *"how do you
 |---|--------|----------------------|---------|
 | 34 | **Discovery Bank (South Africa) — "Vitality Money"** | **[P]** **Behavior-priced banking, live since March 2019** (a licensed, digital-only retail bank), **~1.2M customers** (as of May 2025). Interest rates **flex monthly with financial behaviour**, measured across six behaviours (planning, savings, short-term debt, insurance, retirement, property). From discovery.co.za, verbatim: *"Up to **7% less** on your optional single credit facility,"* up to 5.25% on demand savings, up to 3.5% on everyday balances. **Your borrowing rate is a function of how you handle money.** EY's case study calls it *"the world's first behavio[u]ral bank"*; the UN's **UNSGSA (Queen Máxima)** profiled it (Jun 4, 2025). [Discovery](https://www.discovery.co.za/bank/vitality-money) · [EY](https://www.ey.com/en_za/insights/banking-capital-markets/how-the-worlds-first-behavioral-bank-is-focusing-on-customer-needs) · [UNSGSA](https://www.unsgsa.org/stories/making-healthy-choices-habit-discovery-banks-vitality-money-program-encourages-behavior-change-better-financial-health) | **THE feasibility anchor.** *"A licensed retail bank has priced credit on behaviour for **seven years**, for **1.2 million customers**. This isn't a hypothesis — it's a product with a P&L, a regulator, and a UN case study."* ⚠️ **Two hard rules before you open your mouth — see the box below.** |
 | 35 | **Usage-based / telematics insurance** | **[S] — industry & market-research sources, NOT regulator data. Label them as such.** Consented behavioural data → a personalized price, **at scale, in a regulated industry**: **21M+ US policyholders shared telematics data with their insurer in 2024** (IoT Insurance Observatory, via insurance trade press; ~28% CAGR since 2018). **14.4% of personal-lines motor policies are telematics — _globally_** (Research & Markets / GlobeNewswire, Jun 13, 2025, from a 2024 consumer survey). ⚠️ **On discounts, tell the truth:** carriers advertise **10–30%+**, but the **Maryland Insurance Administration** (a state insurance *regulator*) found only **31% of enrolled drivers actually saw their premium go down in 2023**; the Consumer Federation of America calls the advertised savings *"a mirage for many drivers, or… highly exaggerated."* [GlobeNewswire](https://www.globenewswire.com/news-release/2025/06/13/3099019/0/en/Usage-Based-and-Telematics-Motor-Insurance-Report-2025-Telematics-Becomes-a-Consumer-Favorite-as-14-4-of-Policies-Now-Include-It.html) · [CFA](https://consumerfed.org/news/blogs/insurance-companies-claim-telematics-will-save-you-money-on-auto-insurance-the-truth-is-more-complicated/) | **The adoption is the point — not the discount.** *"Consented behavioural pricing is already normal: **21 million Americans hand their insurer their driving data** for a better price. We're doing the same for credit — except the applicant holds the consent, and the price comes back as an **offer**."* ⚠️ **If a judge pushes on the discount, concede it immediately** — *"advertised, not realized; a US state regulator found only 31% of drivers actually saved."* **The concession wins more than the number would have.** It also sets up our own rule: **we show a real price, not a teaser rate.** |
+| 49 | **Freddie Mac — 2024 Cost to Originate Study** *(added 2026-07-16)* | **[P] — but US single-family mortgage, NOT Saudi. Label it every time.** Verbatim: **personnel expenses are 67% of total loan-production cost**; underwriting *"remains fairly manual and therefore costly"*; high-automation lenders originate loans **"$1,500, or 14%, less costly"**; executives *"believe it can help them save up to **40%**."* [Study (PDF)](https://sf.freddiemac.com/docs/pdf/cost-to-originate-full-study-2024.pdf) | **The efficiency supplement — never the load-bearing feasibility claim.** *"Two-thirds of loan-origination cost is people doing manual document and underwriting work; lenders who automate cut cost-per-loan **14% measured**, up to 40% believed — Tabaqa delivers that straight-through, in seconds."* ⚠️ **Quote the measured 14%, not the 40% aspiration.** ⚠️ **Counter → rebuttal:** *"That's US mortgage data, not Saudi auto finance."* → *"Correct — I present it as a **global efficiency benchmark**, not a Saudi figure; the mechanism (manual underwriting + document verification **IS** the cost) is channel-agnostic, and I quote the measured 14%."* 🚫 **Do NOT fabricate a Saudi SAR operational-savings number** — no Saudi cost-to-originate exists. Feasibility rides on **#34 Discovery (live 7 yrs, 1.2M)** + Tier 5's legal chain; this row is the supplement. |
 | (11) | **Experian Boost** — cross-reference only | **[P/SR]** **47% of previously unscoreable users became scoreable** once they consented to share bank data. | **Consent-willingness evidence ONLY.** Never a product analogy — see **the Experian Boost trap** at Tier 2. |
 
 > ### ⚠️ NEVER SAY "FIRST IN THE WORLD"
@@ -226,9 +301,10 @@ Every rung below is a row in the table above. This is the answer to *"how do you
     It is **Discovery's own marketing number, unaudited.** It appears in the UN/UNSGSA feature — but the UN is *repeating Discovery*, not verifying it: every statistic there is attributed to Discovery Bank itself, with no independent source. **Repeating it unverified breaks our own evidence rule** — the one rule this entire document exists to enforce. **DO NOT QUOTE unless primary-verified.**
     **Bonus reason to leave it alone:** it is almost certainly a **selection effect**, not a treatment effect. Customers who *reach* Diamond status are different people from those who don't — the number tells you who they already were, not what the product did to them. A sharp banking judge will say exactly that, and if we're the ones who put the number on the slide, **we lose the whole Data axis in one sentence.** Cite Discovery for **the mechanism being live** (#34), never for its size.
 13. **Petal's ~400k approvals** and **Lean's ~1M verified accounts** are **company PR figures** — consistent across independent coverage, but **unaudited**. Say *"they report…"*.
-14. **⚫ "KSA retail + personal finance ≈ SAR 1.4 trillion" — DEMOTED. Do not present this as a fact.**
-    Its trail is **Ken Research → a WordPress blog** — i.e. **secondary at best, and the chain of custody is a blog.** It has **no place in a dossier whose entire claim to authority is primary verification.** It currently survives, correctly labelled as an estimate, in `app/PRICING_ENGINE.md` — **it does not survive here, and it never goes on a slide or into a sentence spoken to a judge.**
-    **If you are asked to size the market, don't guess — refuse and redirect:** *"I won't quote a market size I can't source. What I can source: **78.8% of Saudi adults are banked, 56.7% have a credit file** — about **11 million people who cannot be priced today** — and Vision 2030's own KPI moves fintech's share from **9.4% to 20%**."* **That is a better answer than the trillion.** (This *is* "refuse, don't guess," applied to us.)
+14. **⚫ "KSA retail + personal finance ≈ SAR 1.4 trillion" — STAYS DEAD. Do not present this as a fact.**
+    Its trail is **Ken Research → a WordPress blog** — i.e. **secondary at best, and the chain of custody is a blog.** It has **no place in a dossier whose entire claim to authority is primary verification.** It survives, correctly labelled as an estimate, in `app/PRICING_ENGINE.md` — **it does not survive here, and it never goes on a slide or into a sentence spoken to a judge.**
+    **⚠️ UPDATED 2026-07-16 — the refusal is retired; the replacement is primary.** We no longer dodge market-size questions, because **SAMA publishes the number itself**: **SAR 3,186.3bn total bank credit (Q2 2025)**, of which **SAR 469.8bn consumer finance** — and **SAR 2,584bn (2023)** for vintage-matched work (Tier 4A, #41–42). **Answer with SAMA's figure, never the trillion.**
+    **The redirect, now upgraded:** *"I won't quote a blog's trillion. **SAMA's own number is SAR 3.19 trillion** of bank credit, **SAR 470 billion** of it consumer finance. And the gap is the Kingdom's own KPI: SME lending **9.4% → 20%** — **SAR 338 billion** it has committed to unlock. Meanwhile **78.8% of Saudi adults are banked and only 56.7% have a credit file** — about **6 million people who cannot be priced today**."*
 
 ### C · 🗣️ Words that get us caught
 
@@ -248,6 +324,17 @@ Every rung below is a row in the table above. This is the answer to *"how do you
 
 26. **Kaggle Home Credit Default Risk** — doubly licence-locked (see #39). Never in the deck, the demo, the repo, or a sentence.
 
+### E · 💰 The riyal landmines *(added 2026-07-16 — killed in the Jul 15 verification pass)*
+
+27. **⚫ "SAR 932.8bn / 29.3% real estate, Q2-2025" — REFUTED (1-2 in verification).** Use the confirmed **SAR 922.2bn (Q1-2025)** instead (#45).
+28. **⚫ "MSME SAR 258bn end-2023" and the derived "SME gap SAR 259bn" — REFUTED (0-3, unanimous).** Use **MSME SAR 351.7bn (2024)** (#44) and the **10.6pp → SAR 338bn** gap (#40) instead.
+29. **⚫ "IMF: household DSTI ~40% / data scarce" — REFUTED (0-3, unanimous). Do not cite it at all.**
+30. **⚫ "~11 million unscorable Saudis" — SUPERSEDED BY OUR OWN CORRECTION. Say ~6 million.**
+    This was **our** number until Jul 16; it applied the 22-point wedge to the *total population* instead of the **~27.4M adult (15+) base**. The rigorous figure is **~6.07M ≈ 6 million** (#20, #47). **Every doc reconciles to 6M.** Saying 11M now doesn't just overstate — it **contradicts our own deck**, and the contradiction is what a judge punishes.
+31. **⚫ NEVER present a Saudi SAR operational-savings number.** No primary Saudi cost-to-originate exists; building one needs two unsourced inputs (loans/yr, cost/loan). The **Freddie Mac 14%** (#49) is a **US mortgage benchmark** — say so in the same breath, and quote the **measured 14%**, never the **40% aspiration**.
+32. **⚫ NEVER say "measured" about the SAR 4–12bn reducible losses.** The stock (~SAR 40bn) is **[P→C]**; the **reduction % is [ILL] — an assumption.** Say **"illustrative."**
+33. **⚫ NEVER speak a [P→C] number without its arithmetic.** SAR 338bn, ~6M, SAR 55–184bn and SAR 40bn are **computed, not published.** The math goes **on the slide**, inputs labelled with source + vintage. A computed number spoken bare is indistinguishable from one we invented — and a judge will treat it as exactly that.
+
 ---
 
 ## ⚠️ STANDING CAVEATS — the things only time can fix (disclose them; don't be caught by them)
@@ -260,3 +347,4 @@ Every rung below is a row in the table above. This is the answer to *"how do you
 
 *Created 2026-07-04 from a 5-agent adversarially-verified research pass.*
 *Extended 2026-07-13: folded in `app/RESEARCH-2026-07-08.md` (109-agent run, 23 primary-verified claims) + `SCALE_STORY.md`; added Tier 6 (behavior-priced finance, live) and Tier 7 (open-source licence map); corrected the Experian thin-file figure; demoted the SAR 1.4T market size. Primary URLs inline.*
+*Extended 2026-07-16: folded in `app/RESEARCH-2026-07-15.md` (104-agent run, 22 confirmed / 3 refuted). Added **Tier 4A — the gap in riyals** (#40–#48: SAR 338bn SME gap, SAR 3.19tn / 470bn TAM, ~6M → SAR 55–184bn, ~SAR 40bn NPL → SAR 4–12bn) + **#49 Freddie Mac cost-to-originate** (67% personnel, 14% measured). Added labels **[P→C]** and **[ILL]**. Added landmine section **E (#27–#33)**. **Corrected the wedge from ~11M to ~6M** (GASTAT adult base) and retired the "we can't size the market" refusal — SAMA publishes it. Primary URLs inline; re-open each before the deck ships.*

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tabaqa — Data-Source Legality Dossier</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 14mm 15mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0; font-family: "Charter", "Iowan Old Style", Georgia, serif;
+    font-size: 9.6pt; line-height: 1.5; color: #14161a;
+  }
+  .ar { font-family: "SF Arabic", "Geeza Pro", "Al Bayan", "Baghdad", serif; direction: rtl; text-align: right; }
+  h1,h2,h3 { font-family: "SF Pro Text", -apple-system, "Helvetica Neue", sans-serif; margin: 0; }
+  a { color: #1b3a6b; text-decoration: none; word-break: break-all; }
+
+  /* ---- masthead ---- */
+  .mast { border-bottom: 2.5px solid #1b3a6b; padding-bottom: 8px; margin-bottom: 14px; }
+  .mast-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .brand { font-size: 15pt; font-weight: 700; color: #1b3a6b; letter-spacing: -0.2px; }
+  .brand .ar-inline { font-family: "SF Arabic","Geeza Pro",serif; font-weight: 400; }
+  .meta { font-size: 7.6pt; color: #5b6472; text-align: right; line-height: 1.45; }
+  h1 { font-size: 12.5pt; font-weight: 650; margin-top: 7px; letter-spacing: -0.2px; }
+  .sub { font-size: 8.4pt; color: #5b6472; margin-top: 3px; font-style: italic; }
+
+  /* ---- BLUF ---- */
+  .bluf { background: #f4f7fb; border-left: 3px solid #1b3a6b; padding: 9px 12px; margin: 0 0 14px; }
+  .bluf h2 { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.9px; color: #1b3a6b; margin-bottom: 5px; }
+  .bluf p { margin: 0 0 5px; }
+  .bluf p:last-child { margin-bottom: 0; }
+
+  /* ---- sections ---- */
+  section { margin-bottom: 13px; }
+  h2.sec {
+    font-size: 10pt; font-weight: 650; color: #1b3a6b;
+    border-bottom: 1px solid #dde2e8; padding-bottom: 3px; margin-bottom: 7px;
+    break-after: avoid;
+  }
+  h3.sub-h { break-after: avoid; }
+  blockquote, .stop, .gap, .bluf, .chain li { break-inside: avoid; }
+  thead { display: table-header-group; }
+  h2.sec .n { color: #9aa3b0; font-weight: 400; margin-right: 5px; }
+  h3.sub-h { font-size: 8.8pt; font-weight: 650; margin: 8px 0 4px; }
+  p { margin: 0 0 6px; }
+
+  /* ---- badges ---- */
+  .b { display: inline-block; font-family: "SF Mono", ui-monospace, monospace; font-size: 6.6pt;
+       font-weight: 600; letter-spacing: 0.4px; padding: 1.2px 5px; border-radius: 2px; vertical-align: 1.5px; }
+  .b-ok   { background: #e3f2e8; color: #0b6b3a; border: 0.5px solid #b6ddc5; }
+  .b-warn { background: #fdf3e0; color: #8a5a00; border: 0.5px solid #ecd4a3; }
+  .b-bad  { background: #fbe9ea; color: #a3242b; border: 0.5px solid #eec3c6; }
+  .b-grey { background: #eef1f4; color: #5b6472; border: 0.5px solid #d5dbe2; }
+
+  /* ---- tables ---- */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; font-size: 8.6pt; }
+  th { background: #f4f7fb; color: #1b3a6b; font-family: "SF Pro Text", sans-serif; font-size: 7.4pt;
+       text-transform: uppercase; letter-spacing: 0.5px; text-align: left; padding: 4px 7px;
+       border-bottom: 1px solid #c9d4e2; }
+  td { padding: 5px 7px; border-bottom: 0.5px solid #e6eaef; vertical-align: top; }
+  tr { break-inside: avoid; }
+  td.art { font-family: "SF Mono", ui-monospace, monospace; font-size: 7.6pt; font-weight: 600;
+           color: #1b3a6b; white-space: nowrap; }
+
+  /* ---- quotes ---- */
+  blockquote { margin: 5px 0 7px; padding: 6px 10px; background: #fafbfc;
+               border-left: 2px solid #c9d4e2; font-size: 8.6pt; }
+  blockquote.ar { border-left: 0; border-right: 2px solid #c9d4e2; }
+  .src { font-size: 7.2pt; color: #7c8592; font-family: "SF Pro Text", sans-serif; margin-top: 2px; }
+
+  /* ---- chain ---- */
+  .chain { counter-reset: step; margin: 6px 0 8px; padding: 0; list-style: none; }
+  .chain li { counter-increment: step; position: relative; padding: 0 0 5px 22px; }
+  .chain li::before {
+    content: counter(step); position: absolute; left: 0; top: 0.5px;
+    width: 14px; height: 14px; border-radius: 50%; background: #1b3a6b; color: #fff;
+    font-family: "SF Mono", monospace; font-size: 7pt; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chain li.concl::before { background: #0b6b3a; content: "→"; font-size: 8pt; }
+
+  /* ---- callouts ---- */
+  .stop { border: 1px solid #eec3c6; background: #fdf6f6; padding: 8px 11px; margin: 7px 0; }
+  .stop h3 { color: #a3242b; font-size: 8.4pt; margin-bottom: 4px; }
+  .gap  { border: 1px solid #d5dbe2; background: #fafbfc; padding: 8px 11px; margin: 7px 0; }
+
+  ul.tight { margin: 4px 0 6px; padding-left: 15px; }
+  ul.tight li { margin-bottom: 3px; }
+
+  .foot { margin-top: 14px; padding-top: 7px; border-top: 1px solid #dde2e8;
+          font-size: 7.2pt; color: #7c8592; font-family: "SF Pro Text", sans-serif; }
+  .pagebreak { break-before: page; }
+  code { font-family: "SF Mono", ui-monospace, monospace; font-size: 8pt; background: #f1f3f6;
+         padding: 0.5px 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="mast">
+  <div class="mast-row">
+    <div class="brand">Tabaqa <span class="ar-inline">طبقة</span></div>
+    <div class="meta">
+      Internal research dossier · <strong>not for external distribution</strong><br>
+      Compiled 16 July 2026 · AMAD ed.2, Day 1
+    </div>
+  </div>
+  <h1>Data-Source Legality &amp; Access Routes — What We Can Cite, What We Cannot</h1>
+  <div class="sub">Companion to EVIDENCE.md. Every claim carries its provenance and confidence. Gaps are stated as gaps, not filled by inference.</div>
+</div>
+
+<div class="bluf">
+  <h2>Bottom line</h2>
+  <p><strong>Two of the seven proposed sources are now refused on primary law, with citations.</strong> Health data (صحتي) and security/criminal records (أبشر) are named as <em>Sensitive Data</em> in a single sentence of <strong>PDPL Art. 1(11)</strong>. Consent does not cure it: <strong>Art. 7</strong> bars making consent a condition of a service unless the service is <em>directly related</em> to that data, and <strong>Art. 11</strong> limits collection to the <em>minimum necessary</em>. A DBR decision is obligations ÷ income; health status is neither.</p>
+  <p><strong>سمة is lawful for us only because we are embedded inside the bank.</strong> Implementing Regs <strong>Art. 28</strong> is a closed list — a bureau may not issue a credit record except on a member's request with consent, a dispute body's, SAMA's, or the consumer's own. A non-member holding perfect consent has <em>no route</em>. The bank pulls سمة as a member; we never touch the bureau.</p>
+  <p><strong>Five of seven sources remain unestablished</strong> — GOSI, تداول, the property registry, نفاذ/أبشر's identity route, and the open-banking AIS scope boundary. See §4. Do not assert routes for them.</p>
+</div>
+
+<section>
+  <h2 class="sec"><span class="n">§1</span> صحتي and أبشر — refused on primary law <span class="b b-ok">FIRST-HAND READ</span></h2>
+  <p>Source: Personal Data Protection Law (PDPL), English text published by SDAIA (V2, 23 April 2023). Obtained by direct download and <code>pdftotext</code> extraction — <strong>not</strong> via the search round, which returned zero claims on PDPL.</p>
+
+  <table>
+    <thead><tr><th style="width:15%">Article</th><th>Operative text</th></tr></thead>
+    <tbody>
+      <tr><td class="art">Art. 1(11)</td><td><em>"Sensitive Data: Personal Data revealing racial or ethnic origin, or religious, intellectual or political belief, <strong>data relating to security criminal convictions and offenses</strong>, biometric or Genetic Data for the purpose of identifying the person, <strong>Health Data</strong>, and data that indicates that one or both of the individual's parents are unknown."</em></td></tr>
+      <tr><td class="art">Art. 1(13)</td><td><em>"Health Data: Any Personal Data related to an individual's health condition, whether their <strong>physical, mental or psychological</strong> conditions, or related to Health Services received by that individual."</em></td></tr>
+      <tr><td class="art">Art. 6(4)<br>Art. 10(7)<br>Art. 15(6)</td><td>Legitimate interest is available as a basis for processing, collection and disclosure respectively — each <em>"provided that <strong>no Sensitive Data is to be processed</strong>."</em> The carve-out is identical in all three. Consent is therefore the only remaining door.</td></tr>
+      <tr><td class="art">Art. 7</td><td><em>"The consent referred to in paragraph (1) of Article (5) of this Law <strong>may not form a condition of providing a service or a benefit</strong>, unless such service or benefit is <strong>directly related</strong> to the Processing of Personal Data for which the consent is given."</em></td></tr>
+      <tr><td class="art">Art. 11(1)<br>Art. 11(3)</td><td>Purpose <em>"shall be directly related to the Controller's purposes"</em>; content <em>"shall be appropriate and <strong>limited to the minimum amount necessary</strong> to achieve the purpose of the Collection."</em></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-h">The chain</h3>
+  <ol class="chain">
+    <li>Health data and criminal/security records are <strong>Sensitive Data</strong> — Art. 1(11), both named explicitly.</li>
+    <li>Legitimate interest is <strong>unavailable</strong> for sensitive data — Arts. 6(4), 10(7), 15(6). Only consent remains.</li>
+    <li>But consent <strong>cannot be a condition of the financing</strong> unless the financing is <em>directly related</em> to that data — Art. 7.</li>
+    <li>And collection must be <strong>minimum necessary</strong> for a purpose <em>directly related</em> to the controller's — Art. 11(1), 11(3).</li>
+    <li class="concl">A DBR decision is <strong>obligations ÷ income</strong>. Health status is neither. It fails "directly related" and fails "minimum necessary" — <strong>consent does not cure it.</strong></li>
+  </ol>
+
+  <p><strong>Note the convergence:</strong> Art. 7's <em>"directly related"</em> and Art. 11(3)'s <em>"minimum necessary"</em> are the legal formalization of the DBR arithmetic. The law and the engine agree — if a signal feeds neither obligations nor income, there is no lawful basis to collect it for this purpose.</p>
+
+  <h3 class="sub-h">Ready-to-speak line</h3>
+  <blockquote class="ar">«بيانات صحتي والسجل الأمني <strong>بيانات حساسة</strong> — نظام حماية البيانات الشخصية، <strong>المادة ١(١١)</strong>. والموافقة ما تكفي: <strong>المادة ٧</strong> تمنع اشتراط الموافقة لتقديم خدمة إلا إذا كانت مرتبطة بها مباشرة، و<strong>المادة ١١</strong> تحصر الجمع في الحد الأدنى اللازم. قرار التمويل نسبة التزامات إلى دخل — والحالة الصحية ليست أيًّا منهما. رفضناها بالتصميم، والنظام يرفضها قبلنا.»</blockquote>
+
+  <div class="stop">
+    <h3>Caveats on this section</h3>
+    <ul class="tight">
+      <li>This is the <strong>English</strong> text. <strong>Arabic is authoritative</strong> for Saudi law — cite the Arabic in any judged deliverable.</li>
+      <li>The <strong>Implementing Regulations were not read.</strong> Art. 5(1) defers to them for "the cases in which the consent must be explicit" — that is very likely where the explicit-consent-for-sensitive-data rule sits. The Law-level chain above holds without it, but the picture is incomplete.</li>
+      <li>Version not confirmed current as of July 2026. PDPL is Royal Decree M/19 (2021) as amended by M/148 (2023); this PDF is labelled V2, 23 April 2023.</li>
+      <li>The PDPL contains <strong>no credit-specific anti-discrimination clause</strong> that we found. The argument runs through purpose limitation and Art. 7 — not through a discrimination bar.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="n">§2</span> سمة — lawful only inside the bank <span class="b b-ok">CONFIRMED 3–0</span></h2>
+  <p>Source: SAMA Rulebook (primary). Nine of the search round's ten surviving claims concern this source; it is the one question the round answered conclusively.</p>
+
+  <table>
+    <thead><tr><th style="width:20%">Instrument</th><th>Finding</th><th style="width:13%">Vote</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="art">Royal Decree<br>M/37</td>
+        <td>Credit Information Law — a primary statute (نظام), sitting above SAMA circulars and above its own Implementing Regulations. <strong>In force as of July 2026</strong>, no successor found. Dated <strong>5/7/1429H</strong>, published 7/8/1429H (8 Aug 2008), effective 180 days after <em>publication</em> per Art. 17.</td>
+        <td><span class="b b-ok">3–0</span></td>
+      </tr>
+      <tr>
+        <td class="art">Arts. 5(2), 9(1)<br>Regs 39, 40(1)</td>
+        <td><strong>Written</strong> consent is the statutory gate, and it attaches to the <em>inquiry</em>. Art. 9(1) — no first-time record without written consent. Art. 5(2) — a member may obtain a copy subject to written consent. Regs Art. 40(1) — consent obtained <em>upon inquiry</em>.</td>
+        <td><span class="b b-ok">3–0</span></td>
+      </tr>
+      <tr>
+        <td class="art">Regs Art. 28</td>
+        <td><strong>The decisive finding.</strong> Closed list — a bureau <em>"may not issue any credit record on a consumer except based on"</em> (1) a member's request + that consumer's consent, (2) a competent dispute-settlement body's request, (3) SAMA's request, or (4) the consumer's own request. <strong>Consent is necessary but not sufficient. A non-member with perfect consent has no route.</strong></td>
+        <td><span class="b b-ok">3–0</span></td>
+      </tr>
+      <tr>
+        <td class="art">Regs Arts.<br>21 · 22 · 25 · 27</td>
+        <td>Access runs through accredited membership, never self-serve: SAMA-approved membership agreements (21), submitted to SAMA for non-objection (22), SAMA-approved working rules (25), bureau must verify the applicant's identity <em>and purpose</em> (27). Art. 6 confines use to statutory purposes; Art. 13 penalises violations up to <strong>SAR 1M</strong> (doubled on repetition) plus licence suspension.</td>
+        <td><span class="b b-ok">3–0</span></td>
+      </tr>
+      <tr>
+        <td class="art">— sandbox</td>
+        <td>No public developer sandbox, API-key route, or registration surface documented. Onboarding is a manual enterprise sales process. Report as a <em>documented absence</em>, not proof none exists.</td>
+        <td><span class="b b-warn">2–1</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <blockquote class="ar"><strong>Regs Art. 40(1)</strong> — «الحصول على موافقة المستهلك الخطية <strong>عند الاستعلام</strong> عنه وموافقته على تزويد الشركات المرخص لها بمعلومات ائتمانية عنه»
+  <div style="margin-top:5px"><strong>Regs Art. 39</strong> — «لا يجوز للشركات إنشاء سجل ائتماني لمستهلك أو تبادله مع أي عضو أو شركة إلا بعد موافقة المستهلك <strong>خطياً</strong> على ذلك»</div></blockquote>
+  <div class="src">Strongest evidence in the entire round: a verifier downloaded the Arabic Implementing Regulations PDF and ran <code>pdftotext</code> directly, bypassing any fetch-model paraphrase.</div>
+
+  <h3 class="sub-h">Why this validates the architecture</h3>
+  <p>The 15 July decision to present Tabaqa as an <strong>embedded engine inside one bank</strong> is not only a product choice — under Art. 28 it is the <strong>only lawful configuration</strong> for سمة access. The retired 12 July marketplace framing, with Tabaqa standing outside as its own entity, had no route to the bureau regardless of how much consent the customer gave. The pivot solved a legal problem before we knew we had it.</p>
+  <p><strong>The answer for س٩:</strong> the bank pulls سمة as a member, under its customer's written consent, per Art. 28(1). We are a processor inside the bank and never touch the bureau ourselves.</p>
+
+  <h3 class="sub-h">Contested — do not present as settled <span class="b b-warn">2–1 BOTH WAYS</span></h3>
+  <p>Whether bureau membership is legally restricted to licensed lenders is <strong>genuinely unresolved.</strong> Textually it is not: Art. 1 defines "Member" purely contractually — <em>"any government or private entity which is party to a credit information exchange contract"</em> — and Art. 21 obliges bureaus to sign with <em>"any party that wishes to obtain credit information."</em> But SAMA's own FAQ (Q9, Q12) states the opposite operationally: <em>"only licensed credit entities can join."</em> Resolve as an <strong>absence of prohibition, not an affirmative grant</strong>; SAMA's non-objection gate closes the door in practice. Six stronger variants of the "not lender-restricted" claim were voted down 0–3 or 1–2.</p>
+</section>
+
+<section>
+  <h2 class="sec"><span class="n">§3</span> تداول and property — the only signal is negative <span class="b b-warn">MEDIUM</span></h2>
+  <p>SDAIA's <strong>Government Service Bus (GSB)</strong> carries exactly the contested data classes — the electronic health file (الملف الصحي الإلكتروني), real-estate deeds (الصكوك العقارية), and the commercial registry — proving a government-to-government transmission route exists. But its stated eligibility (شروط المستفيدين) confines it to government entities: <em>"أن تكون الجهة المزودة للخدمة أو المستفيدة جهة حكومية"</em> — the entity providing <em>or</em> benefiting must be a government entity.</p>
+  <p>This supports a <strong>"no consented route"</strong> verdict on health and property data for <em>both</em> the licensed bank and an unlicensed processor. <strong>It must not be cited as an available integration path.</strong> Confidence is medium: SDAIA blocks automated fetch, so all of this rests on search transcription returned identically across four queries in two languages — strong, but never directly read. A human should eyeball the live شروط المستفيدين line before this carries weight.</p>
+  <p><strong>Independent of legality:</strong> both sources fail on engineering. Saudi consumer financing is DBR-capped and DBR is income-based, not net-worth-based — a securities portfolio or a title deed cannot move the ratio. Their only decision-relevant output (rental income, dividends) already arrives in the bank account we read. They would add provenance, not signal.</p>
+</section>
+
+<section>
+  <h2 class="sec"><span class="n">§4</span> Not established — state as gaps, never fill by inference <span class="b b-grey">ZERO CLAIMS</span></h2>
+  <div class="gap">
+    <table style="margin:0">
+      <thead><tr><th style="width:26%">Source / question</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>GOSI</strong> (جهة التوظيف)</td><td><strong>Zero coverage.</strong> No named API, consent product, or channel established — despite being a live row on our own MVP consent screen (PRODUCT_SPEC §6.4). This is the most important gap.</td></tr>
+        <tr><td><strong>أبشر / نفاذ</strong></td><td><strong>Worse than before.</strong> All four Yaqeen claims were refuted (0–3, 0–3, 1–2, 1–2), removing the only identity-source evidence in the round. We currently have <em>no</em> verified account of the sanctioned identity route.</td></tr>
+        <tr><td><strong>تداول / Edaa</strong></td><td>Zero claims. No consumer-consent data-sharing API analogous to AIS was established either way. CMA Open Finance activity: not established.</td></tr>
+        <tr><td><strong>Property registry</strong></td><td>Only the negative GSB signal above (§3). No affirmative route established; no consented ownership-verification API found or excluded.</td></tr>
+        <tr><td><strong>AIS scope boundary</strong></td><td><strong>Flagged risk.</strong> Whether SAMA's open-banking AIS scope stops at bank accounts and e-money wallets, or reaches securities/insurance/government data, was <em>not</em> verified this round. "AIS covers wallets" entered this round as an assumption carried in from context. <em>Our 8 July criteria research did verify wallet-in-scope (3-vote, definitional) — that prior finding stands; it simply was not re-confirmed here.</em></td></tr>
+        <tr><td><strong>Insurance Authority split</strong></td><td>Zero claims. The proposition that health-based pricing is lawful only under a different regulator for credit-life/takaful — and is a distinct product from credit underwriting — is <strong>unverified</strong>. Plausible, uncited. Do not assert it.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="n">§5</span> Landmines — sentences that will not survive a check <span class="b b-bad">DO NOT SAY</span></h2>
+  <table>
+    <thead><tr><th style="width:38%">❌ Do not say</th><th>Why it fails</th></tr></thead>
+    <tbody>
+      <tr><td>"The law mandates <strong>per-pull</strong> consent."</td><td>An interpretive gloss, not regulation text. «عند الاستعلام» supports it, but nothing expressly prohibits standing consent — and Saudi banks in practice rely on broad account-opening authorizations covering ongoing inquiry (cf. Regs Art. 40(4) weekly updates, periodic review of active customers).</td></tr>
+      <tr><td>"<strong>Art. 28(4)</strong> is the basis for consumer-permissioned self-pull."</td><td>Its verbatim text is only <em>"the consumer's request"</em> — a data subject's right to their <em>own</em> record. It does not document fintech intermediation or onward transfer to a non-member; Arts. 6 and 27 cut against unconstrained onward use.</td></tr>
+      <tr><td>"سمة gates <strong>all</strong> access."</td><td>Literal overbreadth — a consumer can self-access their own report (MOLIM) with no membership agreement. That is a data subject reading their own file, not third-party access.</td></tr>
+      <tr><td>"Membership <strong>is</strong> / <strong>is not</strong> restricted to licensed lenders."</td><td>Genuinely unresolved — 2–1 splits pointing in opposite directions, six stronger variants refuted. Present as contested or not at all.</td></tr>
+      <tr><td>Anything sourced to <strong>SAMA Circular 44075800</strong>.</td><td>See below — the best citation we have and the least verified.</td></tr>
+      <tr><td>"Royal Decree M/37 dated <strong>6/7/1429H</strong>."</td><td>SAMA's own rulebook metadata carries this off-by-one; the Bureau of Experts, SAMA's <em>own</em> Implementing Regulations page, and NAUSS all say <strong>5/7/1429H</strong>. Also: the 180-day clock runs from <em>publication</em> (7/8/1429H), not the decree date.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="stop">
+    <h3>⚠ SAMA Circular 44075800 — verify before any judged use</h3>
+    <p style="margin-bottom:4px">Reportedly (18/4/2023 · 27/9/1444H) permits bureaus to sign fintech membership agreements without SAMA non-objection only if the fintech (a) holds or has applied for a SAMA/CMA-supervised licence <strong>and</strong> (b) its activity <em>"must involve <strong>entering into a credit relationship with the consumer</strong>."</em> If true, a read-only data-processor is excluded from the membership route <strong>by construction</strong> — which would moot the contested membership debate entirely and become the single most useful citation in the set.</p>
+    <p style="margin:0"><strong>But it was surfaced incidentally during verification of another claim, never put to a vote, and no article-level URL was captured.</strong> It is currently our best <em>and</em> weakest citation. Re-fetch and confirm before it touches a slide, a script, or a judge.</p>
+  </div>
+
+  <div class="stop">
+    <h3>⚠ Two broken citations — swap before use</h3>
+    <ul class="tight" style="margin-bottom:0">
+      <li>SAMA FAQ — the dead path is <code>/en-US/FAQs/pages/creditinformation.aspx</code>. The live canonical path is <code>/en-US/PortalServices/FAQs/Pages/CreditInformation.aspx</code>.</li>
+      <li><code>sama.gov.sa/en-US/License/Pages/CreditBureaus.aspx</code> — a <strong>dead error page</strong> whose "supporting quote" was a <strong>synthesized annotation, not a page excerpt</strong>. The adversarial layer caught this before it reached the deliverable. The underlying rulebook URLs it cited do check out; the quote does not.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="n">§6</span> Method &amp; provenance — read this before trusting the vote counts</h2>
+  <p><strong>Two different provenances are mixed in this document and must not blur.</strong> §2–§3 come from a 105-agent adversarial search round (5 angles · 23 sources fetched · 109 claims extracted · 25 verified · <strong>10 confirmed, 15 refuted</strong>). §1 (PDPL) came from <strong>neither</strong> — the search returned zero claims on PDPL; it was obtained afterward by direct <code>curl</code> + <code>pdftotext</code> against SDAIA's published PDF.</p>
+  <p><strong>The fetch layer was broken across the board</strong>, and this materially lowers confidence below what the vote counts suggest: <code>simah.com</code> returned HTTP 403 to every automated fetch; <code>sdaia.gov.sa</code> blocked with a BIG-IP rejection; <code>my.gov.sa</code> 403'd; <code>laws.boe.gov.sa</code> failed TLS; several <code>sama.gov.sa</code> portal pages returned site-wide error templates. <strong>All سمة text and all SDAIA text therefore rest on convergent search-engine snippets, never a first-hand read.</strong> The two places evidence is strongest are precisely the two where a PDF was downloaded and parsed locally — the Arabic Implementing Regulations (§2) and the PDPL (§1).</p>
+  <p><strong>Time-sensitivity:</strong> nothing here was verified against a source dated later than the سمة instruments (2008–2023) plus Circular 44075800 (2023). SAMA's first open-banking licences are ~4 months old and PDPL implementing practice is still maturing. Sandbox and licensing claims have a short shelf life.</p>
+
+  <h3 class="sub-h">Recommended next round — cheap, and use the technique that worked</h3>
+  <ul class="tight">
+    <li><strong>PDPL Implementing Regulations</strong> — <code>sdaia.gov.sa/ar/Research/Documents/ExecutiveRegulations.pdf</code>. Art. 5(1) defers to them for when consent must be <em>explicit</em>; likely completes §1.</li>
+    <li><strong>GOSI</strong> — a real search. The §4 gap is our own P0 consent row.</li>
+    <li><strong>Circular 44075800</strong> — direct fetch, capture an article-level URL.</li>
+    <li>Download and parse. Do not fan out agents against a fetch layer that 403s.</li>
+  </ul>
+
+  <h3 class="sub-h">Primary sources cited</h3>
+  <p style="font-size:7.8pt; line-height:1.45; color:#5b6472">
+    PDPL (EN, SDAIA V2 23 Apr 2023) — <a>sdaia.gov.sa/en/SDAIA/about/Documents/Personal Data English V2-23April2023- Reviewed-.pdf</a> · Credit Information Law — <a>rulebook.sama.gov.sa/en/credit-information-law</a> · Implementing Regulations — <a>rulebook.sama.gov.sa/en/implementing-regulations-credit-information-law</a> · Art. 28 (article-level, ref. <bdi>أق/13709</bdi> &middot; <bdi>22/9/1432H</bdi>) — <a>rulebook.sama.gov.sa/en/article-28-1</a> · Art. 40 — <a>rulebook.sama.gov.sa/en/article-40-0</a> · SAMA FAQ (live path) — <a>sama.gov.sa/en-US/PortalServices/FAQs/Pages/CreditInformation.aspx</a> · SDAIA GSB — <a>sdaia.gov.sa/ar/Services/Pages/GSB.aspx</a> · Arabic Implementing Regs mirror (parsed locally) — <a>bayancb.com/media/ytonosj3/اللائحة-التنفيذية-لنظام-المعلومات-الائتمانية.pdf</a>
+  </p>
+</section>
+
+<div class="foot">
+  <strong>Tabaqa طبقة</strong> — Data-Source Legality Dossier · compiled 16 July 2026 · companion to <code>EVIDENCE.md</code><br>
+  Team rule: a claim not in this dossier, or marked contested/unverified within it, does not get spoken to a judge. Gaps in §4 are gaps — not invitations to infer.
+</div>
+
+</body>
+</html>
