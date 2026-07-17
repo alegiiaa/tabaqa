@@ -33,7 +33,6 @@ flowchart TD
     end
 
     M --> N["🎬 THE REVEAL — Result.tsx<br/>same engine, two input sets:<br/>bank-only vs bank+wallet · Fahd: +6,000 SAR → 82"]
-    N --> O["🤖 Ask-Tabaqa — CommandBar.tsx → assistant.py<br/>ALLaM-2-7B on Groq · digit firewall<br/>fail → deterministic answer, source: rules:firewall"]
     N --> P["📋 Decision Cockpit — DecisionCockpit.tsx<br/>verdict · SAMA numbers cited · path-to-approval"]
 
     subgraph TRUST["🔏 Trust layer"]
@@ -165,41 +164,18 @@ Sum → clamp to **1–99**. Then `PD = clamp(1.39 × (1 − score/99)², 0.002�
 **What happens mechanically:** the same engine runs on two input sets — bank-only, then bank+wallet fused. Nothing else differs, so the delta *is* the wallet layer, honest by construction. For Fahd (`con_8842`): the wallet reveals **+6,000 SAR/month** of real, Masdr-verified income invisible to the bank statement → `verified_income_share` jumps → **score 82**. The animation plays that delta as a story beat.
 **Choreography note (from the Jul 10 session):** Fahd is *already prime* — his beat is "look what lifted it." For a decline→approval arc, use a persona or an own-data upload.
 
-### ⑩ Ask-Tabaqa — the firewalled copilot (`assistant.py` + `CommandBar.tsx`)
-
-**Baby:** a friend who read your report card and explains it in your language — but is physically unable to say any number that isn't written on the card.
-**The stack:** ALLaM-2-7B (the Saudi national model) served by Groq, temperature 0.35, fed `copilotFacts` — score, reveal amount, reason codes, recourse steps, SAMA caps — as `context.facts`. The system prompt embeds **pre-translated reference answers** (Arabic + English, every number engine-verified): a 7B model *rephrases* well but *composes* badly, so we let it rephrase a correct answer instead of composing a wrong one. That pattern is what made quality land.
-**The firewall — every reply must pass all gates or it never reaches the screen:**
-1. **Digit grounding** (`_reply_grounded`): normalize Arabic-Indic and Eastern digits + Arabic decimal marks (`str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹٫٬", …)`), extract every number, and require each to trace to the allowed set — every fact number, its rounding, its percent form (0.55 may be spoken as 55%), plus harmless counts 0–12 and the scale constants 99/100. Tolerance: ±0.011 absolute or 0.5% relative. One untraceable number → rejected.
-2. **Template hygiene** (`_reply_clean`): any leaked `{` or `}` → rejected.
-3. **Language integrity:** an Arabic question must get a *pure Arabic* reply — more than 2 Latin words outside the brand allowlist (tabaqa, sama, nsf, sar, urpay, barq, masdr, allam…) → rejected. English questions symmetrically (< 30% Arabic characters).
-4. **Rejection is silent:** the user sees `_grounded_answer()` — the deterministic recourse answer built from the same facts — tagged `source: rules:firewall`. The same answer serves Groq 429s and missing keys. The AI degrades to rules; it never degrades to nonsense.
-
-```mermaid
-flowchart LR
-    U["question"] --> LLM["ALLaM-2-7B<br/>(facts + reference answers)"]
-    LLM --> G1{"digits all<br/>traceable?"}
-    G1 -- no --> FB["deterministic answer<br/>source: rules:firewall"]
-    G1 -- yes --> G2{"no braces? language<br/>matches question?"}
-    G2 -- no --> FB
-    G2 -- yes --> OK["reply, source: allam"]
-```
-
-**The one-liner for judges:** *the AI narrates; the rules decide — and the narrator is caged by the arithmetic.*
-**Ops truth:** Groq free tier counts *requested* max_tokens against 6k tokens/min — the copilot's ~2k-token prompt allows ~2 calls/min before 429→fallback. Dev Tier before Jul 16 is what keeps the live-AI factor live.
-
-### ⑪ The receipt — `ComplianceReceipt.tsx` → `/receipt` → `/verify`
+### ⑩ The receipt — `ComplianceReceipt.tsx` → `/receipt` → `/verify`
 
 **Baby:** the toy comes with a certificate, and anyone can scan the sticker to check it's real — no account, no password.
 **What happens:** every decision emits **six checks computed live from this decision's own data** (never static ✓s): DBR under the cited SAMA cap · consent recorded · verification tier honesty · data-processor route · income evidence · **statement integrity (stage ③'s result)**. Rendered in-app, printed as an A4 artifact at `/receipt`, verified publicly at `/verify?rc=` via QR. The `/report` page is the applicant-facing sibling — an Arabic-first, Naskh-set attestation.
 **Why:** the compliance officer is a buyer too. A filable artifact turns "trust us" into "file this."
 
-### ⑫ The lender surface — cockpit + API
+### ⑪ The lender surface — cockpit + API
 
 **Baby:** one plug that fits every lamp — five lines of code and the lender's system asks us for scores.
 **What happens:** `DecisionCockpit.tsx` composes the memo a credit officer would file: verdict banner, mini gauge, SAMA numbers with citation, signed reasons with feature values. The API side: Supabase `api_keys` table + per-call metering behind one auth core (stdlib PostgREST calls, **fail-open** so a Supabase blip can never take the demo down), live sandbox keys issued from `/developers`, hosted reference at `API_REFERENCE.md`. Integration is genuinely 5 lines against `POST /v1/score`.
 
-### ⑬ The evidence layer — why any of this is believable (`eval/`, frozen ❄️)
+### ⑫ The evidence layer — why any of this is believable (`eval/`, frozen ❄️)
 
 **Baby:** we didn't just build the toy — we tested it on nearly a million real children's report cards, and we even ran the one experiment that could prove us wrong. It didn't.
 **AUC in one breath:** put one good payer and one defaulter behind a curtain and ask the model to point at the riskier one — AUC is how often it points right. 0.5 = coin flip, 1.0 = always.
@@ -225,8 +201,7 @@ Plus: 1M-account Gaussian-copula synthetic corpus with **TSTR 96%** (train-on-sy
 | WOE points scorecard | `scoring/` | the decision | auditable & replayable; a GBM/LLM scorer is neither |
 | Direction lock | `scorecard.py:_verify_lineage` | anti-drift | the served card can't contradict the validated fit — enforced at boot |
 | SAMA policy module | `sama.py` | cited caps | the regulator's numbers, not ours |
-| ALLaM-2-7B @ Groq | `assistant.py`, `enrich.py` | AR/EN narration | the *Saudi national model* — optics and substance; Groq = fastest inference |
-| Digit firewall | `assistant.py` | cage the narrator | grounding enforced by arithmetic, not by prompt-hoping |
+| ALLaM-2-7B @ Groq | `enrich.py`, `insights` | AR/EN narration | the *Saudi national model* — optics and substance; Groq = fastest inference |
 | Supabase | `api/keystore.py`, `auth.py` | keys + metering | managed Postgres, RLS, minutes to live keys |
 | Vercel (web + API) | both projects | hosting | judge-openable URL; cold start absorbed by prefetch |
 | eval harness | `eval/` | the proof | ablation, negative control, TSTR — teams claim, we measure |
@@ -281,5 +256,4 @@ Watheeq's thread structure (what demonstrably hooked 238k viewers): **known pain
 - **Point magnitudes ≠ fitted coefficients.** The card is an expert policy card direction-locked to the fit; magnitudes re-fit on the licensee's book. Disclosed in the model card.
 - **The integrity check defeats edits, not full re-forgery.** A forger recomputing every balance passes it; AIS-sourced data is the real answer. Say both.
 - **Czech/Taiwanese/Russian lifts are not Saudi lifts.** Mechanism transfers; magnitudes attenuate (our own Saudi anchor: ×0.819). Never quote +0.203 as a Saudi number.
-- **The copilot rate-limits on the free tier** (~2 calls/min). The fallback is deterministic and high-quality — but the LIVE-AI moment needs Groq Dev Tier before Jul 16.
 - **Fahd is already prime** — his story is "what lifted it," not "decline→approval." Use a persona for the redemption arc.

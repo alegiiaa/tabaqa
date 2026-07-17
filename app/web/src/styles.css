@@ -1241,8 +1241,6 @@ table.ledger tr:last-child td{border-bottom:0}
 /* while the tour is up, let the page scroll everything clear of the fixed card
    (on phones the card would otherwise sit exactly over the reveal CTA) */
 body:has(.tour-card) .ds-content{padding-bottom:210px}
-/* the docked copilot bar reserves scroll room too — bottom-edge buttons stay clickable */
-body:has(.cmd) .ds-content{padding-bottom:130px}
 
 /* ── U2 · decision cockpit (⑤ Decision memo) ──────────────────────────────── */
 .memo{display:flex;flex-direction:column;gap:16px}
@@ -1395,58 +1393,6 @@ body:has(.cmd) .ds-content{padding-bottom:130px}
   font-weight:600;letter-spacing:.02em;color:var(--blue);background:var(--blue-soft);
   border:1px solid rgba(37,99,235,.16);vertical-align:middle}
 
-/* ── Tabaqa Guide — in-app AI assistant ──────────────────────────────────── */
-.asst{position:fixed;right:22px;bottom:22px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-.asst.rtl{right:auto;left:22px;align-items:flex-start}
-.asst-fab{width:58px;height:58px;border-radius:50%;border:0;cursor:pointer;color:#fff;display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--blue),#7c3aed);box-shadow:0 10px 30px rgba(37,99,235,.40)}
-.asst-fab svg{width:26px;height:26px}
-.asst-fab.pulse{animation:asstpulse 1.8s ease-out infinite}
-@keyframes asstpulse{0%{box-shadow:0 10px 30px rgba(37,99,235,.40),0 0 0 0 rgba(124,58,237,.45)}
-  70%{box-shadow:0 10px 30px rgba(37,99,235,.40),0 0 0 16px rgba(124,58,237,0)}
-  100%{box-shadow:0 10px 30px rgba(37,99,235,.40),0 0 0 0 rgba(124,58,237,0)}}
-.asst-nudge{border:1px solid var(--line);background:#fff;color:var(--text);font-size:13px;font-weight:600;
-  padding:9px 13px;border-radius:14px;cursor:pointer;box-shadow:0 8px 24px rgba(12,18,38,.12);max-width:230px}
-
-.asst-panel{width:370px;max-width:calc(100vw - 32px);height:540px;max-height:calc(100vh - 110px);background:#fff;
-  border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 60px rgba(12,18,38,.24);
-  display:flex;flex-direction:column;overflow:hidden}
-.asst-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
-  background:linear-gradient(135deg,var(--blue),#7c3aed);color:#fff}
-.asst-head-l{display:flex;align-items:center;gap:11px}
-.asst-head strong{display:block;font-size:14.5px}
-.asst-status{font-size:11.5px;opacity:.85}
-.asst-orb{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center}
-.asst-orb>span{width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
-.asst-x{background:rgba(255,255,255,.16);border:0;color:#fff;width:26px;height:26px;border-radius:8px;cursor:pointer;font-size:12px}
-
-.asst-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg-soft)}
-.asst-msg{display:flex;gap:8px;align-items:flex-end;max-width:90%}
-.asst-msg.user{align-self:flex-end;flex-direction:row-reverse}
-.asst-av{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff;
-  background:linear-gradient(135deg,var(--blue),#7c3aed)}
-.asst-bubble{padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.55;background:#fff;
-  border:1px solid var(--line);color:var(--text)}
-.asst-msg.user .asst-bubble{background:var(--blue);color:#fff;border-color:transparent}
-.asst-msg.user .asst-bubble strong{color:#fff}
-.asst-bubble strong{color:var(--blue-deep)}
-.asst.rtl .asst-bubble{direction:rtl;text-align:right}
-.asst-typing{display:inline-flex;gap:4px;padding:3px 0}
-.asst-typing i{width:7px;height:7px;border-radius:50%;background:var(--faint);animation:asstdot 1s infinite}
-.asst-typing i:nth-child(2){animation-delay:.15s} .asst-typing i:nth-child(3){animation-delay:.3s}
-@keyframes asstdot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
-
-.asst-chips{display:flex;flex-wrap:wrap;gap:7px;padding:0 16px 10px;background:var(--bg-soft)}
-.asst-chip{border:1px solid var(--line-2);background:#fff;color:var(--blue);font-size:12px;font-weight:600;
-  padding:7px 11px;border-radius:999px;cursor:pointer}
-.asst-chip:hover{background:var(--blue-soft)}
-.asst-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff}
-.asst-input input{flex:1;border:1px solid var(--line-2);border-radius:12px;padding:10px 13px;font-size:13.5px;font-family:inherit;outline:none}
-.asst-input input:focus{border-color:var(--blue)}
-.asst-input button{flex:none;width:40px;border:0;border-radius:12px;background:var(--blue);color:#fff;cursor:pointer;display:grid;place-items:center}
-.asst-input button:disabled{opacity:.45;cursor:default}
-.asst-input button svg{width:18px;height:18px}
-
 /* ── Developers / API docs page ──────────────────────────────────────────── */
 .dv{min-height:100vh;background:var(--bg);color:var(--text)}
 .dv-top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
@@ -1571,89 +1517,6 @@ body:has(.cmd) .ds-content{padding-bottom:130px}
   border:1px solid var(--line);border-radius:8px;padding:5px 11px;cursor:pointer}
 .dv-pg-sniptabs button.active{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
 @media(max-width:560px){.dv-pg-keybar{flex-direction:column;align-items:stretch}}
-
-/* ── Tabaqa Copilot — premium midnight-blue command capsule (Wispr-style) ─── */
-:root{--cyan:#00f0ff;--cyan-soft:#5fe9ff;--mid:#0a0f1a;--mid-deep:#050b14}
-/* film-grain texture (feTurbulence) — breaks the digital flatness */
-.cmd-cap,.cmd-card{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.cmd-cap::after,.cmd-card::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background-image:var(--grain);background-size:140px 140px;opacity:.05;mix-blend-mode:overlay}
-.cmd{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:1100;
-  display:flex;flex-direction:column;align-items:center;gap:12px;width:min(540px,92vw)}
-@keyframes cmdrise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.cmd-nudge{background:linear-gradient(180deg,var(--mid),var(--mid-deep));color:#eaf3ff;font-size:13px;font-weight:600;
-  border:1px solid rgba(120,180,255,.14);padding:9px 15px;border-radius:999px;cursor:pointer;
-  box-shadow:0 1px 1px rgba(0,0,0,.6),0 16px 40px rgba(2,8,20,.5),inset 0 1px 0 rgba(150,215,255,.16);animation:cmdrise .35s ease}
-
-/* the capsule — slim glass pill resting on the screen */
-.cmd-cap{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;width:100%;
-  padding:7px 8px 7px 16px;border-radius:9999px;
-  background:linear-gradient(180deg,var(--mid),var(--mid-deep));border:1px solid rgba(120,180,255,.13);
-  box-shadow:0 1px 1px rgba(0,0,0,.7),0 22px 55px rgba(2,8,20,.6),0 0 0 1px rgba(0,240,255,.05),
-    inset 0 1px 0 rgba(150,215,255,.18)}
-.cmd-cap:focus-within{border-color:rgba(0,240,255,.28);box-shadow:0 1px 1px rgba(0,0,0,.7),0 24px 60px rgba(2,8,20,.62),
-    0 0 0 1px rgba(0,240,255,.18),inset 0 1px 0 rgba(150,215,255,.2)}
-.cmd-cap.recording{padding:7px 9px;justify-content:space-between}
-.cmd-spark{flex:none;width:24px;height:24px;display:grid;place-items:center;color:var(--cyan-soft);
-  filter:drop-shadow(0 0 5px rgba(0,240,255,.45))}
-.cmd-spark svg{width:16px;height:16px;animation:cmdspin 7s linear infinite}
-@keyframes cmdspin{to{transform:rotate(360deg)}}
-.cmd-cap input{flex:1;border:0;outline:none;font-size:14.5px;font-family:inherit;background:none;
-  color:#eaf3ff;min-width:0;caret-color:var(--cyan)}
-.cmd-cap input::placeholder{color:rgba(150,190,235,.45)}
-.cmd.rtl .cmd-cap input{direction:rtl;text-align:right}
-/* monospace live timer — technical, precise */
-.cmd-timer{flex:none;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--cyan);
-  letter-spacing:.04em;min-width:34px;text-align:center}
-
-/* circular controls */
-.cmd-circle{flex:none;width:38px;height:38px;border:0;border-radius:50%;cursor:pointer;display:grid;place-items:center;
-  transition:transform .12s,background .15s,box-shadow .15s;position:relative}
-.cmd-circle:active{transform:scale(.92)}
-.cmd-circle svg{width:18px;height:18px}
-.cmd-circle.mic{background:rgba(160,210,255,.08);color:var(--cyan-soft)}
-.cmd-circle.mic:hover{background:rgba(0,240,255,.14)}
-.cmd-circle.send{background:linear-gradient(135deg,#22ecff,#0bb6ff);color:#04121a;
-  box-shadow:0 0 16px rgba(0,240,255,.5)}
-.cmd-circle.cancel{background:rgba(160,200,235,.09);color:rgba(214,230,250,.82)}
-.cmd-circle.cancel:hover{background:rgba(160,200,235,.16)}
-.cmd-circle.confirm{background:var(--cyan);color:#04121a;box-shadow:0 0 18px rgba(0,240,255,.6)}
-
-/* recording — glowing cyan dotted waveform between ✕ and ✓ */
-.cmd-dots{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;height:24px}
-.cmd-dots i{width:4px;height:4px;border-radius:999px;background:rgba(0,240,255,.45);animation:cmddot 1s ease-in-out infinite}
-@keyframes cmddot{0%,100%{height:4px;opacity:.45;box-shadow:none}
-  50%{height:16px;opacity:1;background:var(--cyan);box-shadow:0 0 8px rgba(0,240,255,.7)}}
-
-/* floating reply card */
-.cmd-card{position:relative;overflow:hidden;width:100%;border-radius:18px;
-  background:linear-gradient(180deg,#0b1220,var(--mid-deep));border:1px solid rgba(120,180,255,.13);padding:16px 18px;
-  box-shadow:0 1px 1px rgba(0,0,0,.6),0 24px 60px rgba(2,8,20,.6),inset 0 1px 0 rgba(150,215,255,.14);animation:cmdrise .3s ease}
-.cmd-card-x{position:absolute;top:11px;inset-inline-end:12px;background:rgba(160,200,235,.09);border:0;color:rgba(214,230,250,.6);
-  width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:11px;z-index:1}
-.cmd-card-head{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
-  color:var(--cyan);margin-bottom:10px}
-.cmd-orb{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#bff7ff,var(--cyan));display:grid;place-items:center;
-  box-shadow:0 0 12px rgba(0,240,255,.55)}
-.cmd-orb>span{width:8px;height:8px;border-radius:50%;background:#04121a;animation:cmdpulse 1.4s ease-in-out infinite}
-@keyframes cmdpulse{0%,100%{opacity:.55}50%{opacity:1}}
-.cmd-reply{font-size:14px;line-height:1.62;color:#dfeaf7}
-.cmd-reply strong{color:var(--cyan-soft)}
-.cmd.rtl .cmd-reply{direction:rtl;text-align:right}
-.cmd-think{display:flex;gap:5px;padding:4px 0}
-.cmd-think i{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 7px rgba(0,240,255,.6);animation:asstdot 1s infinite}
-.cmd-think i:nth-child(2){animation-delay:.15s}.cmd-think i:nth-child(3){animation-delay:.3s}
-.cmd-retry{margin-top:11px;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;cursor:pointer;
-  color:var(--cyan);background:rgba(0,240,255,.1);border:1px solid rgba(0,240,255,.32);padding:7px 13px;border-radius:999px}
-.cmd-retry:hover{background:rgba(0,240,255,.18)}
-.cmd-retry svg{width:15px;height:15px}
-.cmd-acting{margin-top:11px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;
-  color:var(--cyan);background:rgba(0,240,255,.1);border:1px solid rgba(0,240,255,.3);padding:6px 12px;border-radius:999px;animation:cmdrise .25s ease}
-.cmd-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
-.cmd-chip{border:1px solid rgba(120,180,255,.18);background:rgba(120,180,255,.05);color:#bfe6f5;font-size:12px;font-weight:600;
-  padding:7px 11px;border-radius:999px;cursor:pointer}
-.cmd-chip:hover{background:rgba(0,240,255,.12);border-color:rgba(0,240,255,.4)}
-@media(max-width:560px){.cmd{bottom:14px}}
 
 /* ── Tabaqa Credit Report — official Arabic attestation (Watheeq-style, print-ready) ── */
 .rpt-load{min-height:100vh;display:grid;place-items:center;color:var(--muted);font-size:16px;gap:10px;background:#eceff5;
@@ -1986,8 +1849,6 @@ html[dir=rtl] .fwd{transform:scaleX(-1)}
 /* reveal-flow arrows: row visually reverses in RTL, so the glyph must too */
 html[dir=rtl] .mm-rev-arrow,html[dir=rtl] .connect-reveal-arrow{display:inline-block;transform:scaleX(-1)}
 html[dir=rtl] .acard-reveal .arr,html[dir=rtl] .persona-reveal .arr{display:inline-block;transform:scaleX(-1)}
-/* guard the latent assistant double-flip (user rows carry no avatar today) */
-html[dir=rtl] .asst-msg.user{flex-direction:row}
 /* hero photo focal point follows the mirror */
 html[dir=rtl] .mm-hero{background-position:center left}
 /* physical→logical */

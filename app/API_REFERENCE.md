@@ -185,22 +185,6 @@ curl -s https://tabaqa-api.vercel.app/v1/affordability -H 'Content-Type: applica
 }
 ```
 
-### ④ `POST /v1/assistant` — the conversational guide
-
-A Tabaqa-aware assistant (Claude-powered when a key is set, else a bilingual
-scripted fallback). The Anthropic key stays server-side.
-
-```bash
-curl -s https://tabaqa-api.vercel.app/v1/assistant -H 'Content-Type: application/json' -d '{
-  "messages":[{"role":"user","content":"I have a bank account, how do I connect?"}],
-  "context":{"section":"connect","connected":false}
-}'
-```
-
-```jsonc
-{ "reply": "To connect, go to the Connect screen …", "suggestions": ["…"], "source": "rules" }
-```
-
 ---
 
 ## Supporting endpoints

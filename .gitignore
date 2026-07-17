@@ -36,7 +36,6 @@ venv/
 app/TASKS.md
 app/CHECKLIST.md
 app/SESSION-*.md
-app/COPILOT_FEATURE.md
 
 # local media / working assets (the README uses assets/header.gif only)
 /gif/

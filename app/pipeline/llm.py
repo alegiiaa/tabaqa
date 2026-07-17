@@ -108,8 +108,6 @@ ENRICH_MODEL = _model("TABAQA_ENRICH_MODEL", "claude-haiku-4-5",
                       "TABAQA_GROQ_ENRICH_MODEL", "allam-2-7b")
 INSIGHTS_MODEL = _model("TABAQA_INSIGHTS_MODEL", "claude-sonnet-4-6",
                         "TABAQA_GROQ_INSIGHTS_MODEL", "allam-2-7b")
-ASSISTANT_MODEL = _model("TABAQA_ASSISTANT_MODEL", "claude-haiku-4-5",
-                         "TABAQA_GROQ_ASSISTANT_MODEL", "allam-2-7b")
 
 # Tag baked into ``generated_by``/``source`` so the UI can show which model spoke.
 PROVIDER_TAG = "allam" if _active() == "groq" else "claude"
@@ -141,19 +139,6 @@ def _anthropic_structured(model, system, prompt, schema, max_tokens, thinking) -
         text = next(b.text for b in resp.content if b.type == "text")
         return json.loads(text)
     except Exception:  # pragma: no cover - any API/parse failure → graceful fallback
-        return None
-
-
-def _anthropic_chat(model, system, messages, max_tokens) -> Optional[str]:
-    client = _get_client()
-    if client is None:
-        return None
-    try:
-        resp = client.messages.create(
-            model=model, max_tokens=max_tokens, system=system, messages=messages,
-        )
-        return next((b.text for b in resp.content if b.type == "text"), "").strip() or None
-    except Exception:  # pragma: no cover
         return None
 
 
@@ -234,12 +219,6 @@ def _groq_structured(model, system, prompt, schema, max_tokens) -> Optional[dict
         return None
 
 
-def _groq_chat(model, system, messages, max_tokens, temperature=0.7) -> Optional[str]:
-    msgs = ([{"role": "system", "content": system}] if system else []) + list(messages)
-    return (_groq_raw(model, msgs, max_tokens=max_tokens, temperature=temperature, json_mode=False)
-            or None)
-
-
 # ── public API (provider-routed) ────────────────────────────────────────────
 def structured(
     *, model: str, system: str, prompt: str, schema: dict,
@@ -262,18 +241,3 @@ def structured(
     if data is not None:
         _cache[key] = data
     return data
-
-
-def chat(*, model: str, system: str, messages: list[dict], max_tokens: int = 600,
-         temperature: float = 0.7) -> Optional[str]:
-    """Plain conversational completion → assistant text, or None if disabled/errored.
-
-    ``messages`` is the running [{role, content}] history. Not cached (each turn is
-    unique). Used by the in-app assistant; degrades to a scripted fallback on None.
-    (``temperature`` applies to the Groq path; Anthropic chat keeps its default.)
-    """
-    prov = _active()
-    if prov is None:
-        return None
-    return (_groq_chat(model, system, messages, max_tokens, temperature) if prov == "groq"
-            else _anthropic_chat(model, system, messages, max_tokens))

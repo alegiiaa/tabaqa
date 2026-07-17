@@ -290,11 +290,6 @@ export interface AffordabilityInput {
   redf_beneficiary?: boolean
 }
 
-// ── assistant ──────────────────────────────────────────────────────────────
-export interface AssistantMessage { role: 'user' | 'assistant'; content: string }
-export interface AssistantAction { type: 'navigate' | 'open' | 'none'; section?: string | null; target?: string | null }
-export interface AssistantReply { reply: string; suggestions: string[]; source: string; action?: AssistantAction | null }
-
 // ── transport ──────────────────────────────────────────────────────────────
 // One classified error type so the UI can show a friendly, bilingual message
 // (and a Retry) instead of the browser's raw "Failed to fetch". `kind` tells the
@@ -367,6 +362,4 @@ export const api = {
     postJson<Insights>('/v1/insights', { connection_id }),
   insightsStatement: (statement: StatementInput) =>
     postJson<Insights>('/v1/insights', { statement }),
-  assistant: (messages: AssistantMessage[], context?: Record<string, unknown>) =>
-    postJson<AssistantReply>('/v1/assistant', { messages, context }),
 }

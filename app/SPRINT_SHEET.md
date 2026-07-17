@@ -16,7 +16,6 @@ Example of the convention on already-shipped work:
 
 | ✓ | Task | Why | Proof |
 |---|---|---|---|
-| ✅ | Ask-Tabaqa copilot | ed.1 jury rewards live AI; ALLaM = Saudi-model optics | commit `86be67b` + prod probe: pure-AR grounded reply |
 | ✅ | Statement integrity + refuse-don't-guess | the trust beat; kills "what if the CSV is fake" | commit `b955236` + `/v1/score` returns `statement_integrity` |
 | ✅ | API prod deploy | full stack must run today's code | both probes green (SESSION-2026-07-10 §top) |
 
@@ -27,11 +26,11 @@ Example of the convention on already-shipped work:
 | ✓ | Task | Why | Owner | When | Proof (fill when done) |
 |---|---|---|---|---|---|
 | ☐ | **Venue format from qualification email** — build-on-site or pitch+demo? | every plan below assumes pitch+demo; if wrong, we re-plan NOW, not Jul 15 | You | tonight | quote the email line here |
-| ☐ | **Groq Dev Tier upgrade** | free tier = ~2 copilot calls/min → the live-AI hero moment starves mid-demo (devil finding) | You | tonight | dashboard screenshot showing tier + new TPM limit |
+| ☐ | **Groq Dev Tier upgrade** | free tier = 6k tokens/min shared → `/v1/insights` (ALLaM narration) 429s mid-demo (devil finding) | You | tonight | dashboard screenshot showing tier + new TPM limit |
 | ☐ | **Book mock judge for dry run #1** | 34/50 devil baseline says rehearsal, not code, is where the points are; findings drive Jul 12–13 fixes | You | tonight | name + confirmed time |
 | ☐ | **Real-export sprint** — team WhatsApp, 10+ own bank/wallet exports through the app | the #1 lever from the 34/50 review: "works on OUR real data" beats any slide; also stress-tests adapters | You + team | Jul 11–12 | list: institution → parsed ✓/✗ → score |
 | ☐ | **Dry run #1** — real person, live site, stopwatch, `JUDGE_SCRIPT.md` | first contact with a real human; every stumble becomes a fix ticket below | Both | Jul 12 | stumble list (append as tasks) |
-| ☐ | **Pre-demo API smoke script** — `/health` keyed, one live score, key issuance, copilot probe — 5 min on venue wifi | venue wifi is the single biggest demo risk; scripted = no thinking under pressure | Claude | Jul 11 | script path + one green local run pasted |
+| ☐ | **Pre-demo API smoke script** — `/health` keyed, one live score, key issuance, `/v1/insights` probe — 5 min on venue wifi | venue wifi is the single biggest demo risk; scripted = no thinking under pressure | Claude | Jul 11 | script path + one green local run pasted |
 | ☐ | **Kill-the-LLM + kill-the-network drill** — demo with Groq 429'd; demo fully offline (`smoke_test.py` path) | the fallback must be *rehearsed*, not just built — fumbling the fallback reads worse than having none | Both | Jul 15 | 2-line drill log: what we did when each died |
 | ☐ | **Dry run #2 → FULL FREEZE** | after this, only rehearsal — the 92%-done-product/unrehearsed-3-minutes failure mode | Both | Jul 15 | stopwatch time + freeze declared here |
 

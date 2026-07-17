@@ -20,22 +20,12 @@ type View =
   | { kind: 'result'; result: ScoreResult; name: string; source: string; initialTab?: 'memo' }
 
 /** The lender-side CRM: score other people (upload / form / persona) and keep a history. */
-export function Applicants({ onActiveResult }: {
-  /** Reports the applicant whose Result is on screen (null when none) — the
-   *  Ask-Tabaqa copilot grounds its answers on whoever the lender is looking at. */
-  onActiveResult?: (r: ScoreResult | null) => void
-} = {}) {
+export function Applicants() {
   const { tx } = useTx()
   const [view, setView] = useState<View>({ kind: 'list' })
   const [applicants, setApplicants] = useState<SavedApplicant[]>([])
   const [loading, setLoading] = useState(true)
   const [persistMsg, setPersistMsg] = useState<string | null>(null)
-
-  useEffect(() => {
-    onActiveResult?.(view.kind === 'result' ? view.result : null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view])
-  useEffect(() => () => { onActiveResult?.(null) }, [])  // section switch → back to own profile
 
   async function refresh() {
     setLoading(true)

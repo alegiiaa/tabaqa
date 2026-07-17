@@ -163,24 +163,6 @@ class KeyResponse(BaseModel):
     note: str
 
 
-# ── in-app assistant ───────────────────────────────────────────────────────
-class AssistantMessage(BaseModel):
-    role: str  # "user" | "assistant"
-    content: str
-
-
-class AssistantRequest(BaseModel):
-    messages: list[AssistantMessage]
-    context: dict | None = None   # {section?, connected?} — guides the assistant
-
-
-class AssistantResponse(BaseModel):
-    reply: str
-    suggestions: list[str] = Field(default_factory=list)
-    source: str                   # "claude:<model>" | "rules"
-    action: dict | None = None    # {type: navigate|open|none, section?, target?}
-
-
 # ── shared sub-models ─────────────────────────────────────────────────────
 class ReasonCodeModel(BaseModel):
     code: str

@@ -227,7 +227,7 @@ function Playground() {
 const NAV = [
   ['overview', 'Overview'], ['playground', 'Playground'],
   ['auth', 'Authentication'], ['score', 'Score'],
-  ['insights', 'Insights'], ['affordability', 'Affordability'], ['assistant', 'Assistant'],
+  ['insights', 'Insights'], ['affordability', 'Affordability'],
   ['model', 'Data model'], ['errors', 'Errors'], ['validation', 'How it’s validated'],
 ] as const
 const NAV_IDS = NAV.map(([id]) => id)
@@ -398,18 +398,6 @@ export function DevelopersPage() {
     "citation": "SAMA Responsible Lending Principles, Circular 46538/99, Chapter IV"
   }
 }`}</Code>
-          </section>
-
-          <section id="assistant">
-            <h2>④ Conversational guide</h2>
-            <Endpoint method="POST" path="/v1/assistant">
-              <p>A Tabaqa-aware assistant (Claude when a key is set, else a bilingual scripted
-                fallback). The Anthropic key stays server-side.</p>
-            </Endpoint>
-            <Code lang="bash">{`curl -s ${API}/v1/assistant -H 'Content-Type: application/json' -d '{
-  "messages":[{"role":"user","content":"How do I connect my bank?"}],
-  "context":{"section":"connect","connected":false}
-}'`}</Code>
           </section>
 
           <section id="model">

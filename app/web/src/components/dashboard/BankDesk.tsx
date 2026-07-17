@@ -6,31 +6,11 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTx } from '../../lib/tx'
-import type { AssistantAction, ScoreResult } from '../../lib/api'
 import { DashboardLayout, type NavSpec, type Section } from './DashboardLayout'
 import { IncomingOrders, OrderToast, fetchOrders, type TabaqaOrder } from './IncomingOrders'
 import { Applicants } from './Applicants'
-import { CommandBar } from './CommandBar'
 
 type DeskSection = Extract<Section, 'orders' | 'applicants'>
-
-/** Ask-Tabaqa fact set for the applicant the worker is looking at — same
- *  grounding contract as the full dashboard (the firewall's allowed numbers). */
-function buildCopilotFacts(r: ScoreResult) {
-  return {
-    score: r.tabaqa_score,
-    score_scale: 'score is 1-99, higher is better',
-    risk_flag: r.risk_flag,
-    bank_only_income_sar: r.income.bank_only_income,
-    true_verified_income_sar: r.income.true_monthly_income,
-    hidden_income_revealed_sar: r.income.reveal_delta,
-    verified_income_share: r.income.verified_share,
-    months_observed: r.confidence?.months_observed,
-    top_reasons: r.reason_codes.slice(0, 5).map((c) => ({ label: c.label, points: c.points, polarity: c.polarity })),
-    recourse: r.recourse ?? undefined,
-    sama_dbr_cap_pct: { employee: 33.33, retiree: 25 },
-  }
-}
 
 export function BankDesk() {
   const { tx } = useTx()
@@ -68,10 +48,6 @@ export function BankDesk() {
 
   const pending = orders?.filter((o) => o.status === 'pending').length ?? 0
 
-  // Ask-Tabaqa grounds on whoever the worker is reviewing in المتقدمون.
-  const [applicantResult, setApplicantResult] = useState<ScoreResult | null>(null)
-  const facts = section === 'applicants' && applicantResult ? buildCopilotFacts(applicantResult) : null
-
   const nav: NavSpec[] = [
     {
       id: 'orders',
@@ -95,11 +71,6 @@ export function BankDesk() {
     },
   }
 
-  function handleAction(a: AssistantAction) {
-    if (a.type === 'navigate' && (a.section === 'orders' || a.section === 'applicants')) setSection(a.section)
-    else if (a.type === 'open' && a.target === 'developers') window.open('/developers', '_blank')
-  }
-
   return (
     <>
       <DashboardLayout
@@ -111,9 +82,8 @@ export function BankDesk() {
       >
         {section === 'orders'
           ? <IncomingOrders orders={orders} onChanged={() => { void poll() }} />
-          : <Applicants onActiveResult={setApplicantResult} />}
+          : <Applicants />}
       </DashboardLayout>
-      <CommandBar section={section} connected onAction={handleAction} facts={facts} />
       {toast && section !== 'orders' && (
         <OrderToast
           o={toast}

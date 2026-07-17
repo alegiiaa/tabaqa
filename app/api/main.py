@@ -34,15 +34,11 @@ from affordability import affordability  # noqa: E402
 import lenders as lender_layer  # noqa: E402
 import sama  # noqa: E402
 
-from assistant import respond as assistant_respond  # noqa: E402
-
 from .models import (  # noqa: E402
     AccessRequest,
     AccountModel,
     AffordabilityRequest,
     AffordabilityResponse,
-    AssistantRequest,
-    AssistantResponse,
     FeaturesModel,
     IncomeComponentModel,
     IncomeModel,
@@ -486,14 +482,6 @@ def offers_route(req: OffersRequest, ctx: KeyCtx = Depends(api_key)) -> OffersRe
 def personas() -> list[dict]:
     """Sample applicants for the gallery — headline numbers from the real pipeline."""
     return PERSONAS
-
-
-@app.post("/v1/assistant", response_model=AssistantResponse)
-def assistant(req: AssistantRequest) -> AssistantResponse:
-    """Tabaqa Guide — the conversational in-app helper (Claude when a key is set,
-    else a bilingual scripted fallback). The Anthropic key stays server-side."""
-    out = assistant_respond([m.model_dump() for m in req.messages], req.context)
-    return AssistantResponse(**out)
 
 
 @app.post("/v1/access-request")

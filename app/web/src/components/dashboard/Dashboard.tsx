@@ -2,10 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import { useTx } from '../../lib/tx'
 import { IncomingOrders, OrderToast, fetchOrders, type TabaqaOrder } from './IncomingOrders'
-import { api, type AssistantAction, type ScoreResult, type StatementInput } from '../../lib/api'
+import { api, type ScoreResult, type StatementInput } from '../../lib/api'
 import { DashboardLayout, type NavSpec, type Section } from './DashboardLayout'
 import { Connect, type Picks } from './Connect'
-import { CommandBar } from './CommandBar'
 import { MyMoney } from './MyMoney'
 import { Applicants } from './Applicants'
 import { RevealScreen, ScoreScreen, LedgerScreen } from './Result'
@@ -17,23 +16,6 @@ import { JudgeTour, markTourSeen, tourSeen } from './Tour'
 
 const MY_CONNECTION = 'con_8842' // the signed-in user's own accounts (demo protagonist)
 const DEFAULT_PICKS: Picks = { bank: 'alinma', wallet: 'barq' }
-
-/** The Ask-Tabaqa fact set for one scored person — see copilotFacts below. */
-function buildCopilotFacts(r: ScoreResult) {
-  return {
-    score: r.tabaqa_score,
-    score_scale: 'score is 1-99, higher is better',
-    risk_flag: r.risk_flag,
-    bank_only_income_sar: r.income.bank_only_income,
-    true_verified_income_sar: r.income.true_monthly_income,
-    hidden_income_revealed_sar: r.income.reveal_delta,
-    verified_income_share: r.income.verified_share,
-    months_observed: r.confidence?.months_observed,
-    top_reasons: r.reason_codes.slice(0, 5).map((c) => ({ label: c.label, points: c.points, polarity: c.polarity })),
-    recourse: r.recourse ?? undefined,
-    sama_dbr_cap_pct: { employee: 33.33, retiree: 25 },
-  }
-}
 
 /** Re-brand the demo accounts + transactions to the institutions the user picked. */
 function rethemeResult(result: ScoreResult, picks: Picks): ScoreResult {
@@ -159,23 +141,6 @@ export function Dashboard() {
 
   const pendingOrders = orders?.filter((o) => o.status === 'pending').length ?? 0
 
-  // Ask-Tabaqa grounded facts: the on-screen person's REAL numbers, and the ONLY
-  // numbers the copilot's LLM may use — enforced server-side by the grounding
-  // firewall. In the Applicants section the copilot grounds on whoever the
-  // lender is looking at (the committee show's Yousef beat); elsewhere, on the
-  // signed-in profile.
-  const [applicantResult, setApplicantResult] = useState<ScoreResult | null>(null)
-  const copilotFacts = useMemo(() => {
-    const src = section === 'applicants' ? applicantResult : themed
-    return src ? buildCopilotFacts(src) : null
-  }, [section, applicantResult, themed])
-
-  // The copilot acts inside the app only: navigate sections / open the docs.
-  function handleAction(a: AssistantAction) {
-    if (a.type === 'navigate' && a.section) setSection(a.section as Section)
-    else if (a.type === 'open' && a.target === 'developers') window.open('/developers', '_blank')
-  }
-
   function onConnected(r: ScoreResult, p: Picks, inp?: StatementInput) {
     setMy(r)
     setPicks(p)
@@ -195,12 +160,7 @@ export function Dashboard() {
   }
 
   if (!connected) {
-    return (
-      <>
-        <Connect onConnected={onConnected} />
-        <CommandBar section="connect" connected={false} onAction={handleAction} />
-      </>
-    )
+    return <Connect onConnected={onConnected} />
   }
 
   // The nav tells the story the pitch tells: the offers are the product, and
@@ -254,7 +214,7 @@ export function Dashboard() {
         {section === 'orders' ? (
           <IncomingOrders orders={orders} onChanged={() => { void pollOrders() }} />
         ) : section === 'applicants' ? (
-          <Applicants onActiveResult={setApplicantResult} />
+          <Applicants />
         ) : section === 'model' ? (
           <>
             <ModelCardPanel />
@@ -266,8 +226,6 @@ export function Dashboard() {
           <SectionBody section={section} result={themed} onNavigate={setSection} conn={insightsConn} />
         ) : null}
       </DashboardLayout>
-      {/* Both are bottom-docked — while the tour coaches, the copilot yields the stage. */}
-      {!tour && <CommandBar section={section} connected onAction={handleAction} facts={copilotFacts} />}
       {tour && <JudgeTour onNavigate={setSection} onClose={closeTour} />}
       {/* the "you have a new order" moment — raised live when the app sends one */}
       {orderToast && section !== 'orders' && (

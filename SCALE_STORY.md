@@ -5,7 +5,7 @@
 > engine** (user decision, Jul 12; built + live in the app under «التمويل», commit `bca75e7`).
 > The hero beat is no longer DECLINE→APPROVE — it is **«0 عروض ← 4 عروض»**: same search,
 > same SAMA rules; the wallet becomes visible and the offers appear. The engine (score,
-> reveal, copilot, receipt) is the trust layer underneath.
+> reveal, receipt) is the trust layer underneath.
 > **The current story lives in `JUDGE_SCRIPT.md` (rewritten) + `TEAM_BRIEF.md` §1/§5/§7** —
 > including the FOUR FORBIDDEN SENTENCES (ID-only onboarding · Sehhaty/Absher data ·
 > "banks give us formulas" · "approval is a formality") and their corrected versions.
@@ -132,7 +132,7 @@ Two things nobody else has: the **Arabic/RTL/Hijri adapter layer** (verified unc
 > «وحتى لا تظنون أنها آلة موافقات — هذا **يوسف**، دخل حر متقطع:
 > درجته **٥١**. القرار: **رفض — حتى مع محفظته.** النموذج يقول لا عندما يجب أن يقول لا.
 > لكن الفرق عندنا: **الرفض ليس نهاية — الدرجة تتكلم.»**
-*Tap the Ask-Tabaqa bar → hero chip: «ليش درجتي ٥١؟ ووش أسوي عشان أوصل ٦٧؟» → ALLaM answers live, in Arabic, grounded:*
+*Open «مسار الوصول للموافقة» on Yousef's result — «ليش درجتي ٥١؟ ووش أسوي عشان أوصل ٦٧؟» is answered live, in Arabic, grounded:*
 > *(the product says it, not the presenter: balance buffer +14 · avoid overdrafts +9 → indicative ≈ 74, REVIEW band)*
 > «هذا **علّام** — النموذج السعودي — يشرح ولا **يلمس** الدرجة أبدًا: الدرجة نموذج إحصائي مدقَّق على ٩٦٣ ألف طلب حقيقي. إذا اخترع علّام رقمًا واحدًا، لا يصل للشاشة.»
 
@@ -152,7 +152,7 @@ Two things nobody else has: the **Arabic/RTL/Hijri adapter layer** (verified unc
 > نطلب شيئًا واحدًا: **بنك شريك لأول تجربة.** والقرار — كما شفتم — ينعكس في ثوانٍ.»
 
 ### Fallbacks (rehearse each once)
-- **LLM dies / rate-limits** → the copilot silently serves the same answer from the deterministic engine — the beat proceeds identically (this is by design; it happened in testing and no one can tell).
+- **LLM dies / rate-limits** → the insights panel silently falls back to the deterministic engine's own answer — the beat proceeds identically (this is by design; it happened in testing and no one can tell).
 - **Wifi dies** → phone screen-recording of beats ②–③ + printed receipt carries ④.
 - **Judge won't participate** → recovery lines above; the show works fully presenter-driven.
 
@@ -167,9 +167,8 @@ Two things nobody else has: the **Arabic/RTL/Hijri adapter layer** (verified unc
 
 | Pri | Item | Detail | Est. |
 |---|---|---|---|
-| **P0** | **Ask-Tabaqa copilot (the AI hero moment)** | Resurrect the parked command-bar rails (`app/COPILOT_FEATURE.md`); ground answers in the deterministic recourse/path-to-approval features so ALLaM narrates real numbers and cannot hallucinate the score; Arabic-first | ~1 day |
-| **P0** | **Groq Dev Tier before Jul 16** | Free tier = 6k tokens/**min** counting *requested* max_tokens — a live on-stage demo on the shared free tier will 429 mid-answer. Also: copilot must degrade **silently** to the deterministic recourse answer on 429 (no error state, ever, on stage) | admin task |
-| P1 | Lean sandbox "Connect via API" spike | Proves the production channel live next to upload. **Decide by Jul 12** — only if the copilot lands early | ~1 day |
+| **P0** | **Groq Dev Tier before Jul 16** | `/v1/insights` runs ALLaM on Groq; free tier = 6k tokens/**min** counting *requested* max_tokens — a live on-stage demo on the shared free tier will 429 mid-answer. Also: the insights panel must degrade **silently** to the deterministic answer on 429 (no error state, ever, on stage) | admin task |
+| P1 | Lean sandbox "Connect via API" spike | Proves the production channel live next to upload. **Decide by Jul 12** | ~1 day |
 | P1 | Demo smoke script + judge one-pager | Already queued | — |
 | P2 | Deck: one "Scale" slide from §2 (ladder + unit economics + demand) | Slots into the deck-flags review; **commits only at the Jul 14 fold-in** | small |
 
@@ -180,7 +179,7 @@ Two things nobody else has: the **Arabic/RTL/Hijri adapter layer** (verified unc
 Rule: **fix what a judge can trigger live; prove what we can already prove; disclose what only time can fix, with dates.**
 
 **FIX by Jul 15 (code):**
-1. **Grounding firewall** in the Ask-Tabaqa copilot — recourse engine computes all numbers; ALLaM only narrates; post-generation digit-check against the fact set, invented number → deterministic fallback. Judge line: "if the model invents a number, you never see it."
+1. **Grounding firewall** in `/v1/insights` — recourse engine computes all numbers; ALLaM only narrates; post-generation digit-check against the fact set, invented number → deterministic fallback. Judge line: "if the model invents a number, you never see it."
 2. **Running-balance integrity check** in adapters + "integrity: passed" chip (UI + compliance receipt) — answers "what stops me editing my CSV?" with "try it; the receipt will refuse." Full answer = API channel (data never passes through the applicant's hands).
 3. **Refuse, don't guess** — low fingerprint confidence or failed debit/credit sanity check → "needs review" column-confirm state, never a silent wrong score.
 4. **Real-export sprint (whole team, starts now):** everyone exports their own real bank/wallet statements; run all through the adapters; fix every parse failure. Target 10+ real files before Jul 16 → "our adapters have parsed N real exports" becomes true.
@@ -197,7 +196,7 @@ Cold-start honesty line (rehearse): "Our score is mechanism-validated on a milli
 
 ## 8 · Calendar
 
-- **Jul 10** — book mock judge; start Ask-Tabaqa copilot
+- **Jul 10** — book mock judge
 - **Jul 12** — go/no-go on the Lean sandbox spike
 - **Jul 14** — docs unfreeze: fold research + this brief into judge script and deck; re-check competitors & licensing freshness
 - **Jul 15** — code freeze; full timed run-through of §5 with fallbacks tested (kill the network, kill the LLM — the show must still finish)

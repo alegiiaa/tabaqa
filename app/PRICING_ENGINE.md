@@ -230,7 +230,7 @@ Human approval stays; only the typing disappears.
 | `POST /v1/offers` endpoint | tabaqa-api (mirrors `affordability.py`) | ~3 hours |
 | Lender console + queue + agreement stat | new `/lender` route, extends `DecisionCockpit.tsx`, portfolio strip via `LenderImpact.tsx` | ~1 day |
 | Consent scope + expiry on receipt | `ComplianceReceipt.tsx` | ~1 hour |
-| Copilot answers "ليش مؤشر التزامي ٧٦؟" | existing firewalled `/v1/insights`, grounded in subscores | ~1 hour |
+| Narrate the index — "ليش مؤشر التزامي ٧٦؟" | existing firewalled `/v1/insights`, grounded in subscores | ~1 hour |
 | Evidence: behavioral-trend ablation on real defaults | `eval/` harness (Berka / AlfaBattle), add commitment-features column to model card | ~half day |
 
 **No new data source anywhere in this table.** Every feature is a reinterpretation of data
@@ -254,7 +254,7 @@ already ingested — that is the definition of a two-day-safe feature.
 - [ ] `/lender` console: pre-filled queue + calc trace + approve/reject + agreement stat
 - [ ] Portfolio early-warning strip
 - [ ] Receipt: consent scope + expiry line
-- [ ] Copilot grounding for the index
+- [ ] `/v1/insights` grounding for the index
 - [ ] (If time) eval ablation: do behavioral-trend features add lift on real defaults?
       Even a modest +AUC turns the index from a slogan into a measured claim.
 
@@ -336,7 +336,7 @@ What this feature adds is **the claim**, stated precisely:
 2. `lenders.ts` — bounded discount-only `commitmentDiscount` in offer pricing
 3. **`POST /v1/offers`** on tabaqa-api — the pricing engine as a keyed, metered API product
 4. `/lender` console route — maker-checker queue + calc trace + agreement stat
-5. Copilot grounding extension (index subscores → firewalled `/v1/insights`)
+5. Insights grounding extension (index subscores → firewalled `/v1/insights`)
 6. Receipt: consent scope + expiry line
 
 The technical *story* to judges: mirrored math (client `lenders.ts` ≡ server `affordability.py`),
@@ -422,7 +422,7 @@ MVP starts with one product type and 2–3 lenders.*
 - **Request slider + live ceiling** (every number traceable — no magic amounts)
 - Counter-offer / path-to-full-amount
 - `POST /v1/offers` — the engine served as a keyed API (proves "engine, not interface")
-- The trust layer already built: integrity check, compliance receipt, transparent box, copilot
+- The trust layer already built: integrity check, compliance receipt, transparent box
 - Scope discipline: **1–2 financing types × 3–5 lenders** (all fictional, labelled illustrative)
 
 ### OUT of the MVP
@@ -430,7 +430,7 @@ MVP starts with one product type and 2–3 lenders.*
 - ❌ Commitment Index (not unique — see decision banner; roadmap slide only)
 - ❌ Lender console as a build (static mockup screen in the deck instead)
 - ❌ Time-slider "second reveal" (do not split the judge's memory — 0→4 is the reveal)
-- ❌ Copilot extension for the index
+- ❌ `/v1/insights` extension for the index
 - ❌ Any real-bank branding (no Alinma)
 
 ### The three sentences that defend it
