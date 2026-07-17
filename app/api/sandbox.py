@@ -610,9 +610,98 @@ def _export(path: Path) -> None:
     print(f"wrote {COHORT_SIZE:,} rows → {path} ({size_mb:.1f} MB)\ngrades: {dist}")
 
 
+def full_person(nin: str) -> dict:
+    """Every data object for one identity — the nine payloads, separated."""
+    ident = _identity(nin)
+    out: dict = {"identity": {"national_id": nin, **ident, "age": _age_for(nin, ident)}}
+    for slug in PROVIDERS:
+        if ident["persona"].startswith("cohort_"):
+            out[slug] = _cohort_payload(slug, nin, _cohort_person(int(ident["persona"][7:])))
+        else:
+            out[slug] = PAYLOADS.get(ident["persona"], {}).get(slug)
+    for slug in ROADMAP_PROVIDERS:
+        out[slug] = _roadmap_payload(slug, nin, ident["persona"])
+    out["sehhaty"] = {"refused": True, "http_status": 451,
+                      "reason": "health data excluded by design (PDPL sensitive data)"}
+    return out
+
+
+_TX_SAMPLE = 2_000  # identities whose full transactions go into the sample file
+
+
+def _export_full(outdir: Path) -> None:
+    """Relational export — one CSV per data TYPE, joined by national_id.
+
+    persons (1 row/person) · obligations · holdings · properties (1 row/item)
+    · transactions_sample (every transaction for the first 2,000 identities —
+    the full expansion would be ~40M rows; any person's statements are one API
+    call away). All regenerable byte-for-byte; gitignored.
+    """
+    import csv
+
+    outdir.mkdir(parents=True, exist_ok=True)
+    counts: dict[str, int] = {}
+    with (outdir / "persons.csv").open("w", newline="", encoding="utf-8-sig") as fp, \
+         (outdir / "obligations.csv").open("w", newline="", encoding="utf-8-sig") as fo, \
+         (outdir / "holdings.csv").open("w", newline="", encoding="utf-8-sig") as fh, \
+         (outdir / "properties.csv").open("w", newline="", encoding="utf-8-sig") as fr:
+        wp, wo = csv.writer(fp), csv.writer(fo)
+        wh, wr = csv.writer(fh), csv.writer(fr)
+        wp.writerow(["national_id", "name_ar", "name_en", "age", "marital_status", "dependents",
+                     "sector", "employer", "monthly_salary_sar", "service_years",
+                     "side_income_sar", "credit_grade", "serious_delinquency"])
+        wo.writerow(["national_id", "obligation_type", "lender", "monthly_payment_sar",
+                     "outstanding_sar", "remaining_months"])
+        wh.writerow(["national_id", "security", "shares", "market_value_sar"])
+        wr.writerow(["national_id", "property_type", "city", "estimated_value_sar"])
+        for idx in range(COHORT_SIZE):
+            p = _cohort_person(idx)
+            nin = cohort_nin(idx)
+            rf = roadmap_facts(nin)
+            wp.writerow([nin, p["name_ar"], p["name_en"], max(rf["age"], 21 + p["service_years"]),
+                         rf["marital_status"], rf["dependents"], p["sector"], p["employer"],
+                         p["salary"], p["service_years"], p["side_income"],
+                         p["grade"], int(p["delinquent"])])
+            for o in p["obligations"]:
+                wo.writerow([nin, o["type"], o["lender"], o["monthly_payment"],
+                             o["outstanding"], o["remaining_months"]])
+            for h in rf["holdings"]:
+                wh.writerow([nin, h["security"], h["shares"], h["market_value"]])
+            for pr in rf["properties"]:
+                wr.writerow([nin, pr["type"], pr["city"], pr["estimated_value"]])
+            counts["persons"] = counts.get("persons", 0) + 1
+            counts["obligations"] = counts.get("obligations", 0) + len(p["obligations"])
+            counts["holdings"] = counts.get("holdings", 0) + len(rf["holdings"])
+            counts["properties"] = counts.get("properties", 0) + len(rf["properties"])
+            if (idx + 1) % 100_000 == 0:
+                print(f"  {idx + 1:,} persons…")
+    with (outdir / "transactions_sample.csv").open("w", newline="", encoding="utf-8-sig") as ft:
+        wt = csv.writer(ft)
+        wt.writerow(["national_id", "source", "date", "description", "amount_sar", "type", "category"])
+        for idx in range(_TX_SAMPLE):
+            p = _cohort_person(idx)
+            nin = cohort_nin(idx)
+            for slug in ("bank-core", "open-banking", "wallet"):
+                for t in _cohort_payload(slug, nin, p)["transactions"]:
+                    wt.writerow([nin, slug, t["date"], t["description"], t["amount"],
+                                 t["type"], t["category"]])
+                    counts["transactions_sample"] = counts.get("transactions_sample", 0) + 1
+    for name, n in counts.items():
+        print(f"  {name}.csv — {n:,} rows")
+    print(f"relational export → {outdir}")
+
+
 if __name__ == "__main__":
     if "sync" in sys.argv[1:]:
         _sync()
+    if "person" in sys.argv[1:]:
+        nin_arg = sys.argv[sys.argv.index("person") + 1]
+        out = APP_DIR / "data" / "synthetic" / f"person_{nin_arg}.json"
+        out.write_text(json.dumps(full_person(nin_arg), ensure_ascii=False, indent=2),
+                       encoding="utf-8")
+        print(f"wrote every data object for {nin_arg} → {out}")
+    if "export-full" in sys.argv[1:]:
+        _export_full(APP_DIR / "data" / "synthetic" / "cohort_export")
     if "export" in sys.argv[1:]:
         args = [a for a in sys.argv[1:] if a not in ("sync", "export")]
         _export(Path(args[0]) if args else APP_DIR / "data" / "synthetic" / "cohort_500k.csv")

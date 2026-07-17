@@ -20,3 +20,5 @@ data/external/
 data/saudi_priors/findex2025.csv
 data/synthetic/corpus_saudi/
 data/synthetic/cohort_500k.csv
+data/synthetic/cohort_export/
+data/synthetic/person_*.json
