@@ -3,6 +3,8 @@
 // All figures computed in financeMath.ts; the engine story is Tabaqa-behind-the-bank.
 
 import { useEffect, useMemo, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { Dialog } from '@capacitor/dialog'
 import {
   PRODUCT, BankOffer, offersFor, maxFinancing, eligibleIncome,
   installmentRoom, schedule, fmt, pct, AHMED,
@@ -182,7 +184,10 @@ export function FinanceFlow({ onExit }: { onExit: () => void }) {
             في هذه النسخة التجريبية تُحاكى المصادر عبر Tabaqa Sandbox API — نفس الهيكل
             ونفس التقنية، دون اتصال بجهات حقيقية.
           </p>
-          <button className="bk-cta" onClick={() => setStage('processing')}>
+          <button
+            className="bk-cta"
+            onClick={() => { void askConsentNative().then((ok) => ok && setStage('processing')) }}
+          >
             اسمح بالوصول واحسب أهليتي
           </button>
           <button className="bk-ghost" onClick={onExit}>إلغاء</button>
@@ -256,6 +261,23 @@ export function FinanceFlow({ onExit }: { onExit: () => void }) {
 }
 
 // ── pieces ───────────────────────────────────────────────────────────────────
+
+// Inside the native shell, consent gets the OS-level moment users know from
+// every permission ask (location, camera): a real UIAlertController via the
+// Dialog plugin — the same visual grammar as "Allow / Don't Allow". In a plain
+// browser the in-page consent button is already the explicit act; no dialog.
+async function askConsentNative(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return true
+  const { value } = await Dialog.confirm({
+    title: 'السماح للمصرف بالوصول إلى بياناتك المالية؟',
+    message:
+      'قراءة فقط: حساباتك البنكية، محفظتك الرقمية، بيانات التوظيف، والسجل الائتماني — ' +
+      'لغرض تقييم أهليتك للتمويل فقط. تُسجَّل موافقتك بختم زمني في سجل التدقيق ويمكنك إلغاؤها في أي وقت.',
+    okButtonTitle: 'السماح',
+    cancelButtonTitle: 'عدم السماح',
+  })
+  return value
+}
 
 // One consented source, expandable in place — the row itself answers the
 // questions ("what do you read? from where? how?") instead of a bare checkmark.

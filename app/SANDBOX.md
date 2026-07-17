@@ -25,12 +25,32 @@ sandbox tell one story.
 | `2047183377` | Sara Al-Shammari | declined — existing obligations exceed the regulatory cap |
 | `1069127734` | Khalid Al-Otaibi | manual review — employment claim conflicts with salary transactions |
 
+## The 500,000-member cohort
+
+Beyond the curated cast, the sandbox hosts a **synthetic population of 500,000 test
+identities** — generated **deterministically on demand**, never stored: NIN ↔ cohort
+index is a reversible permutation with a Luhn check digit, and every provider payload
+is rebuilt from a NIN-seeded RNG. The same NIN always returns the same person; any of
+the 500,000 can be queried instantly; the whole population costs zero disk.
+
+- `GET /sandbox/v1/cohort?offset=0&limit=25` — page through the population
+- `GET /sandbox/v1/cohort/sample` — one random member + their five provider endpoints
+- Every `/sandbox/v1/{provider}/{nin}` endpoint accepts cohort NINs: full 6-month
+  statements (~60 transactions), employment records, bureau reports with plausible
+  obligation mixes, wallet side-income streams — distributions spanning salaries
+  4,000–42,000, grades A–E, ~4% delinquency.
+
+Judge demo: `curl …/cohort/sample` → take the NIN it returns → pull that stranger's
+credit report and bank statement. Repeat — a different person every time, 500,000 deep.
+
 ## Endpoints
 
 | Endpoint | Serves |
 |---|---|
 | `GET /sandbox/v1` | environment metadata, identity directory, provider list, disclaimer |
-| `GET /sandbox/v1/identities` | the test identities |
+| `GET /sandbox/v1/identities` | the curated test identities |
+| `GET /sandbox/v1/cohort` | page through the 500k synthetic population |
+| `GET /sandbox/v1/cohort/sample` | one random cohort member + endpoints |
 | `GET /sandbox/v1/identities/{nin}` | identity verification (KYC-shaped — never underwriting features) |
 | `GET /sandbox/v1/bank-core/{nin}` | the bank's own account statement |
 | `GET /sandbox/v1/open-banking/{nin}` | other-bank account via AIS (read-only) |
