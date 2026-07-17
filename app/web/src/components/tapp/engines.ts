@@ -9,6 +9,10 @@
 
 import { API_BASE } from '../../lib/api'
 import type { StatementInput, StatementRowInput } from '../../lib/api'
+import {
+  createDeskOrder, getDeskOrder, newOrderId,
+  type OrderEvent, type OrderStatus,
+} from '../../lib/ordersDesk'
 import { encodeStatement } from '../../lib/reportlink'
 import {
   computeOffers, LenderPolicy, LockedOffer, Offer, OffersResult, OfferInputs,
@@ -606,14 +610,17 @@ export function lenderReportUrl(d: JourneyData): string {
 }
 
 // ── stage 8 — hand the order to the Tabaqa dashboard (the lender's desk) ─────
-// POST the chosen offer + the applicant's encoded report; the dashboard polls
-// /sandbox/v1/orders, announces the new order and its 24-hour acceptance window.
+// The order goes through lib/ordersDesk: INSERT into the shared Supabase desk
+// (Realtime pushes it onto the dashboard the same second) with the sandbox
+// API's in-memory desk as mirror + offline fallback. The id is generated HERE
+// so both desks agree on it before anything is sent.
 
 export interface OrderReceipt { ok: boolean; orderId: string | null }
 
 export async function submitOrder(d: JourneyData, offer: Offer, productAr: string): Promise<OrderReceipt> {
   const t = tabaqaScore(d.profile)
-  const body = {
+  const res = await createDeskOrder({
+    id: newOrderId(),
     national_id: d.nin,
     applicant_ar: d.identity.nameAr,
     lender_id: offer.lender.id,
@@ -629,55 +636,40 @@ export async function submitOrder(d: JourneyData, offer: Offer, productAr: strin
     eligible_income: Math.round(eligibleIncomeOf(d.profile)),
     obligations: d.profile.obligations,
     report_d: reportD(d),
-  }
-  const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS)
-  try {
-    const res = await fetch(`${API_BASE}/sandbox/v1/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: ctrl.signal,
-    })
-    if (!res.ok) return { ok: false, orderId: null }
-    const env = (await res.json()) as Record<string, any>
-    return { ok: true, orderId: String(env.order_id ?? '') || null }
-  } catch {
-    return { ok: false, orderId: null } // offline mode — the journey continues without the desk
-  } finally {
-    clearTimeout(timer)
-  }
+  })
+  return { ok: res.ok, orderId: res.orderId }
 }
 
-// ── stage 10, closed loop — the app watches its order until the desk decides ─
+// ── stage 10, closed loop — the app tracks its order until the desk answers ──
 // The applicant's side of "accept within 24 hours": the app remembers the last
-// submitted order (sessionStorage, like the auth) and polls its status; the
-// moment the bank worker taps قبول on the dashboard, the phone raises the
-// "تمت الموافقة — راجع الجهة خلال 3 أيام عمل" notice. Once notified, never again.
-
-export type DeskDecision = 'pending' | 'accepted' | 'declined' | 'expired'
+// submitted order PER IDENTITY (localStorage — the tracking card must survive
+// an app relaunch), shows it as the "طلب التمويل الحالي" card on the home
+// screen, and watches it (Supabase Realtime + poll). Every change of state —
+// قبول, رفض, or a tenor extension by the bank worker — raises a notice once:
+// the last-notified signature (status:tenor) is stored alongside the order.
 
 export interface TrackedOrder {
   id: string
+  nin: string
   lenderAr: string
+  productAr: string
   amount: number
-  notified: boolean
+  tenor: number
+  installment: number
   at: number
+  sig: string // last signature the user was notified about, e.g. "pending:48"
 }
 
-const TRACK_KEY = 'tabaqa.tapp.lastOrder'
+const TRACK_PREFIX = 'tabaqa.tapp.order.v2:'
 
-export function trackOrder(id: string, lenderAr: string, amount: number): void {
-  try {
-    sessionStorage.setItem(TRACK_KEY, JSON.stringify(
-      { id, lenderAr, amount, notified: false, at: Date.now() } satisfies TrackedOrder,
-    ))
-  } catch { /* private mode */ }
+export function trackOrder(t: Omit<TrackedOrder, 'at' | 'sig'>): void {
+  const rec: TrackedOrder = { ...t, at: Date.now(), sig: `pending:${t.tenor}` }
+  try { localStorage.setItem(TRACK_PREFIX + t.nin, JSON.stringify(rec)) } catch { /* private mode */ }
 }
 
-export function loadTrackedOrder(): TrackedOrder | null {
+export function loadTrackedOrder(nin: string): TrackedOrder | null {
   try {
-    const raw = sessionStorage.getItem(TRACK_KEY)
+    const raw = localStorage.getItem(TRACK_PREFIX + nin)
     if (!raw) return null
     const t = JSON.parse(raw) as TrackedOrder
     return t?.id ? t : null
@@ -686,18 +678,46 @@ export function loadTrackedOrder(): TrackedOrder | null {
   }
 }
 
-export function markOrderNotified(): void {
-  const t = loadTrackedOrder()
-  if (!t) return
-  try { sessionStorage.setItem(TRACK_KEY, JSON.stringify({ ...t, notified: true })) } catch { /* ignore */ }
+/** Persist the signature the user has now been notified about. */
+export function rememberOrderSig(nin: string, sig: string): TrackedOrder | null {
+  const t = loadTrackedOrder(nin)
+  if (!t) return null
+  const upd = { ...t, sig }
+  try { localStorage.setItem(TRACK_PREFIX + nin, JSON.stringify(upd)) } catch { /* ignore */ }
+  return upd
 }
 
-export async function fetchOrderStatus(orderId: string): Promise<{ status: DeskDecision; lenderAr: string } | null> {
-  try {
-    // cache-bust: a stale "pending" would delay the approval notice on the phone
-    const env = await sbx(`/orders/${encodeURIComponent(orderId)}?t=${Date.now()}`)
-    return { status: env.status as DeskDecision, lenderAr: String(env.lender_ar ?? '') }
-  } catch {
-    return null // desk unreachable — keep waiting quietly
+/** The live truth about a submitted order, wherever the desk lives right now. */
+export interface OrderState {
+  status: OrderStatus
+  lenderAr: string
+  amount: number
+  tenor: number
+  installment: number
+  originalTenor: number | null
+  events: OrderEvent[]
+}
+
+export const orderSig = (s: OrderState): string => `${s.status}:${s.tenor}`
+
+export async function fetchOrderState(orderId: string): Promise<OrderState | null> {
+  const got = await getDeskOrder(orderId)
+  if (!got) return null // desk unreachable — keep waiting quietly
+  const o = got.order
+  return {
+    status: o.status,
+    lenderAr: o.lender_ar,
+    amount: o.amount,
+    tenor: o.tenor_months,
+    installment: o.installment,
+    originalTenor: o.original_tenor_months,
+    events: o.events,
   }
+}
+
+export const ORDER_STATUS_AR: Record<OrderStatus, string> = {
+  pending: 'قيد مراجعة الجهة التمويلية',
+  accepted: 'تمت الموافقة ✓',
+  declined: 'اعتذرت الجهة',
+  expired: 'انتهت مهلة الاعتماد',
 }

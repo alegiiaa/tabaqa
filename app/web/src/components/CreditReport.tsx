@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { StyledQR } from './StyledQR'
 import { API_BASE, api, type ScoreResult, type AffordabilityResult, type StatementInput } from '../lib/api'
+import { getDeskOrder } from '../lib/ordersDesk'
 import { decodeStatement, encodeFacts, shortHash } from '../lib/reportlink'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
@@ -77,13 +78,12 @@ export function CreditReport() {
     let on = true
     ;(async () => {
       try {
-        // cache-bust: a stale edge/browser copy (esp. a cold-instance 404) must
-        // never stick, or the report keeps failing after the order is available
-        const res = await fetch(`${API_BASE}/sandbox/v1/orders/${encodeURIComponent(oParam)}?t=${Date.now()}`, { cache: 'no-store' })
-        if (!res.ok) throw new Error(`orders HTTP ${res.status}`)
-        const env = (await res.json()) as Record<string, any>
-        const s = decodeStatement(String(env.report_d ?? ''))
-        if (on) { setOrder(env); setOrderStatement(s) }
+        // the shared desk (Supabase first, sandbox API fallback) — so the report
+        // survives serverless cold starts and never depends on one lambda's memory
+        const got = await getDeskOrder(oParam, { withReport: true })
+        if (!got || !got.order.report_d) throw new Error('order not found')
+        const s = decodeStatement(got.order.report_d)
+        if (on) { setOrder(got.order as unknown as Record<string, any>); setOrderStatement(s) }
       } catch {
         if (on) setOrderErr('تعذّر جلب ملف الطلب من مكتب الطلبات — تأكد من تشغيل الخادم وأن الطلب ما زال قائمًا.')
       }

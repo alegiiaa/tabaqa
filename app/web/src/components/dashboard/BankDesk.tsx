@@ -6,8 +6,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTx } from '../../lib/tx'
+import { listDesk, subscribeDesk, type DeskTransport } from '../../lib/ordersDesk'
 import { DashboardLayout, type NavSpec, type Section } from './DashboardLayout'
-import { IncomingOrders, OrderToast, fetchOrders, type TabaqaOrder } from './IncomingOrders'
+import { IncomingOrders, OrderToast, type TabaqaOrder } from './IncomingOrders'
 import { Applicants } from './Applicants'
 
 type DeskSection = Extract<Section, 'orders' | 'applicants'>
@@ -16,16 +17,22 @@ export function BankDesk() {
   const { tx } = useTx()
   const [section, setSection] = useState<DeskSection>('orders')
 
-  // ── the desk feed: poll the sandbox orders, toast live arrivals ────────────
+  // ── the desk feed ──────────────────────────────────────────────────────────
+  // Supabase Realtime pushes every desk change (the phone's INSERT included) →
+  // instant refetch; the 5s poll stays as the self-healing fallback, and the
+  // whole thing degrades to the sandbox API desk when Supabase is unreachable.
   const [orders, setOrders] = useState<TabaqaOrder[] | null>(null)
+  const [via, setVia] = useState<DeskTransport>('api')
+  const [live, setLive] = useState(false)
   const [toast, setToast] = useState<TabaqaOrder | null>(null)
   const seen = useRef<Set<string>>(new Set())
   const primed = useRef(false)
 
   async function poll() {
     try {
-      const list = await fetchOrders()
+      const { orders: list, via: transport } = await listDesk()
       setOrders(list)
+      setVia(transport)
       const fresh = list.find((o) => o.status === 'pending' && !seen.current.has(o.order_id))
       list.forEach((o) => seen.current.add(o.order_id))
       if (fresh && primed.current) setToast(fresh)
@@ -36,7 +43,8 @@ export function BankDesk() {
   useEffect(() => {
     void poll()
     const t = window.setInterval(() => { void poll() }, 5000)
-    return () => window.clearInterval(t)
+    const unsub = subscribeDesk(() => { void poll() }, setLive)
+    return () => { window.clearInterval(t); unsub() }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -81,7 +89,7 @@ export function BankDesk() {
         subtitle={META[section].sub}
       >
         {section === 'orders'
-          ? <IncomingOrders orders={orders} onChanged={() => { void poll() }} />
+          ? <IncomingOrders orders={orders} onChanged={() => { void poll() }} live={live} via={via} />
           : <Applicants />}
       </DashboardLayout>
       {toast && section !== 'orders' && (

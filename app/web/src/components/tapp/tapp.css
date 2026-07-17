@@ -529,7 +529,7 @@
 
 /* the desk's decision, landed on the phone — modal notice over everything */
 .tp-decide-back {
-  position: absolute; inset: 0; z-index: 60;
+  position: fixed; inset: 0; z-index: 1190; /* above the tracking sheet — a desk decision outranks it */
   background: rgba(8, 14, 32, 0.5);
   display: flex; align-items: center; justify-content: center;
   padding: 26px;
@@ -630,3 +630,95 @@
   border-radius: 9px; padding: 4px 10px; font-size: 11px; font-weight: 700;
 }
 .tp-ghost.logout { color: var(--tp-bad); font-weight: 600; margin-top: 6px; }
+
+/* ── طلباتي — the tracked order: home card, tracking sheet, live timeline ──── */
+
+.tp-order-card {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  text-align: start;
+  background: var(--tp-card);
+  border: 1px solid var(--tp-line);
+  border-inline-start: 4px solid var(--tp-blue);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tp-order-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex: none;
+  background: var(--tp-blue);
+  animation: tp-order-pulse 1.6s ease infinite;
+}
+.tp-order-dot.accepted { background: var(--tp-ok); animation: none; }
+.tp-order-dot.declined, .tp-order-dot.expired { background: var(--tp-bad); animation: none; }
+@keyframes tp-order-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+  50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+}
+.tp-order-main { flex: 1; min-width: 0; }
+.tp-order-main b { display: block; font-size: 14px; font-weight: 700; }
+.tp-order-main small { display: block; color: var(--tp-dim); font-size: 11.5px; margin-top: 2px; }
+.tp-order-ext { font-style: normal; color: var(--tp-warn); font-weight: 700; }
+.tp-order-st {
+  display: inline-block; margin-top: 6px;
+  font-size: 11px; font-weight: 700;
+  background: var(--tp-soft); color: var(--tp-deep);
+  border-radius: 999px; padding: 3px 10px;
+  font-style: normal;
+}
+.tp-order-st.accepted { background: var(--tp-ok-soft); color: var(--tp-ok); }
+.tp-order-st.declined, .tp-order-st.expired { background: var(--tp-bad-soft); color: var(--tp-bad); }
+.tp-order-st.big { font-size: 12.5px; padding: 5px 14px; margin: 2px 0 10px; }
+.tp-order-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
+.tp-order-ref { font-family: var(--tp-mono); font-style: normal; font-size: 11px; color: var(--tp-faint); }
+.tp-order-ref.big { font-size: 12px; color: var(--tp-dim); }
+
+/* the tracking bottom sheet — fixed + toast-tier z so it always clears the
+   bottom tab bar (an absolute overlay left the nav painted above the sheet) */
+.tp-sheet-back {
+  position: fixed; inset: 0; z-index: 1180;
+  background: rgba(8, 14, 32, 0.5);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: tp-fade 0.22s ease;
+}
+.tp-sheet {
+  background: #fff; width: 100%; max-width: 560px;
+  border-radius: 24px 24px 0 0;
+  padding: 12px 20px calc(env(safe-area-inset-bottom, 12px) + 14px);
+  max-height: 86%;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  animation: tp-rise 0.28s ease;
+}
+.tp-sheet-grab { width: 42px; height: 4px; border-radius: 4px; background: var(--tp-line-2); margin: 0 auto 12px; }
+.tp-sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.tp-sheet-head b { font-size: 16.5px; font-weight: 700; }
+
+/* the order's timeline — what the desk did, the moment it did it */
+.tp-tl { margin-top: 14px; }
+.tp-tl-item { position: relative; display: flex; gap: 12px; padding: 0 0 16px; }
+.tp-tl-item::before {
+  content: ''; position: absolute; top: 14px; bottom: 0;
+  inset-inline-start: 5px; width: 2px; background: var(--tp-line);
+}
+.tp-tl-item:last-child { padding-bottom: 2px; }
+.tp-tl-item:last-child::before { display: none; }
+.tp-tl-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex: none; margin-top: 3px;
+  background: var(--tp-blue); border: 2px solid #fff;
+  box-shadow: 0 0 0 1.5px var(--tp-blue);
+}
+.tp-tl-item.accepted .tp-tl-dot { background: var(--tp-ok); box-shadow: 0 0 0 1.5px var(--tp-ok); }
+.tp-tl-item.declined .tp-tl-dot { background: var(--tp-bad); box-shadow: 0 0 0 1.5px var(--tp-bad); }
+.tp-tl-item.extended .tp-tl-dot { background: var(--tp-warn); box-shadow: 0 0 0 1.5px var(--tp-warn); }
+.tp-tl-item.next .tp-tl-dot { background: var(--tp-bg); box-shadow: 0 0 0 1.5px var(--tp-line-2); }
+.tp-tl-txt { flex: 1; min-width: 0; }
+.tp-tl-txt b { display: block; font-size: 13px; font-weight: 700; }
+.tp-tl-item.next .tp-tl-txt b { color: var(--tp-dim); font-weight: 600; }
+.tp-tl-txt small { display: block; color: var(--tp-dim); font-size: 11.5px; margin-top: 2px; line-height: 1.7; }
+.tp-tl-txt time { display: block; color: var(--tp-faint); font-size: 10.5px; font-family: var(--tp-mono); margin-top: 2px; text-align: end; }
+
+/* the extension notice — same dialog family as accept/decline, info-blue */
+.tp-decide.info { border-top-color: var(--tp-blue); }
+.tp-done-badge.info { background: var(--tp-blue); }

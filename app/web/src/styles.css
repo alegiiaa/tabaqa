@@ -1578,6 +1578,23 @@ body:has(.tour-card) .ds-content{padding-bottom:210px}
   color:#16294e;text-align:justify;direction:rtl;margin:10px 0 0}
 .rpt-attest b{font-weight:700;color:#0b1c46}
 
+/* the desk's applicant block (?o=) — the record behind the attestation.
+   Fixed grids in the document's quiet register: Naskh section titles, tiny
+   letterspaced English keylines, thin rules — never a card, never chrome. */
+.rpt-mid{margin-top:8px}
+.rpt-sec{margin-top:13px}
+.rpt-sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  border-bottom:1px solid #dfe5f0;padding-bottom:4px;margin-bottom:8px}
+.rpt-sec-h b{font-family:'Traditional Arabic','IBM Plex Sans Arabic',serif;font-size:15.5px;font-weight:700;color:#0b1c46}
+.rpt-sec-h span{font-size:7.5px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;
+  color:#1f3bff;white-space:nowrap;font-family:'Inter',sans-serif}
+.rpt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px 14px}
+.rpt-cell small{display:block;font-size:8.5px;color:#8593ad;margin-bottom:1.5px}
+.rpt-cell b{display:block;font-size:11px;font-weight:600;color:#22314f;line-height:1.5}
+.rpt-cell b.mono{font-size:10px;font-weight:500}
+.rpt-srcs{margin:0;font-size:9.5px;line-height:1.95;color:#5b6a87;text-align:justify;direction:rtl}
+.rpt-srcs b{color:#3c4c6e;font-weight:700}
+
 /* verification footer — tiny, centered, no rules; whitespace does the separating.
    Explicitly resets the site-wide `footer` tag rule (styles.css ~351) that would
    otherwise paint the gray panel + border across the report. */
@@ -1595,6 +1612,7 @@ body:has(.tour-card) .ds-content{padding-bottom:210px}
 .rpt-qr svg{display:block}
 .rpt-qr span{font-size:7.5px;color:#9aa6bd;font-weight:600;letter-spacing:.22em;text-align:center;font-family:var(--mono)}
 .rpt-seal{position:absolute;right:60px;top:56%;width:88px;height:88px;z-index:1;opacity:.92}
+.rpt-seal.desk{top:auto;right:auto;bottom:130px;left:82px;transform:rotate(-7deg)}
 .rpt-seal-arc{font-size:7.4px;letter-spacing:.08em;fill:#1f3bff;font-weight:700;font-family:var(--mono)}
 .rpt-seal-score{font-size:30px;font-weight:800;fill:#0b1c46;font-family:var(--mono)}
 .rpt-seal-lab{font-size:8.5px;letter-spacing:.16em;fill:#1f3bff;font-weight:700;font-family:var(--mono)}
@@ -1641,6 +1659,11 @@ body:has(.tour-card) .ds-content{padding-bottom:210px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   @page{size:A4;margin:0}
   .rpt-foot{break-inside:avoid}
+  /* the desk block fills the sheet — tighten its rhythm so one page stays one page */
+  .rpt-sec{break-inside:avoid;margin-top:9px}
+  .rpt-attest{font-size:15.5px;line-height:1.92}
+  .rpt-grid{gap:5px 12px}
+  .rpt-srcs{line-height:1.75}
 }
 
 /* ── Model card · wallet-layer ablation (ModelCardPanel) ─────────────────── */
@@ -2312,3 +2335,25 @@ html[dir=rtl] .mm-hero{background-position:center left}
 .ord-toast-txt span{font-size:12px;color:var(--muted);line-height:1.55}
 .ord-toast-x{flex:none;background:none;border:0;color:var(--faint);font-size:14px;cursor:pointer;padding:4px}
 @media(max-width:640px){.ord-figs{grid-template-columns:1fr 1fr}}
+
+/* ── orders desk: live transport, extend-tenor control, demo reset ─────────── */
+.ord-card.fresh{animation:ordfresh 1.4s ease 2}
+@keyframes ordfresh{0%,100%{box-shadow:0 12px 30px -18px rgba(37,99,235,.5)}50%{box-shadow:0 0 0 4px rgba(37,99,235,.28),0 12px 34px -14px rgba(37,99,235,.6)}}
+.ord-status.ext{background:var(--warn-soft,#f7eeda);color:var(--warn,#9c6a1d);animation:none}
+.ord-was{display:block;font-style:normal;font-size:10.5px;color:var(--warn,#9c6a1d);margin-top:2px}
+.ord-extend{position:relative}
+.ord-extend-pop{margin-top:8px;background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.ord-extend-cap{display:block;color:var(--muted);font-size:11.5px;margin-bottom:8px;line-height:1.7}
+.ord-extend-chips{display:flex;gap:8px;flex-wrap:wrap}
+.ord-extend-chip{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg-card);border:1px solid var(--line-2);border-radius:11px;padding:7px 12px;cursor:pointer;font-family:inherit}
+.ord-extend-chip:hover:not(:disabled){border-color:var(--blue);box-shadow:0 6px 18px -12px rgba(37,99,235,.6)}
+.ord-extend-chip:disabled{opacity:.5;cursor:default}
+.ord-extend-chip b{font-size:12.5px;font-family:var(--mono)}
+.ord-extend-chip i{font-style:normal;font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+.ord-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px}
+.ord-foot .ord-note{margin:0;display:flex;align-items:center;gap:7px}
+.ord-live-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none;animation:ordlive 1.6s ease infinite}
+@keyframes ordlive{0%,100%{box-shadow:0 0 0 0 rgba(15,157,99,.35)}50%{box-shadow:0 0 0 5px rgba(15,157,99,0)}}
+.ord-reset{background:none;border:1px solid var(--line);border-radius:9px;color:var(--muted);font-size:11px;padding:5px 10px;cursor:pointer;font-family:inherit}
+.ord-reset:hover:not(:disabled){color:var(--bad,#c93a2e);border-color:var(--bad,#c93a2e)}
+.ord-reset:disabled{opacity:.5;cursor:default}

@@ -23,6 +23,7 @@ import asyncio
 import hashlib
 import json
 import random
+import re
 import sys
 import time
 import uuid
@@ -900,6 +901,22 @@ async def nafath_verify(nin: str, request_id: str, chosen: int) -> dict:
 ORDERS: list[dict] = []
 ORDER_TTL_S = 24 * 3600
 _ORDERS_MAX = 50
+_ORDER_ID_RE = re.compile(r"^ord_[0-9a-f]{6,32}$")
+
+
+def _now_iso() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def _annuity_installment(amount: float, apr: float, months: int) -> float:
+    """Mirror of lib/lenders.ts installmentFor — same murabaha annuity."""
+    if months <= 0:
+        return 0.0
+    i = apr / 12.0
+    if i <= 0:
+        return amount / months
+    af = ((1 + i) ** months - 1) / (i * (1 + i) ** months)
+    return amount / af
 
 
 def _order_view(o: dict) -> dict:
@@ -917,8 +934,14 @@ async def create_order(payload: dict) -> dict:
     ident = _identity(nin)  # unknown test NINs 404 like everywhere else
     ms = await _provider_latency(260)
     num = lambda k: int(float(payload.get(k) or 0))  # noqa: E731
+    # The app generates the id so the shared Supabase desk and this mirror agree
+    # on it; anything malformed (or a replay) gets a fresh server id as before.
+    raw_id = str(payload.get("order_id") or "")
+    client_id_ok = bool(_ORDER_ID_RE.fullmatch(raw_id)) and all(
+        x["order_id"] != raw_id for x in ORDERS
+    )
     order = {
-        "order_id": f"ord_{uuid.uuid4().hex[:10]}",
+        "order_id": raw_id if client_id_ok else f"ord_{uuid.uuid4().hex[:10]}",
         "environment": ENVIRONMENT,
         "simulated": True,
         "received_at": time.time(),
@@ -940,6 +963,8 @@ async def create_order(payload: dict) -> dict:
         # the applicant's fused statement, encoded — the dashboard renders the
         # SAME report the app derived, re-scored live at /report?d=
         "report_d": str(payload.get("report_d", ""))[:300_000],
+        "original_tenor_months": None,
+        "events": [{"at": _now_iso(), "type": "submitted"}],
     }
     ORDERS.insert(0, order)
     del ORDERS[_ORDERS_MAX:]
@@ -1001,6 +1026,37 @@ async def decide_order(order_id: str, request: Request) -> dict:
         if o["order_id"] == order_id:
             o["status"] = "accepted" if request.url.path.endswith("/accept") else "declined"
             o["decided_at"] = time.time()
+            o.setdefault("events", []).append({"at": _now_iso(), "type": o["status"]})
+            return {"environment": ENVIRONMENT, "simulated": True, **_order_view(o)}
+    raise HTTPException(status_code=404, detail=f"Unknown order '{order_id}'")
+
+
+@router.post("/orders/{order_id}/extend")
+async def extend_order(order_id: str, add: int = 6) -> dict:
+    """The bank worker's extension: more months on the same murabaha pricing —
+    installment recomputed with the offer's annuity, the admin fee carried over.
+    Mirrors the Supabase-desk update the dashboard performs (lib/ordersDesk.ts)."""
+    add = max(1, min(36, int(add)))
+    for o in ORDERS:
+        if o["order_id"] == order_id:
+            if o["status"] == "declined":
+                raise HTTPException(status_code=409, detail="Declined orders cannot be extended")
+            old_tenor = int(o.get("tenor_months") or 0)
+            new_tenor = min(96, old_tenor + add)
+            if new_tenor == old_tenor:
+                return {"environment": ENVIRONMENT, "simulated": True, **_order_view(o)}
+            fee = max(0.0, float(o.get("total") or 0) - float(o.get("installment") or 0) * old_tenor)
+            inst = _annuity_installment(float(o.get("amount") or 0), float(o.get("apr") or 0), new_tenor)
+            if o.get("original_tenor_months") is None:
+                o["original_tenor_months"] = old_tenor
+            o["tenor_months"] = new_tenor
+            o["installment"] = int(round(inst))
+            o["total"] = int(round(inst * new_tenor + fee))
+            o["extended_at"] = time.time()
+            o.setdefault("events", []).append({
+                "at": _now_iso(), "type": "extended",
+                "tenor_months": new_tenor, "installment": o["installment"],
+            })
             return {"environment": ENVIRONMENT, "simulated": True, **_order_view(o)}
     raise HTTPException(status_code=404, detail=f"Unknown order '{order_id}'")
 

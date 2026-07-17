@@ -119,7 +119,12 @@ const PRODUCT_AR: Record<ProductType, string> = {
 
 // ── the flow ─────────────────────────────────────────────────────────────────
 
-export function JourneyFlow({ nin, nameAr, onExit }: { nin: string; nameAr: string; onExit: () => void }) {
+export function JourneyFlow({ nin, nameAr, onExit, onOrder }: {
+  nin: string
+  nameAr: string
+  onExit: () => void
+  onOrder?: () => void // the shell reloads its tracked-order card off this
+}) {
   const [stage, setStage] = useState<Stage>('request')
 
   // stage 1 — the request
@@ -158,9 +163,20 @@ export function JourneyFlow({ nin, nameAr, onExit }: { nin: string; nameAr: stri
     setSending(true)
     const receipt = await submitOrder(data, selected, PRODUCT_AR[product])
     setOrder(receipt)
-    // the shell watches this order — when the desk accepts, the app raises the
-    // "تمت الموافقة — راجع الجهة خلال 3 أيام عمل" notice wherever the user is
-    if (receipt.ok && receipt.orderId) trackOrder(receipt.orderId, selected.lender.nameAr, selected.amount)
+    // the shell watches this order — قبول/رفض/تمديد from the desk raises the
+    // matching notice wherever the user is, and the home card tracks it live
+    if (receipt.ok && receipt.orderId) {
+      trackOrder({
+        id: receipt.orderId,
+        nin,
+        lenderAr: selected.lender.nameAr,
+        productAr: PRODUCT_AR[product],
+        amount: selected.amount,
+        tenor: selected.tenor,
+        installment: selected.installment,
+      })
+      onOrder?.()
+    }
     setSending(false)
     setVerdict(null)
     setStage('bankcheck')
@@ -452,7 +468,11 @@ export function JourneyFlow({ nin, nameAr, onExit }: { nin: string; nameAr: stri
                   : 'وضع بدون اتصال — يُسلَّم الطلب وتقريرك الموثّق إلى لوحة الجهة فور عودة الاتصال، وعلى الجهة اعتماده خلال 24 ساعة.'}
               </p>
             </div>
-            <p className="tp-hint" style={{ marginTop: 12 }}>كل ذلك — دون زيارة فرع، ودون أن تغادر بياناتك الخام طبقة.</p>
+            <p className="tp-hint" style={{ marginTop: 12 }}>
+              تابع حالة طلبك من بطاقة <b>«طلب التمويل الحالي»</b> في الشاشة الرئيسية —
+              أي تحديث من الجهة (قبول أو تمديد) يصلك إشعاره فورًا.
+            </p>
+            <p className="tp-hint" style={{ marginTop: 6 }}>كل ذلك — دون زيارة فرع، ودون أن تغادر بياناتك الخام طبقة.</p>
           </div>
           <button className="tp-cta" onClick={onExit}>العودة للرئيسية</button>
           <button className="tp-ghost" onClick={restart}>بدء طلب جديد</button>
