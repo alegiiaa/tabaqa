@@ -15,6 +15,18 @@ function refId(conn: string, d: Date) {
 
 const RISK_AR: Record<string, string> = { low: 'منخفض', medium: 'متوسط', high: 'مرتفع' }
 
+const maskNin = (nin: string) => (nin.length === 10 ? `${nin[0]}•••••${nin.slice(6)}` : nin)
+
+/** One labeled value inside the document's info grids. */
+function Cell({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
+  return (
+    <div className="rpt-cell">
+      <small>{k}</small>
+      <b className={mono ? 'mono' : undefined}>{v}</b>
+    </div>
+  )
+}
+
 /** Tabaqa "stacked layers" mark — color-controllable for masthead / seal / watermark. */
 export function Mark({ fill, className }: { fill: string; className?: string }) {
   return (
@@ -33,9 +45,14 @@ export function Mark({ fill, className }: { fill: string; className?: string }) 
  * Naskh face: KSA masthead, official title, ONE flowing paragraph that sums up the verified income,
  * score, risk and a financing headline (numbers inline, same face — no stat cards), a faint mid-page
  * seal + watermark, QR bottom-right, the green blessing, and a flush bottom document band — all on
- * one fixed A4 sheet, for any data (it stays a fixed height because no variable-
- * length table is rendered). Frontend-only: re-fetches the live /v1/score + /v1/affordability so the
+ * one fixed A4 sheet, for any data (no variable-length table is ever rendered — every added block
+ * is a fixed grid). Frontend-only: re-fetches the live /v1/score + /v1/affordability so the
  * numbers always match the engine. Truthfully Tabaqa-branded — NOT a government record (see note).
+ *
+ * Desk mode (?o=<order_id>): the bank-worker view adds the person behind the numbers — the
+ * applicant record the app journey pulled (one /sandbox/v1/cohort/{nin} call: identity, employment,
+ * bureau, household, asset power, internal rating), the incoming order the iOS app sent, and the
+ * consented-sources trail with the fused statement's transaction counts.
  */
 export function CreditReport() {
   const [params] = useSearchParams()
@@ -53,23 +70,46 @@ export function CreditReport() {
   const decodeFailed = !!dParam && !dStatement
 
   const [orderStatement, setOrderStatement] = useState<StatementInput | null>(null)
+  const [order, setOrder] = useState<Record<string, any> | null>(null)
   const [orderErr, setOrderErr] = useState<string | null>(null)
   useEffect(() => {
     if (!oParam) return
     let on = true
     ;(async () => {
       try {
-        const res = await fetch(`${API_BASE}/sandbox/v1/orders/${encodeURIComponent(oParam)}`)
+        // cache-bust: a stale edge/browser copy (esp. a cold-instance 404) must
+        // never stick, or the report keeps failing after the order is available
+        const res = await fetch(`${API_BASE}/sandbox/v1/orders/${encodeURIComponent(oParam)}?t=${Date.now()}`, { cache: 'no-store' })
         if (!res.ok) throw new Error(`orders HTTP ${res.status}`)
         const env = (await res.json()) as Record<string, any>
         const s = decodeStatement(String(env.report_d ?? ''))
-        if (on) setOrderStatement(s)
+        if (on) { setOrder(env); setOrderStatement(s) }
       } catch {
         if (on) setOrderErr('تعذّر جلب ملف الطلب من مكتب الطلبات — تأكد من تشغيل الخادم وأن الطلب ما زال قائمًا.')
       }
     })()
     return () => { on = false }
   }, [oParam])
+
+  // The lender's view deserves the person, not just the numbers: one call to the
+  // sandbox pulls the SAME applicant record the app journey was built from —
+  // identity, employment, bureau, household, asset power, and the computed risk
+  // block. Best-effort: an older API or offline desk just renders the plain report.
+  const [person, setPerson] = useState<Record<string, any> | null>(null)
+  useEffect(() => {
+    const nin = order?.national_id as string | undefined
+    if (!nin) return
+    let on = true
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/sandbox/v1/cohort/${encodeURIComponent(nin)}`)
+        if (!res.ok) return
+        const env = (await res.json()) as Record<string, any>
+        if (on && env.record) setPerson(env.record as Record<string, any>)
+      } catch { /* the attestation stands on its own */ }
+    })()
+    return () => { on = false }
+  }, [order])
 
   const statement = dStatement ?? orderStatement
   const conn = c || (dParam || oParam ? '' : 'con_8842')
@@ -115,6 +155,9 @@ export function CreditReport() {
     ? `${window.location.origin}/verify?r=${ref}&v=${encodeFacts({ r: ref, n: name, s: result.tabaqa_score, pd: result.pd, rf: result.risk_flag, ti: inc.true_monthly_income, bo: inc.bank_only_income, vs: inc.verified_share })}`
     : `${window.location.origin}/verify?r=${ref}&c=${conn}`
   const riskAr = RISK_AR[result.risk_flag] ?? result.risk_flag
+  const assetPower = person
+    ? Number(person.portfolio_value_sar ?? 0) + Number(person.property_value_sar ?? 0)
+    : 0
 
   return (
     <div className="rpt-wrap">
@@ -130,8 +173,9 @@ export function CreditReport() {
         {/* faint layered watermark — fills the mid-page whitespace */}
         <div className="rpt-watermark" aria-hidden><Mark fill="currentColor" className="rpt-wm-mark" /></div>
 
-        {/* verification seal — sits quietly in the whitespace, Watheeq-stamp style */}
-        <div className="rpt-seal" aria-hidden>
+        {/* verification seal — mid-page whitespace normally; the desk layout fills
+            the middle, so there the stamp drops to the signature area by the QR */}
+        <div className={`rpt-seal${order ? ' desk' : ''}`} aria-hidden>
           <svg viewBox="0 0 132 132">
             <defs><path id="rptArc" d="M66,66 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0" /></defs>
             <circle cx="66" cy="66" r="63" fill="none" stroke="#1f3bff" strokeWidth="1.2" />
@@ -192,6 +236,65 @@ export function CreditReport() {
                 : '.'}
             </p>
           </div>
+
+          {/* ── the desk's applicant block (?o= only) — the person behind the
+                 numbers: the record the app journey pulled (backend), the order
+                 it sent (iOS app), and the consented sources it read ── */}
+          {order && (
+            <div className="rpt-mid">
+              <div className="rpt-sec">
+                <div className="rpt-sec-h"><b>بيانات المتقدّم الموثّقة</b><span dir="ltr">APPLICANT RECORD</span></div>
+                <div className="rpt-grid">
+                  <Cell k="رقم الهوية" v={maskNin(String(order.national_id ?? ''))} mono />
+                  {person ? (
+                    <>
+                      <Cell k="العمر" v={`${person.age} سنة`} />
+                      <Cell k="المنطقة" v={String(person.region ?? '—')} />
+                      <Cell k="الحالة الاجتماعية" v={`${person.marital_status ?? '—'}${Number(person.dependents ?? 0) > 0 ? ` · يعول ${person.dependents}` : ''}`} />
+                      <Cell k="جهة العمل" v={String(person.employer ?? '—')} />
+                      <Cell k="فئة جهة العمل" v={String(person.employer_category ?? person.sector ?? '—')} />
+                      <Cell k="سنوات الخدمة" v={person.service_years != null ? String(Math.round(Number(person.service_years))) : '—'} />
+                      <Cell k="الراتب الموثّق" v={`${fmt(Number(person.monthly_salary_sar ?? 0))} ر.س`} />
+                      <Cell k="الدرجة الائتمانية" v={`${person.credit_grade ?? '—'} · ${person.serious_delinquency ? 'تعثّر مسجَّل' : 'سداد منتظم'}`} />
+                      <Cell k="الالتزامات الشهرية" v={`${fmt(Number(person.obligations_monthly_sar ?? 0))} ر.س`} />
+                      <Cell k="قوة الأصول" v={assetPower > 0 ? `${fmt(assetPower)} ر.س` : 'لا أصول مسجَّلة'} />
+                      <Cell k="التصنيف الداخلي" v={`${person.internal_rating ?? '—'} · مخاطر ${person.risk_segment_ar ?? '—'}`} />
+                    </>
+                  ) : (
+                    <>
+                      {statement?.context?.employer && <Cell k="جهة العمل" v={statement.context.employer} />}
+                      {statement?.context?.monthly_wage != null && <Cell k="الراتب الموثّق" v={`${fmt(statement.context.monthly_wage)} ر.س`} />}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="rpt-sec">
+                <div className="rpt-sec-h"><b>الطلب الوارد عبر تطبيق طبقة</b><span dir="ltr">INCOMING ORDER — TABAQA APP</span></div>
+                <div className="rpt-grid">
+                  <Cell k="رقم الطلب" v={String(order.order_id ?? '')} mono />
+                  <Cell k="الجهة الممولة" v={String(order.lender_ar ?? '—')} />
+                  <Cell k="نوع التمويل" v={String(order.product_ar ?? '—')} />
+                  <Cell k="المبلغ المطلوب" v={`${fmt(Number(order.amount ?? 0))} ر.س`} />
+                  <Cell k="القسط الشهري" v={`${fmt(Number(order.installment ?? 0))} ر.س × ${order.tenor_months}`} />
+                  <Cell k="النسبة السنوية" v={`${(Number(order.apr ?? 0) * 100).toFixed(1)}٪`} />
+                  <Cell k="إجمالي المبلغ المستحق" v={`${fmt(Number(order.total ?? 0))} ر.س`} />
+                  <Cell k="قناة الورود" v="تطبيق طبقة (iOS) — نفاذ ✓ · OTP ✓" />
+                </div>
+              </div>
+
+              <div className="rpt-sec">
+                <div className="rpt-sec-h"><b>مصادر البيانات المعتمدة</b><span dir="ltr">CONSENTED DATA SOURCES</span></div>
+                <p className="rpt-srcs">
+                  نفاذ — توثيق الهوية ✓ · سمة — السجل الائتماني · التأمينات الاجتماعية — الراتب والتوظيف ·
+                  البنوك — المصرفية المفتوحة والمحفظة الرقمية · أبشر — الحالة الاجتماعية (لتقدير المصروفات فقط) ·
+                  تداول — الاستثمارات (ملاءة، لا تُحتسب دخلًا) · سجل الأصول والعقارات (ملاءة).
+                  {statement && <> جُمعت <b className="rpt-num">{statement.rows.length}</b> عملية من <b className="rpt-num">{new Set(statement.rows.map((r) => r.source)).size}</b> حسابات خلال آخر ٦ أشهر.</>}
+                  {' '}جميع المصادر (محاكاة) عبر Tabaqa Sandbox — قراءة فقط، بموافقة موثّقة بختم زمني قابلة للإلغاء.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* ── bottom group (pinned to the foot of the page) ── */}
           <div className="rpt-bottom">
