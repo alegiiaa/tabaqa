@@ -127,7 +127,6 @@ export function JourneyFlow({ nin, nameAr, onExit }: { nin: string; nameAr: stri
   const [amount, setAmount] = useState(150_000)
   const [maxMode, setMaxMode] = useState(false)
   const [tenor, setTenor] = useState(48)
-  const [pref, setPref] = useState<SortKey>('best')
 
   // data over the app-login identity (Nafath-verified before the journey opened)
   const [data, setData] = useState<JourneyData | null>(null)
@@ -210,14 +209,7 @@ export function JourneyFlow({ nin, nameAr, onExit }: { nin: string; nameAr: stri
           />
           <div className="tp-range-val"><span>6 أشهر</span><b>{tenor} شهرًا</b><span>60 شهرًا</span></div>
 
-          <label className="tp-lab">أولوية ترتيب العروض (اختياري)</label>
-          <div className="tp-segs">
-            {SORTS.map((s) => (
-              <button key={s.k} className={`tp-seg${pref === s.k ? ' sel' : ''}`}
-                onClick={() => { setPref(s.k); setSort(s.k) }}>{s.label}</button>
-            ))}
-          </div>
-          <p className="tp-hint" style={{ marginTop: 10 }}>
+          <p className="tp-hint" style={{ marginTop: 14 }}>
             جميع العروض بصيغة مرابحة بنسبة ثابتة معلنة — تظهر النسبة والتكلفة الإجمالية على كل عرض.
           </p>
 
