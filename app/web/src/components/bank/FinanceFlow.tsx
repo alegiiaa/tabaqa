@@ -8,7 +8,7 @@ import {
   installmentRoom, schedule, fmt, pct, AHMED,
 } from './financeMath'
 import {
-  PERSONAS, RAW_COUNTS, retrieveSource, verifyIdentity,
+  PERSONAS, RAW_COUNTS, retrieveSource, verifyIdentity, warmSandbox,
   type Retrieval, type Transport,
 } from './connectors'
 import { applicationId } from '../bankdash/appdata'
@@ -53,6 +53,11 @@ export function FinanceFlow({ onExit }: { onExit: () => void }) {
   }, [])
 
   const [stage, setStage] = useState<Stage>(preset ?? 'products')
+
+  // Wake the serverless API the moment the flow opens: by the time the user has
+  // picked an amount and read the consent screen, the lambda is warm and the
+  // processing screen's retrievals answer inside their timeout.
+  useEffect(() => { warmSandbox() }, [])
   const [amount, setAmount] = useState(150_000)
   const [maxMode, setMaxMode] = useState(false)
   const [selected, setSelected] = useState<BankOffer | null>(null)

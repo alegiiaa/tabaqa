@@ -61,7 +61,11 @@ export interface Retrieval<T> {
   ms: number
 }
 
-const FETCH_TIMEOUT_MS = 3500
+// Generous because prod is a serverless lambda: a COLD start (imports + persona
+// synthesis) can take several seconds and must not flip the run to the offline
+// fallback. A genuinely dead network still fails fast (connection error, not
+// timeout), so the fallback remains immediate when it matters.
+const FETCH_TIMEOUT_MS = 10_000
 
 async function sandboxGet(path: string): Promise<Record<string, any>> {
   const ctrl = new AbortController()
@@ -73,6 +77,14 @@ async function sandboxGet(path: string): Promise<Record<string, any>> {
   } finally {
     clearTimeout(timer)
   }
+}
+
+/** Fire-and-forget lambda warm-up — call when the financing flow opens so the
+ *  serverless API is hot before the processing screen's real retrievals begin.
+ *  The home route carries no artificial latency; failures are silently ignored
+ *  (the per-call fallback handles a dead network on its own). */
+export function warmSandbox(): void {
+  sandboxGet('').catch(() => {})
 }
 
 /** One consented source over real HTTP; bundled fallback keeps the same pacing. */
