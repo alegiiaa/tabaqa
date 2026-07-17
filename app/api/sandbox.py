@@ -28,7 +28,7 @@ import time
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 
 from . import cohortdb, riskmodel
 
@@ -953,9 +953,19 @@ async def create_order(payload: dict) -> dict:
     }
 
 
+def _no_store(response: Response) -> None:
+    """Live desk state must NEVER be cached — a stale edge/CDN copy of an empty
+    list is exactly why the dashboard poll can miss an order (Vercel edge caches
+    a `public` response). Force origin on every poll."""
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["CDN-Cache-Control"] = "no-store"
+    response.headers["Vercel-CDN-Cache-Control"] = "no-store"
+
+
 @router.get("/orders")
-def list_orders() -> dict:
+def list_orders(response: Response) -> dict:
     """The dashboard's poll — newest first, each with its acceptance countdown."""
+    _no_store(response)
     return {
         "environment": ENVIRONMENT,
         "simulated": True,
@@ -973,10 +983,11 @@ def clear_orders() -> dict:
 
 
 @router.get("/orders/{order_id}")
-def get_order(order_id: str) -> dict:
+def get_order(order_id: str, response: Response) -> dict:
     """One order, with its bundled report_d — /report?o= fetches this instead of
     carrying the encoded statement in the URL (a ~25KB query string trips Node's
     16KB header cap with HTTP 431, and serverless URL limits besides)."""
+    _no_store(response)
     for o in ORDERS:
         if o["order_id"] == order_id:
             return {"environment": ENVIRONMENT, "simulated": True, **_order_view(o)}

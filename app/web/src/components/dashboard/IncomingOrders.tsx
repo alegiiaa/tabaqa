@@ -32,7 +32,10 @@ export interface TabaqaOrder {
 }
 
 export async function fetchOrders(): Promise<TabaqaOrder[]> {
-  const res = await fetch(`${API_BASE}/sandbox/v1/orders`)
+  // Cache-bust every poll: a stale edge/CDN copy of an empty list is exactly how
+  // the dashboard misses an order the phone already sent. Unique URL + no-store
+  // → each poll goes to origin.
+  const res = await fetch(`${API_BASE}/sandbox/v1/orders?t=${Date.now()}`, { cache: 'no-store' })
   if (!res.ok) throw new Error(`orders HTTP ${res.status}`)
   const env = (await res.json()) as Record<string, any>
   return (env.orders ?? []) as TabaqaOrder[]

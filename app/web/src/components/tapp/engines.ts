@@ -38,7 +38,7 @@ async function sbx(path: string): Promise<Record<string, any>> {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS)
   try {
-    const res = await fetch(`${API_BASE}/sandbox/v1${path}`, { signal: ctrl.signal })
+    const res = await fetch(`${API_BASE}/sandbox/v1${path}`, { signal: ctrl.signal, cache: 'no-store' })
     if (!res.ok) {
       let body: any = null
       try { body = await res.json() } catch { /* non-JSON error body */ }
@@ -694,7 +694,8 @@ export function markOrderNotified(): void {
 
 export async function fetchOrderStatus(orderId: string): Promise<{ status: DeskDecision; lenderAr: string } | null> {
   try {
-    const env = await sbx(`/orders/${encodeURIComponent(orderId)}`)
+    // cache-bust: a stale "pending" would delay the approval notice on the phone
+    const env = await sbx(`/orders/${encodeURIComponent(orderId)}?t=${Date.now()}`)
     return { status: env.status as DeskDecision, lenderAr: String(env.lender_ar ?? '') }
   } catch {
     return null // desk unreachable — keep waiting quietly
