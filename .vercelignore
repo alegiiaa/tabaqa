@@ -1,0 +1,17 @@
+# Vercel builds only app/web (rootDirectory) but uploads the whole repo. Exclude
+# everything that isn't the Vite web build so the upload doesn't stall (EPIPE on
+# a 4.8GB tree): backend datasets, the native iOS shell, videos, and venue docs.
+app/data
+app/video
+app/eval
+app/web/ios
+app/web/scripts
+assets
+gif
+branding
+*.pdf
+*.pptx
+*.docx
+*.mp4
+node_modules
+dist
