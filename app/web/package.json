@@ -8,9 +8,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ios:local": "VITE_API_BASE=http://localhost:8000 npm run build && cap sync ios",
+    "ios:prod": "VITE_API_BASE=https://tabaqa-api.vercel.app npm run build && cap sync ios"
   },
   "dependencies": {
+    "@capacitor/cli": "^7.6.8",
+    "@capacitor/core": "^7.6.8",
+    "@capacitor/ios": "^7.6.8",
     "@supabase/supabase-js": "^2.108.2",
     "@types/qrcode-generator": "^0.0.16",
     "framer-motion": "^12.40.0",

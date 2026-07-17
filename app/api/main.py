@@ -76,10 +76,16 @@ app = FastAPI(
 )
 
 def _cors_origins() -> list[str]:
-    """Allowed origins from CORS_ORIGINS (comma-separated, or '*'); dev default otherwise."""
+    """Allowed origins from CORS_ORIGINS (comma-separated, or '*'); dev default otherwise.
+
+    capacitor://localhost is the iOS shell's WebView origin (HYBRID_PLAN §5a) — without
+    it every fetch from the phone app is CORS-blocked and the journey silently degrades
+    to the bundled-data fallback. Production must include it in CORS_ORIGINS too.
+    """
     env = os.environ.get("CORS_ORIGINS", "").strip()
     if not env:
-        return ["http://localhost:5173", "http://127.0.0.1:5173"]
+        return ["http://localhost:5173", "http://127.0.0.1:5173",
+                "capacitor://localhost"]
     return [o.strip() for o in env.split(",") if o.strip()]
 
 

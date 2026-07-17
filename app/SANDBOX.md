@@ -83,6 +83,24 @@ never drift.
 - Demo fallback ladder: sandbox API → bundled payloads. The journey plays identically
   either way because the bytes are identical; only the footer line changes.
 
+## The iOS shell (HYBRID_PLAN §5a)
+
+The Capacitor app bundles `dist/` and calls whatever `VITE_API_BASE` was at build
+time — there is no Vite proxy inside the WebView, and its origin is
+`capacitor://localhost` (allowed by the API's dev CORS default; prod runs
+`CORS_ORIGINS=*`). Two builds, one command each:
+
+- `npm run ios:prod` — phone → **https://tabaqa-api.vercel.app** (LIVE with the
+  sandbox since 2026-07-17). Works on simulator *and* real device, any network.
+  The demo pairing: judge holds the phone, anyone can `curl` the same sandbox
+  from their own laptop.
+- `npm run ios:local` — phone → the Mac's `localhost:8000` (simulator only;
+  loopback is shared and ATS-exempt). The theater pairing: simulator + live
+  uvicorn access log side by side, six requests printing in step with the UI.
+
+If the API is unreachable the journey still plays from the bundled bytes and the
+processing footer says so — the demo cannot hard-fail.
+
 ## Ops
 
 - **Dev:** Vite proxies `/sandbox` → `localhost:8000` (vite.config.ts). Restart a
