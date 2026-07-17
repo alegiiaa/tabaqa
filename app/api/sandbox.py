@@ -438,9 +438,44 @@ def _sync() -> None:
     print(f"synced {copied} payload files → {_DEPLOY_COPY}")
 
 
+def _export(path: Path) -> None:
+    """Materialize the whole cohort into one CSV — 500k rows, one per identity.
+
+    The file is a VIEW of the deterministic generator (regenerable any time, so
+    it stays gitignored); the API remains the source of truth. Transactions are
+    not expanded here — that would be ~40M rows; pull any member's statements
+    from /sandbox/v1/bank-core/{nin} instead.
+    """
+    import csv
+
+    grades: dict[str, int] = {}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8-sig") as f:  # BOM so Excel reads Arabic
+        w = csv.writer(f)
+        w.writerow(["idx", "national_id", "name_ar", "name_en", "sector", "employer",
+                    "monthly_salary_sar", "service_years", "side_income_sar",
+                    "obligations_count", "obligations_monthly_sar",
+                    "credit_grade", "serious_delinquency"])
+        for idx in range(COHORT_SIZE):
+            p = _cohort_person(idx)
+            grades[p["grade"]] = grades.get(p["grade"], 0) + 1
+            w.writerow([idx, cohort_nin(idx), p["name_ar"], p["name_en"], p["sector"],
+                        p["employer"], p["salary"], p["service_years"], p["side_income"],
+                        len(p["obligations"]), p["total_obl"], p["grade"],
+                        int(p["delinquent"])])
+            if (idx + 1) % 100_000 == 0:
+                print(f"  {idx + 1:,} rows…")
+    size_mb = path.stat().st_size / 1e6
+    dist = " ".join(f"{g}:{grades[g]:,}" for g in sorted(grades))
+    print(f"wrote {COHORT_SIZE:,} rows → {path} ({size_mb:.1f} MB)\ngrades: {dist}")
+
+
 if __name__ == "__main__":
     if "sync" in sys.argv[1:]:
         _sync()
+    if "export" in sys.argv[1:]:
+        args = [a for a in sys.argv[1:] if a not in ("sync", "export")]
+        _export(Path(args[0]) if args else APP_DIR / "data" / "synthetic" / "cohort_500k.csv")
     for nin, ident in IDENTITIES.items():
         stocked = len(PAYLOADS.get(ident["persona"], {}))
         print(f"{nin}  {ident['persona']:7} {stocked}/{len(PROVIDERS)} sources  — {ident['scenario']}")
