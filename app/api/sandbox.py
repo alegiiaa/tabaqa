@@ -30,7 +30,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
 
-from . import riskmodel
+from . import cohortdb, riskmodel
 
 APP_DIR = Path(__file__).resolve().parents[1]
 _CANONICAL = APP_DIR / "web" / "src" / "data"   # source of truth (dev + full deploys)
@@ -374,8 +374,8 @@ def summary() -> dict:
     """One-line ops view for /health: is the sandbox stocked?"""
     stocked = sum(1 for p in PAYLOADS.values() if len(p) == len(PROVIDERS))
     return {"identities": len(IDENTITIES), "stocked": stocked,
-            "cohort": COHORT_SIZE, "providers": list(PROVIDERS),
-            "roadmap": list(ROADMAP_PROVIDERS)}
+            "cohort": COHORT_SIZE, "cohort_db": cohortdb.backing(),
+            "providers": list(PROVIDERS), "roadmap": list(ROADMAP_PROVIDERS)}
 
 
 def _identity(nin: str) -> dict:
@@ -567,11 +567,17 @@ def sandbox_home() -> dict:
         "identities": [{"national_id": nin, **ident} for nin, ident in IDENTITIES.items()],
         "cohort": {
             "population": COHORT_SIZE,
+            "storage": cohortdb.backing() or "generated on demand",
             "browse": "/sandbox/v1/cohort?offset=0&limit=25",
+            "filters": "region · sector · grade · stage · delinquent · "
+                       "min_salary · max_salary · sort=salary|pd|dbr|score|el&desc=1",
+            "record": "/sandbox/v1/cohort/{national_id}",
+            "stats": "/sandbox/v1/cohort/stats",
             "sample": "/sandbox/v1/cohort/sample",
             "suggest": "/sandbox/v1/cohort/suggest?prefix=108&limit=6",
-            "note": "synthetic test population generated deterministically per NIN — "
-                    "every member's five provider payloads are queryable",
+            "note": "synthetic test population — every member's provider payloads and "
+                    "full risk record are queryable; the SQLite store is built from "
+                    "the same deterministic generator, so the two can never disagree",
         },
         "providers": [
             {"id": slug, "name_ar": ar, "name_en": en,
@@ -610,18 +616,37 @@ def identities() -> list[dict]:
 
 
 @router.get("/cohort")
-def cohort(offset: int = 0, limit: int = 25) -> dict:
-    """Page through the 500,000-member synthetic cohort (generated, not stored)."""
+def cohort(offset: int = 0, limit: int = 25,
+           region: str | None = None, sector: str | None = None,
+           grade: str | None = None, stage: int | None = None,
+           delinquent: int | None = None,
+           min_salary: float | None = None, max_salary: float | None = None,
+           sort: str | None = None, desc: bool = False) -> dict:
+    """Page through the 500,000-member cohort — real WHERE/ORDER BY queries when
+    the SQLite store is built (`python -m api.cohortdb build`), thin generator
+    rows otherwise (slim serverless deploys can't ship the ~250MB file)."""
     offset = max(0, offset)
     limit = max(1, min(limit, 100))
+    if cohortdb.available():
+        total, page = cohortdb.browse(
+            offset, limit, region=region, sector=sector, grade=grade,
+            stage=stage, delinquent=delinquent,
+            min_salary=min_salary, max_salary=max_salary, sort=sort, desc=desc)
+        return {"environment": ENVIRONMENT, "simulated": True,
+                "backing": cohortdb.backing(),
+                "population": COHORT_SIZE, "matching": total,
+                "offset": offset, "limit": limit,
+                "record_endpoint": "/sandbox/v1/cohort/{national_id}",
+                "identities": page}
     page = []
     for idx in range(offset, min(offset + limit, COHORT_SIZE)):
         p = _cohort_person(idx)
         page.append({"national_id": cohort_nin(idx), "name_ar": p["name_ar"],
                      "name_en": p["name_en"], "sector": p["sector"],
                      "credit_grade": p["grade"]})
-    return {"environment": ENVIRONMENT, "simulated": True, "population": COHORT_SIZE,
-            "offset": offset, "limit": limit, "identities": page}
+    return {"environment": ENVIRONMENT, "simulated": True, "backing": "generated",
+            "population": COHORT_SIZE, "offset": offset, "limit": limit,
+            "identities": page}
 
 
 @router.get("/cohort/sample")
@@ -694,6 +719,52 @@ def cohort_suggest(prefix: str = "", limit: int = 6) -> dict:
         "note_en": "Sandbox-only convenience for browsing the synthetic population — "
                    "a real identity system never autocompletes national IDs.",
     }
+
+
+@router.get("/cohort/stats")
+def cohort_stats() -> dict:
+    """Portfolio-level aggregates over the whole 500k store — the warehouse view.
+
+    Live GROUP BY / AVG / SUM queries against the SQLite database (cached after
+    the first call): grade and IFRS 9 distributions, regional counts, salary
+    percentiles, portfolio expected loss. Proof the population actually exists
+    as queryable records, not a spreadsheet.
+    """
+    if not cohortdb.available():
+        raise HTTPException(
+            status_code=503,
+            detail="Cohort database not available on this deployment — run "
+                   "`python -m api.sandbox export`, then `python -m api.cohortdb loadpg` "
+                   "(PostgreSQL) or `python -m api.cohortdb build` (SQLite).")
+    return {"environment": ENVIRONMENT, "simulated": True,
+            "backing": cohortdb.backing(),
+            "derived": True, "model_version": riskmodel.MODEL_VERSION,
+            **cohortdb.stats()}
+
+
+@router.get("/cohort/{nin}")
+async def cohort_record(nin: str) -> dict:
+    """The full analytical record for one identity — all ~58 columns: person
+    facts plus the derived risk block (SAMA ratios, PD/LGD/EAD/EL, IFRS 9
+    stage, masterscale rating, stress test). Served from the SQLite store when
+    built; recomputed live from the deterministic generator otherwise — the
+    two are byte-equal by construction."""
+    ident = _identity(nin)  # unknown test NINs 404 like everywhere else
+    ms = await _provider_latency(310)
+    rec = cohortdb.record(nin) if cohortdb.available() else None
+    backing = cohortdb.backing()
+    if rec is None:
+        facts = person_facts(nin)
+        rec = dict(zip(_BASE_COLS, _base_row(facts)))
+        rec.update(riskmodel.advanced_metrics(facts))
+        backing = "computed"
+    return {"environment": ENVIRONMENT, "simulated": True, "backing": backing,
+            "request_id": f"sbx_{uuid.uuid4().hex[:12]}",
+            "subject": {"national_id": nin, "persona": ident["persona"],
+                        "name_ar": ident["name_ar"]},
+            "latency_ms": ms,
+            "record": rec,
+            "raw_payloads": [f"/sandbox/v1/{slug}/{nin}" for slug in PROVIDERS]}
 
 
 @router.get("/identities/{nin}")
@@ -891,6 +962,14 @@ def list_orders() -> dict:
         "accept_within_s": ORDER_TTL_S,
         "orders": [_order_view(o) for o in ORDERS],
     }
+
+
+@router.delete("/orders")
+def clear_orders() -> dict:
+    """Reset the desk between demo runs — clears every order (demo convenience)."""
+    n = len(ORDERS)
+    ORDERS.clear()
+    return {"environment": ENVIRONMENT, "simulated": True, "cleared": n}
 
 
 @router.get("/orders/{order_id}")
