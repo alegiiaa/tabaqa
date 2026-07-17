@@ -20,13 +20,17 @@ into data/sandbox/ for slim API deployments that exclude web/.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import random
 import sys
+import time
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+
+from . import riskmodel
 
 APP_DIR = Path(__file__).resolve().parents[1]
 _CANONICAL = APP_DIR / "web" / "src" / "data"   # source of truth (dev + full deploys)
@@ -76,7 +80,7 @@ PROVIDERS: dict[str, tuple[str, str, str, int]] = {
 # demo decision: their production integrations need agreements/frameworks that
 # do not exist yet (open-finance investments, property registry, civil-registry
 # household data). Kept separate so the decision engine's inputs stay exactly
-# the regulator-clean five above. Health data has no slot at all — see /sehhaty.
+# the regulator-clean five above. Health data has no slot at all, anywhere.
 ROADMAP_PROVIDERS: dict[str, tuple[str, str, int]] = {
     "household": ("السجلات المدنية — الحالة الاجتماعية والمعالون (محاكاة)",
                   "Civil registry — household (simulated)", 280),
@@ -389,6 +393,139 @@ def _identity(nin: str) -> dict:
     )
 
 
+# ── the analytics facts layer — everything riskmodel needs, per person ───────
+# New behavioral facts (region, file age, delinquency depth, utilization) come
+# from a SEPARATE additive seed ("-adv-") so every already-shipped cohort field
+# — names, salaries, grades, whole statements — stays byte-identical. Facts the
+# statements already imply (rent, inquiries) are REPLAYED from the same RNG
+# streams the payload builders use, so the columns and the raw payloads can
+# never disagree.
+
+_REGIONS = [("الرياض", 29), ("جدة", 17), ("الدمام", 13), ("مكة", 6), ("المدينة", 5),
+            ("بريدة", 5), ("أبها", 5), ("تبوك", 4), ("حائل", 3), ("جازان", 4),
+            ("الطائف", 4), ("الأحساء", 5)]
+
+_EMPLOYER_CATEGORY = {
+    "شركة اتصالات كبرى": "خاص — مدرجة كبرى",
+    "مصرف تجاري": "خاص — مدرجة كبرى",
+    "مستشفى خاص — الرياض": "خاص — كبيرة",
+    "شركة تجزئة وطنية": "خاص — كبيرة",
+    "شركة لوجستية": "خاص — كبيرة",
+    "شركة مقاولات": "خاص — متوسطة",
+    "شركة تقنية ناشئة": "خاص — ناشئة",
+}
+
+
+def _employer_category(employer: str, sector: str) -> str:
+    """The tier Saudi banks price on — salary-transfer listed vs SME vs gov."""
+    return "حكومي" if sector == "حكومي" else _EMPLOYER_CATEGORY.get(employer, "خاص — أخرى")
+
+
+def _replayed_rent(p: dict) -> int:
+    """The rent the bank-core statement carries — same stream, first draw."""
+    import random as _random
+    rng = _random.Random(f"{p['rng_seed']}-bank-core")
+    return int(p["salary"] * rng.uniform(0.22, 0.34)) // 100 * 100
+
+
+def _replayed_inquiries(p: dict) -> int:
+    """The inquiry count the credit-bureau payload reports — same stream."""
+    import random as _random
+    return _random.Random(f"{p['rng_seed']}-credit-bureau").randint(0, 3)
+
+
+def _extended_facts(idx: int, p: dict, age: int) -> dict:
+    import random as _random
+    rng = _random.Random(f"tabaqa-cohort-adv-{idx}")
+    region = rng.choices([r for r, _w in _REGIONS], weights=[w for _r, w in _REGIONS])[0]
+    history = min(rng.randint(8, 220), max(6, (age - 20) * 12))
+    worst = 90 if p["delinquent"] else rng.choices([0, 30, 60], weights=[86, 10, 4])[0]
+    has_card = any("بطاقة" in o["type"] for o in p["obligations"])
+    util = round(rng.uniform(0.12, 0.93), 2) if has_card else None
+    return {"region": region, "credit_history_months": history,
+            "worst_delinquency": worst, "card_utilization": util}
+
+
+def cohort_facts(idx: int) -> dict:
+    """One cohort member's full fact sheet — the riskmodel input contract."""
+    p = _cohort_person(idx)
+    nin = cohort_nin(idx)
+    rf = roadmap_facts(nin)
+    age = max(rf["age"], 21 + p["service_years"])
+    return {
+        "national_id": nin, "idx": idx,
+        "name_ar": p["name_ar"], "name_en": p["name_en"],
+        "salary": p["salary"], "side_income": p["side_income"],
+        "service_years": p["service_years"], "sector": p["sector"],
+        "employer": p["employer"],
+        "employer_category": _employer_category(p["employer"], p["sector"]),
+        "obligations": p["obligations"], "total_obl": p["total_obl"],
+        "delinquent": p["delinquent"], "grade": p["grade"],
+        "age": age, "marital": rf["marital_status"], "dependents": rf["dependents"],
+        "portfolio_value": rf["portfolio_value"],
+        "properties_count": len(rf["properties"]), "property_value": rf["property_value"],
+        "rent_monthly": _replayed_rent(p),
+        "recent_inquiries": _replayed_inquiries(p),
+        **_extended_facts(idx, p, age),
+    }
+
+
+def _cast_facts(nin: str, ident: dict) -> dict:
+    """The same fact sheet for a curated persona, read from its payload files."""
+    import random as _random
+    pay = PAYLOADS.get(ident["persona"], {})
+    emp = pay.get("employment", {}).get("record", {})
+    rep = pay.get("credit-bureau", {}).get("report", {})
+    wallet_tx = pay.get("wallet", {}).get("transactions", [])
+    bank_tx = pay.get("bank-core", {}).get("transactions", [])
+    salary = float(emp.get("verified_monthly_salary", 0) or 0)
+    side = int(sum(t.get("amount", 0) for t in wallet_tx if t.get("type") == "credit") / 6) // 100 * 100
+    rent_rows = [t.get("amount", 0) for t in bank_tx
+                 if t.get("type") == "debit" and t.get("category") == "سكن"]
+    obligations = [{
+        "type": str(o.get("type", "")),
+        "monthly_payment": float(o.get("monthly_payment", 0) or 0),
+        "outstanding": float(o.get("outstanding", 0) or 0),
+        "remaining_months": int(o.get("remaining_months", 0) or 0),
+    } for o in rep.get("obligations", [])]
+    sector = "حكومي" if "حكوم" in str(emp.get("employment_sector", "")) else "خاص"
+    employer = str(emp.get("employer_name", ""))
+    delinquent = bool(rep.get("serious_delinquency", False))
+    rf = roadmap_facts(nin)
+    rng = _random.Random(f"tabaqa-adv-cast-{nin}")
+    history = rng.randint(36, 160)
+    worst = 90 if delinquent else rng.choices([0, 30], weights=[85, 15])[0]
+    has_card = any("بطاقة" in o["type"] for o in obligations)
+    util = round(rng.uniform(0.2, 0.85), 2) if has_card else None
+    return {
+        "national_id": nin, "idx": None,
+        "name_ar": ident["name_ar"], "name_en": ident["name_en"],
+        "salary": salary, "side_income": side,
+        "service_years": float(emp.get("service_years", 0) or 0),
+        "sector": sector, "employer": employer,
+        "employer_category": _employer_category(employer, sector),
+        "obligations": obligations,
+        "total_obl": float(rep.get("total_monthly_obligations",
+                                   sum(o["monthly_payment"] for o in obligations)) or 0),
+        "delinquent": delinquent, "grade": str(rep.get("credit_grade", "C")),
+        "age": _age_for(nin, ident), "marital": rf["marital_status"], "dependents": rf["dependents"],
+        "portfolio_value": rf["portfolio_value"],
+        "properties_count": len(rf["properties"]), "property_value": rf["property_value"],
+        "rent_monthly": int(sum(rent_rows) / 6) if rent_rows else int(salary * 0.28),
+        "recent_inquiries": int(rep.get("recent_inquiries", 1) or 0),
+        "region": "الرياض", "credit_history_months": history,
+        "worst_delinquency": worst, "card_utilization": util,
+    }
+
+
+def person_facts(nin: str) -> dict:
+    """Fact sheet for any test identity — cohort or curated cast."""
+    ident = _identity(nin)
+    if ident["persona"].startswith("cohort_"):
+        return cohort_facts(int(ident["persona"][7:]))
+    return _cast_facts(nin, ident)
+
+
 async def _provider_latency(base_ms: int) -> int:
     """Sleep like a real integration would — base profile plus network jitter."""
     ms = max(60, int(random.gauss(base_ms, base_ms * 0.12)))
@@ -432,6 +569,7 @@ def sandbox_home() -> dict:
             "population": COHORT_SIZE,
             "browse": "/sandbox/v1/cohort?offset=0&limit=25",
             "sample": "/sandbox/v1/cohort/sample",
+            "suggest": "/sandbox/v1/cohort/suggest?prefix=108&limit=6",
             "note": "synthetic test population generated deterministically per NIN — "
                     "every member's five provider payloads are queryable",
         },
@@ -446,10 +584,22 @@ def sandbox_home() -> dict:
              "status": "roadmap", "note_ar": ROADMAP_NOTE_AR, "note_en": ROADMAP_NOTE_EN}
             for slug, (ar, en, _ms) in ROADMAP_PROVIDERS.items()
         ],
-        "excluded_by_design": {
-            "endpoint": "/sandbox/v1/sehhaty/{national_id}",
-            "returns": "HTTP 451 Unavailable For Legal Reasons",
-            "note_ar": "البيانات الصحية مستبعدة من المحرك عمدًا — بيانات حساسة بموجب نظام حماية البيانات الشخصية",
+        "identity_login": {
+            "id": "nafath",
+            "name_ar": "النفاذ الوطني الموحد (محاكاة)",
+            "name_en": "Nafath national SSO (simulated)",
+            "init": "/sandbox/v1/nafath/init/{national_id}",
+            "verify": "/sandbox/v1/nafath/verify/{national_id}?request_id=&chosen=",
+            "note_ar": "محاكاة لتجربة نفاذ (رقم التحقق المزدوج) — التكامل الفعلي يتطلب اتفاقية مركز المعلومات الوطني",
+        },
+        "analytics": {
+            "endpoint": "/sandbox/v1/analytics/{national_id}",
+            "derived": True,
+            "note_ar": "طبقة تحليلية محسوبة (ليست مصدر بيانات): مؤشرات أهلية ومخاطر على مستوى الفرد — "
+                       "نسب الاستقطاع النظامية، درجة سلوكية، PD/LGD/EAD وخسارة متوقعة، تصنيف داخلي، واختبار ضغط",
+            "note_en": "Computed analytics layer (not a data source): per-person underwriting "
+                       "and risk metrics — SAMA DBR ratios, behavioral score, PD/LGD/EAD, "
+                       "expected loss, internal rating, stress test. Formulas: app/DATA_DICTIONARY.md",
         },
     }
 
@@ -486,17 +636,82 @@ def cohort_sample() -> dict:
             "endpoints": [f"/sandbox/v1/{slug}/{nin}" for slug in PROVIDERS]}
 
 
+# Short Arabic hints for the curated cast in suggestion rows — mirrors the app's
+# quick-pick copy so both surfaces tell the same one-line story per persona.
+_CAST_HINT_AR = {
+    "1084634821": "موافقة — الصورة الكاملة تغطي المبلغ",
+    "2047183377": "لا عروض متوافقة — الالتزامات فوق الحد",
+    "1069127734": "مراجعة — الراتب المعلن لا يطابق الحركات",
+}
+
+_SUGGEST_SCAN_BUDGET = 60_000  # ≫ expected ~200 candidates/hit at 0.5% density
+
+
+@router.get("/cohort/suggest")
+def cohort_suggest(prefix: str = "", limit: int = 6) -> dict:
+    """Type-ahead over the test population (curated cast + 500k cohort) by NIN prefix.
+
+    SANDBOX-ONLY convenience for the app's Nafath-style login: every identity
+    here is synthetic, so autocompleting IDs is a feature — a real identity
+    system must never do this. No index is stored: cohort NINs come from an
+    invertible permutation of 0..499,999, so we walk the numeric range the
+    prefix implies and keep the values whose inverse lands inside the cohort.
+    """
+    q = "".join(ch for ch in prefix if ch.isdigit())[:10]
+    limit = max(1, min(limit, 12))
+    matches: list[dict] = [
+        {"national_id": nin, "kind": "cast", "name_ar": ident["name_ar"],
+         "name_en": ident["name_en"], "hint_ar": _CAST_HINT_AR.get(nin, "")}
+        for nin, ident in IDENTITIES.items() if nin.startswith(q)
+    ][:limit]
+    seen = {m["national_id"] for m in matches}
+    scanned = 0
+    if len(matches) < limit and (not q or q[0] == "1"):
+        body_prefix = q[1:9]
+        want_check = q[9] if len(q) == 10 else None
+        span = 10 ** (8 - len(body_prefix))
+        lo = int(body_prefix) * span if body_prefix else 0
+        v = lo
+        while v < lo + span and scanned < _SUGGEST_SCAN_BUDGET and len(matches) < limit:
+            idx = ((v * _PERM_INV) - _PERM_SALT) % 100_000_000
+            if idx < COHORT_SIZE:
+                nin = cohort_nin(idx)
+                if (want_check is None or nin[9] == want_check) and nin not in seen:
+                    p = _cohort_person(idx)
+                    matches.append({
+                        "national_id": nin, "kind": "cohort",
+                        "name_ar": p["name_ar"], "name_en": p["name_en"],
+                        "hint_ar": f"{p['employer']} · درجة {p['grade']}",
+                        "member_no": idx + 1,
+                    })
+            v += 1
+            scanned += 1
+    return {
+        "environment": ENVIRONMENT, "simulated": True,
+        "prefix": q, "population": COHORT_SIZE, "matches": matches,
+        "note_ar": "إكمال الهويات خاصية بيئة تجريبية لاستكشاف العينة الاصطناعية — "
+                   "أنظمة الهوية الفعلية لا تُكمل أرقام الهويات ولا تكشف الأسماء قبل التوثيق",
+        "note_en": "Sandbox-only convenience for browsing the synthetic population — "
+                   "a real identity system never autocompletes national IDs.",
+    }
+
+
 @router.get("/identities/{nin}")
 async def identity(nin: str) -> dict:
     """Identity verification — the journey's first real call (KYC-shaped, not underwriting)."""
     ident = _identity(nin)
     ms = await _provider_latency(240)
+    persona = ident["persona"]
     return {
         "environment": ENVIRONMENT,
         "simulated": True,
         "request_id": f"sbx_{uuid.uuid4().hex[:12]}",
         "latency_ms": ms,
         "national_id": nin,
+        "persona": persona,
+        # which of the 500,000 this NIN resolves to — the login's "who am I" line
+        **({"cohort_member_no": int(persona[7:]) + 1, "cohort_population": COHORT_SIZE}
+           if persona.startswith("cohort_") else {}),
         "name_ar": ident["name_ar"],
         "name_en": ident["name_en"],
         # Age comes from IDENTITY, deliberately — never from health records.
@@ -507,24 +722,197 @@ async def identity(nin: str) -> dict:
     }
 
 
-@router.get("/sehhaty/{nin}")
-@router.get("/health-records/{nin}")
-async def sehhaty(nin: str) -> dict:
-    """Deliberately refused — with the reason, not a bare 404.
+# ── the analytics layer — computed, not collected ────────────────────────────
 
-    HTTP 451: Unavailable For Legal Reasons. Health data is sensitive personal
-    data under PDPL; using it to price credit invites discrimination and has no
-    place in this engine. This is a design decision, not a missing feature.
+
+@router.get("/analytics/{nin}")
+async def analytics(nin: str) -> dict:
+    """Underwriting/risk metrics for one identity — a DERIVED view, not a source.
+
+    Everything here is computed from the five consented decision sources plus
+    the roadmap facts: SAMA affordability ratios, a SIMAH-style behavioral
+    score, PD/LGD/EAD and the Basel expected-loss identity, IFRS 9 staging, a
+    10-notch internal masterscale, and a +200bps stress test. Column-by-column
+    formulas: app/DATA_DICTIONARY.md.
     """
-    raise HTTPException(status_code=451, detail={
-        "refused": True,
-        "reason_ar": "البيانات الصحية بيانات حساسة بموجب نظام حماية البيانات الشخصية، "
-                     "واستخدامها في قرارات التمويل باب للتمييز — استُبعدت من المحرك عمدًا، "
-                     "في النسخة التجريبية وفي الإنتاج على حد سواء.",
-        "reason_en": "Health data is sensitive under Saudi PDPL and using it to price "
-                     "credit invites discrimination. Excluded from this engine by design — "
-                     "in the sandbox and in production alike.",
-    })
+    ident = _identity(nin)
+    ms = await _provider_latency(360)
+    facts = person_facts(nin)
+    return {
+        "environment": ENVIRONMENT,
+        "simulated": True,
+        "derived": True,
+        "request_id": f"sbx_{uuid.uuid4().hex[:12]}",
+        "subject": {"national_id": nin, "persona": ident["persona"], "name_ar": ident["name_ar"]},
+        "basis_ar": "طبقة تحليلية محسوبة من المصادر المعتمدة — ليست مصدر بيانات مستقلًا ولا استعلامًا جديدًا",
+        "profile": {"age": facts["age"], "region": facts["region"], "sector": facts["sector"],
+                    "employer_category": facts["employer_category"], "marital": facts["marital"],
+                    "dependents": facts["dependents"]},
+        "metrics": riskmodel.advanced_metrics(facts),
+        "model": {
+            "version": riskmodel.MODEL_VERSION,
+            "documentation": "app/DATA_DICTIONARY.md",
+            "grounding": [
+                "SAMA Responsible Lending Principles, Circular 46538/99, Ch. IV (DBR caps)",
+                "Basel expected-loss identity EL = PD × LGD × EAD; 50% CCF on undrawn revolving",
+                "IFRS 9 impairment staging (1/2/3)",
+                "Saudi Labor Law Art. 84 — end-of-service benefit",
+                "GASTAT HICES 2023 — essential-expense anchor",
+            ],
+        },
+        "latency_ms": ms,
+    }
+
+
+# ── Nafath (محاكاة) — the identity-login moment before consent ───────────────
+# Real Nafath has no public API: private-sector access runs through an NIC/TCC
+# agreement. The sandbox mirrors the UX contract instead — init issues a request
+# with a two-digit confirmation number; the applicant taps the matching number in
+# the (simulated) Nafath app; verify checks the tap. Stateless on purpose: the
+# number is re-derived from the request id, so serverless instances need no store.
+
+
+def _nafath_number(request_id: str) -> int:
+    """The two-digit confirmation number — recomputable from the request id alone."""
+    return int(hashlib.sha256(request_id.encode()).hexdigest(), 16) % 90 + 10
+
+
+@router.get("/nafath/init/{nin}")
+async def nafath_init(nin: str) -> dict:
+    """Open a simulated Nafath verification — returns the number the app must show."""
+    ident = _identity(nin)
+    ms = await _provider_latency(320)
+    rid = f"nfz_{uuid.uuid4().hex[:12]}"
+    return {
+        "environment": ENVIRONMENT,
+        "simulated": True,
+        "provider": {"id": "nafath", "name_ar": "النفاذ الوطني الموحد (محاكاة)",
+                     "name_en": "Nafath national SSO (simulated)"},
+        "request_id": rid,
+        "national_id": nin,
+        "name_ar": ident["name_ar"],
+        "number": _nafath_number(rid),
+        "expires_in_s": 90,
+        "latency_ms": ms,
+        "note_ar": "محاكاة كاملة — لا اتصال بمنصة نفاذ؛ في الإنتاج يتم التكامل عبر اتفاقية مركز المعلومات الوطني",
+        "note_en": "Fully simulated — no connection to the real Nafath platform; "
+                   "production integrates via the NIC/TCC agreement.",
+    }
+
+
+@router.get("/nafath/verify/{nin}")
+async def nafath_verify(nin: str, request_id: str, chosen: int) -> dict:
+    """The applicant tapped a number in the simulated Nafath app — check the tap."""
+    _identity(nin)  # unknown test NINs 404 exactly like every other endpoint
+    ms = await _provider_latency(520)
+    ok = chosen == _nafath_number(request_id)
+    return {
+        "environment": ENVIRONMENT,
+        "simulated": True,
+        "provider": {"id": "nafath", "name_ar": "النفاذ الوطني الموحد (محاكاة)",
+                     "name_en": "Nafath national SSO (simulated)"},
+        "request_id": request_id,
+        "national_id": nin,
+        "verified": ok,
+        "status": "COMPLETED" if ok else "REJECTED",
+        "latency_ms": ms,
+    }
+
+
+# ── incoming orders — the app → dashboard handoff (TEAM SPEC stages 8–10) ────
+# The consumer app submits the chosen offer as an ORDER; the Tabaqa dashboard
+# polls the list, announces "طلب جديد — اقبله خلال 24 ساعة" and shows the same
+# applicant's report (the order carries the encoded fused statement). In-memory
+# by design: the venue demo runs a single local uvicorn. On serverless each
+# instance keeps its own list — best-effort there, and the demo doesn't rely on it.
+
+ORDERS: list[dict] = []
+ORDER_TTL_S = 24 * 3600
+_ORDERS_MAX = 50
+
+
+def _order_view(o: dict) -> dict:
+    remaining = max(0, int(o["received_at"] + ORDER_TTL_S - time.time()))
+    status = o["status"]
+    if status == "pending" and remaining == 0:
+        status = "expired"
+    return {**o, "status": status, "remaining_s": remaining}
+
+
+@router.post("/orders")
+async def create_order(payload: dict) -> dict:
+    """The app sends the chosen offer to the lender — through Tabaqa's desk."""
+    nin = str(payload.get("national_id", ""))
+    ident = _identity(nin)  # unknown test NINs 404 like everywhere else
+    ms = await _provider_latency(260)
+    num = lambda k: int(float(payload.get(k) or 0))  # noqa: E731
+    order = {
+        "order_id": f"ord_{uuid.uuid4().hex[:10]}",
+        "environment": ENVIRONMENT,
+        "simulated": True,
+        "received_at": time.time(),
+        "status": "pending",
+        "national_id": nin,
+        "applicant_ar": str(payload.get("applicant_ar") or ident["name_ar"])[:80],
+        "lender_id": str(payload.get("lender_id", ""))[:40],
+        "lender_ar": str(payload.get("lender_ar", ""))[:80],
+        "product_ar": str(payload.get("product_ar", ""))[:80],
+        "amount": num("amount"),
+        "tenor_months": num("tenor_months"),
+        "installment": num("installment"),
+        "apr": float(payload.get("apr") or 0),
+        "total": num("total"),
+        "score": num("score"),
+        "risk": str(payload.get("risk", ""))[:12],
+        "eligible_income": num("eligible_income"),
+        "obligations": num("obligations"),
+        # the applicant's fused statement, encoded — the dashboard renders the
+        # SAME report the app derived, re-scored live at /report?d=
+        "report_d": str(payload.get("report_d", ""))[:300_000],
+    }
+    ORDERS.insert(0, order)
+    del ORDERS[_ORDERS_MAX:]
+    return {
+        "environment": ENVIRONMENT,
+        "simulated": True,
+        "order_id": order["order_id"],
+        "status": "pending",
+        "accept_within_s": ORDER_TTL_S,
+        "latency_ms": ms,
+    }
+
+
+@router.get("/orders")
+def list_orders() -> dict:
+    """The dashboard's poll — newest first, each with its acceptance countdown."""
+    return {
+        "environment": ENVIRONMENT,
+        "simulated": True,
+        "accept_within_s": ORDER_TTL_S,
+        "orders": [_order_view(o) for o in ORDERS],
+    }
+
+
+@router.get("/orders/{order_id}")
+def get_order(order_id: str) -> dict:
+    """One order, with its bundled report_d — /report?o= fetches this instead of
+    carrying the encoded statement in the URL (a ~25KB query string trips Node's
+    16KB header cap with HTTP 431, and serverless URL limits besides)."""
+    for o in ORDERS:
+        if o["order_id"] == order_id:
+            return {"environment": ENVIRONMENT, "simulated": True, **_order_view(o)}
+    raise HTTPException(status_code=404, detail=f"Unknown order '{order_id}'")
+
+
+@router.post("/orders/{order_id}/accept")
+@router.post("/orders/{order_id}/decline")
+async def decide_order(order_id: str, request: Request) -> dict:
+    for o in ORDERS:
+        if o["order_id"] == order_id:
+            o["status"] = "accepted" if request.url.path.endswith("/accept") else "declined"
+            o["decided_at"] = time.time()
+            return {"environment": ENVIRONMENT, "simulated": True, **_order_view(o)}
+    raise HTTPException(status_code=404, detail=f"Unknown order '{order_id}'")
 
 
 @router.get("/{provider_slug}/{nin}")
@@ -571,43 +959,61 @@ def _sync() -> None:
     print(f"synced {copied} payload files → {_DEPLOY_COPY}")
 
 
-def _export(path: Path) -> None:
-    """Materialize the whole cohort into one CSV — 500k rows, one per identity.
+_BASE_COLS = ["idx", "national_id", "name_ar", "name_en", "age", "region",
+              "sector", "employer", "employer_category",
+              "monthly_salary_sar", "service_years", "side_income_sar",
+              "rent_monthly_sar",
+              "obligations_count", "obligations_monthly_sar",
+              "credit_grade", "serious_delinquency",
+              "marital_status", "dependents",
+              "portfolio_value_sar", "properties_count", "property_value_sar"]
 
-    The file is a VIEW of the deterministic generator (regenerable any time, so
-    it stays gitignored); the API remains the source of truth. Transactions are
-    not expanded here — that would be ~40M rows; pull any member's statements
-    from /sandbox/v1/bank-core/{nin} instead.
+
+def _base_row(f: dict) -> list:
+    return [f["idx"], f["national_id"], f["name_ar"], f["name_en"], f["age"], f["region"],
+            f["sector"], f["employer"], f["employer_category"],
+            f["salary"], f["service_years"], f["side_income"],
+            f["rent_monthly"],
+            len(f["obligations"]), f["total_obl"],
+            f["grade"], int(f["delinquent"]),
+            f["marital"], f["dependents"],
+            f["portfolio_value"], f["properties_count"], f["property_value"]]
+
+
+def _export(path: Path) -> None:
+    """Materialize the whole cohort into one wide analytical CSV — 500k rows.
+
+    One row per identity: the person facts PLUS the full derived risk block
+    (riskmodel.advanced_metrics — SAMA ratios, bureau behavior, PD/LGD/EAD/EL,
+    IFRS 9 stage, masterscale rating, stress test). The file is a VIEW of the
+    deterministic generator (regenerable any time, so it stays gitignored); the
+    API remains the source of truth. Transactions are not expanded here — that
+    would be ~40M rows; pull statements from /sandbox/v1/bank-core/{nin}.
     """
     import csv
 
     grades: dict[str, int] = {}
+    stages: dict[int, int] = {}
+    metric_keys: list[str] = []
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8-sig") as f:  # BOM so Excel reads Arabic
         w = csv.writer(f)
-        w.writerow(["idx", "national_id", "name_ar", "name_en", "age", "sector", "employer",
-                    "monthly_salary_sar", "service_years", "side_income_sar",
-                    "obligations_count", "obligations_monthly_sar",
-                    "credit_grade", "serious_delinquency",
-                    "marital_status", "dependents",
-                    "portfolio_value_sar", "properties_count", "property_value_sar"])
         for idx in range(COHORT_SIZE):
-            p = _cohort_person(idx)
-            nin = cohort_nin(idx)
-            rf = roadmap_facts(nin)
-            grades[p["grade"]] = grades.get(p["grade"], 0) + 1
-            w.writerow([idx, nin, p["name_ar"], p["name_en"],
-                        max(rf["age"], 21 + p["service_years"]), p["sector"],
-                        p["employer"], p["salary"], p["service_years"], p["side_income"],
-                        len(p["obligations"]), p["total_obl"], p["grade"],
-                        int(p["delinquent"]),
-                        rf["marital_status"], rf["dependents"],
-                        rf["portfolio_value"], len(rf["properties"]), rf["property_value"]])
+            facts = cohort_facts(idx)
+            m = riskmodel.advanced_metrics(facts)
+            if not metric_keys:
+                metric_keys = list(m)
+                w.writerow(_BASE_COLS + metric_keys)
+            grades[facts["grade"]] = grades.get(facts["grade"], 0) + 1
+            stages[m["ifrs9_stage"]] = stages.get(m["ifrs9_stage"], 0) + 1
+            w.writerow(_base_row(facts) + [m[k] for k in metric_keys])
             if (idx + 1) % 100_000 == 0:
                 print(f"  {idx + 1:,} rows…")
     size_mb = path.stat().st_size / 1e6
     dist = " ".join(f"{g}:{grades[g]:,}" for g in sorted(grades))
-    print(f"wrote {COHORT_SIZE:,} rows → {path} ({size_mb:.1f} MB)\ngrades: {dist}")
+    sdist = " ".join(f"S{s}:{stages[s]:,}" for s in sorted(stages))
+    print(f"wrote {COHORT_SIZE:,} rows × {len(_BASE_COLS) + len(metric_keys)} cols → {path} ({size_mb:.1f} MB)")
+    print(f"grades: {dist}\nifrs9 stages: {sdist}")
 
 
 def full_person(nin: str) -> dict:
@@ -621,8 +1027,8 @@ def full_person(nin: str) -> dict:
             out[slug] = PAYLOADS.get(ident["persona"], {}).get(slug)
     for slug in ROADMAP_PROVIDERS:
         out[slug] = _roadmap_payload(slug, nin, ident["persona"])
-    out["sehhaty"] = {"refused": True, "http_status": 451,
-                      "reason": "health data excluded by design (PDPL sensitive data)"}
+    out["analytics"] = {"derived": True, "model_version": riskmodel.MODEL_VERSION,
+                        "metrics": riskmodel.advanced_metrics(person_facts(nin))}
     return out
 
 
@@ -633,6 +1039,8 @@ def _export_full(outdir: Path) -> None:
     """Relational export — one CSV per data TYPE, joined by national_id.
 
     persons (1 row/person) · obligations · holdings · properties (1 row/item)
+    · risk_metrics (1 row/person — the FULL derived block: SAMA ratios, bureau
+    behavior, PD/LGD/EAD/EL, IFRS 9 stage, masterscale, stress test)
     · transactions_sample (every transaction for the first 2,000 identities —
     the full expansion would be ~40M rows; any person's statements are one API
     call away). All regenerable byte-for-byte; gitignored.
@@ -641,38 +1049,52 @@ def _export_full(outdir: Path) -> None:
 
     outdir.mkdir(parents=True, exist_ok=True)
     counts: dict[str, int] = {}
+    metric_keys: list[str] = []
     with (outdir / "persons.csv").open("w", newline="", encoding="utf-8-sig") as fp, \
          (outdir / "obligations.csv").open("w", newline="", encoding="utf-8-sig") as fo, \
          (outdir / "holdings.csv").open("w", newline="", encoding="utf-8-sig") as fh, \
-         (outdir / "properties.csv").open("w", newline="", encoding="utf-8-sig") as fr:
+         (outdir / "properties.csv").open("w", newline="", encoding="utf-8-sig") as fr, \
+         (outdir / "risk_metrics.csv").open("w", newline="", encoding="utf-8-sig") as fm:
         wp, wo = csv.writer(fp), csv.writer(fo)
         wh, wr = csv.writer(fh), csv.writer(fr)
-        wp.writerow(["national_id", "name_ar", "name_en", "age", "marital_status", "dependents",
-                     "sector", "employer", "monthly_salary_sar", "service_years",
-                     "side_income_sar", "credit_grade", "serious_delinquency"])
+        wm = csv.writer(fm)
+        wp.writerow(["national_id", "name_ar", "name_en", "age", "region",
+                     "marital_status", "dependents",
+                     "sector", "employer", "employer_category",
+                     "monthly_salary_sar", "service_years",
+                     "side_income_sar", "rent_monthly_sar",
+                     "credit_grade", "serious_delinquency"])
         wo.writerow(["national_id", "obligation_type", "lender", "monthly_payment_sar",
                      "outstanding_sar", "remaining_months"])
         wh.writerow(["national_id", "security", "shares", "market_value_sar"])
         wr.writerow(["national_id", "property_type", "city", "estimated_value_sar"])
         for idx in range(COHORT_SIZE):
-            p = _cohort_person(idx)
-            nin = cohort_nin(idx)
+            facts = cohort_facts(idx)
+            m = riskmodel.advanced_metrics(facts)
+            if not metric_keys:
+                metric_keys = list(m)
+                wm.writerow(["national_id"] + metric_keys)
+            nin = facts["national_id"]
             rf = roadmap_facts(nin)
-            wp.writerow([nin, p["name_ar"], p["name_en"], max(rf["age"], 21 + p["service_years"]),
-                         rf["marital_status"], rf["dependents"], p["sector"], p["employer"],
-                         p["salary"], p["service_years"], p["side_income"],
-                         p["grade"], int(p["delinquent"])])
-            for o in p["obligations"]:
+            wp.writerow([nin, facts["name_ar"], facts["name_en"], facts["age"], facts["region"],
+                         facts["marital"], facts["dependents"],
+                         facts["sector"], facts["employer"], facts["employer_category"],
+                         facts["salary"], facts["service_years"],
+                         facts["side_income"], facts["rent_monthly"],
+                         facts["grade"], int(facts["delinquent"])])
+            for o in facts["obligations"]:
                 wo.writerow([nin, o["type"], o["lender"], o["monthly_payment"],
                              o["outstanding"], o["remaining_months"]])
             for h in rf["holdings"]:
                 wh.writerow([nin, h["security"], h["shares"], h["market_value"]])
             for pr in rf["properties"]:
                 wr.writerow([nin, pr["type"], pr["city"], pr["estimated_value"]])
+            wm.writerow([nin] + [m[k] for k in metric_keys])
             counts["persons"] = counts.get("persons", 0) + 1
-            counts["obligations"] = counts.get("obligations", 0) + len(p["obligations"])
+            counts["obligations"] = counts.get("obligations", 0) + len(facts["obligations"])
             counts["holdings"] = counts.get("holdings", 0) + len(rf["holdings"])
             counts["properties"] = counts.get("properties", 0) + len(rf["properties"])
+            counts["risk_metrics"] = counts.get("risk_metrics", 0) + 1
             if (idx + 1) % 100_000 == 0:
                 print(f"  {idx + 1:,} persons…")
     with (outdir / "transactions_sample.csv").open("w", newline="", encoding="utf-8-sig") as ft:
