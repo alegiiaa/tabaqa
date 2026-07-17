@@ -9,9 +9,15 @@ import {
 import type { InputKind } from '../../lib/db'
 import { num } from '../../lib/csv'
 import { StatementUpload } from './StatementUpload'
+import { ScorePipeline, factsFromResult, type PipelineFacts } from './ScorePipeline'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 const GIG_PLATFORMS = ['Jahez', 'HungerStation', 'Mrsool', 'Careem', 'Uber']
+
+/** Once the engine answers, hold the completed pipeline on screen just long
+ *  enough to read the six lines it filled in — then hand over to the reveal. */
+const SETTLE_MS = 900
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export interface ScoredPayload {
   result: ScoreResult
@@ -33,20 +39,26 @@ export function NewApplicant({
   const { tx, dir } = useTx()
   const [mode, setMode] = useState<Mode>('upload')
   const [busy, setBusy] = useState(false)
+  const [facts, setFacts] = useState<PipelineFacts | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const back = dir === 'rtl' ? '→' : '←'
 
-  async function run(fn: () => Promise<void>) {
-    setBusy(true); setErr(null)
+  /** Score, then let the pipeline settle with the real values before the reveal.
+   *  The API is the only thing gating the result — the settle hold runs after it. */
+  async function run(fn: () => Promise<ScoredPayload>) {
+    setBusy(true); setErr(null); setFacts(null)
     try {
-      await fn()
+      const payload = await fn()
+      setFacts(factsFromResult(payload.result))
+      await sleep(SETTLE_MS)
+      onScored(payload)
     } catch {
       setErr(tx(
         'Scoring didn’t go through. Check your connection and try again.',
         'لم يكتمل التقييم. تحقق من اتصالك وحاول مرة أخرى.',
       ))
-    } finally {
       setBusy(false)
+      setFacts(null)
     }
   }
 
@@ -61,44 +73,52 @@ export function NewApplicant({
         </div>
       </div>
 
-      <div className="res-tabs" role="tablist">
-        {(['upload', 'form', 'persona'] as Mode[]).map((m) => (
-          <button
-            key={m}
-            role="tab"
-            aria-selected={mode === m}
-            className={`res-tab${mode === m ? ' active' : ''}`}
-            onClick={() => setMode(m)}
-          >
-            {m === 'upload' && tx('Upload statement', 'رفع كشف حساب')}
-            {m === 'form' && tx('Guided form', 'نموذج موجّه')}
-            {m === 'persona' && tx('Sample persona', 'نموذج جاهز')}
-          </button>
-        ))}
-      </div>
+      {!busy && (
+        <div className="res-tabs" role="tablist">
+          {(['upload', 'form', 'persona'] as Mode[]).map((m) => (
+            <button
+              key={m}
+              role="tab"
+              aria-selected={mode === m}
+              className={`res-tab${mode === m ? ' active' : ''}`}
+              onClick={() => setMode(m)}
+            >
+              {m === 'upload' && tx('Upload statement', 'رفع كشف حساب')}
+              {m === 'form' && tx('Guided form', 'نموذج موجّه')}
+              {m === 'persona' && tx('Sample persona', 'نموذج جاهز')}
+            </button>
+          ))}
+        </div>
+      )}
 
       {err && <div className="afford-err" style={{ marginTop: 14 }}>{err}</div>}
 
       <div className="newapp-body">
-        {mode === 'upload' && <UploadMode busy={busy} run={run} onScored={onScored} />}
-        {mode === 'form' && <FormMode busy={busy} run={run} onScored={onScored} />}
-        {mode === 'persona' && <PersonaMode run={run} onScored={onScored} />}
+        {busy ? (
+          <ScorePipeline facts={facts} />
+        ) : (
+          <>
+            {mode === 'upload' && <UploadMode run={run} />}
+            {mode === 'form' && <FormMode run={run} />}
+            {mode === 'persona' && <PersonaMode run={run} />}
+          </>
+        )}
       </div>
     </div>
   )
 }
 
+type Run = (fn: () => Promise<ScoredPayload>) => void
+
 // ── upload mode ──────────────────────────────────────────────────────────────
-function UploadMode({
-  busy, run, onScored,
-}: { busy: boolean; run: (fn: () => Promise<void>) => void; onScored: (p: ScoredPayload) => void }) {
+function UploadMode({ run }: { run: Run }) {
   return (
     <StatementUpload
-      busy={busy}
+      busy={false}
       onSubmit={(statement) =>
         run(async () => {
           const result = await api.scoreStatement(statement)
-          onScored({ result, name: statement.name ?? 'Uploaded applicant', input_kind: 'statement', input: statement })
+          return { result, name: statement.name ?? 'Uploaded applicant', input_kind: 'statement', input: statement }
         })
       }
     />
@@ -106,9 +126,7 @@ function UploadMode({
 }
 
 // ── guided form mode ─────────────────────────────────────────────────────────
-function FormMode({
-  busy, run, onScored,
-}: { busy: boolean; run: (fn: () => Promise<void>) => void; onScored: (p: ScoredPayload) => void }) {
+function FormMode({ run }: { run: Run }) {
   const { tx } = useTx()
   const [name, setName] = useState('Form applicant')
   const [months, setMonths] = useState('3')
@@ -144,7 +162,7 @@ function FormMode({
         monthly_spending: num(spending) ?? 0,
       }
       const result = await api.scoreForm(form)
-      onScored({ result, name, input_kind: 'form', input: form })
+      return { result, name, input_kind: 'form' as const, input: form }
     })
   }
 
@@ -183,8 +201,8 @@ function FormMode({
         <L label={tx('Card spending / mo', 'إنفاق البطاقة / شهر')}><input className="ti" value={spending} onChange={(e) => setSpending(e.target.value)} /></L>
       </Group>
       <div className="form-submit">
-        <button className="btn btn-primary full" onClick={submit} disabled={busy}>
-          {busy ? tx('Scoring…', 'جارٍ التقييم…') : tx('Reveal & score', 'اكشف وقيّم')}
+        <button className="btn btn-primary full" onClick={submit}>
+          {tx('Reveal & score', 'اكشف وقيّم')}
         </button>
       </div>
     </div>
@@ -192,14 +210,11 @@ function FormMode({
 }
 
 // ── persona mode ─────────────────────────────────────────────────────────────
-function PersonaMode({
-  run, onScored,
-}: { run: (fn: () => Promise<void>) => void; onScored: (p: ScoredPayload) => void }) {
+function PersonaMode({ run }: { run: Run }) {
   const { tx } = useTx()
   const [personas, setPersonas] = useState<Persona[]>([])
   const [loading, setLoading] = useState(true)
   const [pickErr, setPickErr] = useState<string | null>(null)
-  const [picking, setPicking] = useState<string | null>(null)
 
   useEffect(() => {
     let on = true
@@ -215,13 +230,14 @@ function PersonaMode({
   }, [])
 
   function pick(p: Persona) {
-    setPicking(p.connection_id)
     run(async () => {
-      try {
-        const result = await api.scoreConnection(p.connection_id)
-        onScored({ result, name: p.name, input_kind: 'persona', input: { connection_id: p.connection_id }, connection_id: p.connection_id })
-      } finally {
-        setPicking(null)
+      const result = await api.scoreConnection(p.connection_id)
+      return {
+        result,
+        name: p.name,
+        input_kind: 'persona' as const,
+        input: { connection_id: p.connection_id },
+        connection_id: p.connection_id,
       }
     })
   }
@@ -244,7 +260,7 @@ function PersonaMode({
   return (
     <div className="persona-grid">
       {personas.map((p) => (
-        <button key={p.id} className="persona-card" onClick={() => pick(p)} disabled={!!picking}>
+        <button key={p.id} className="persona-card" onClick={() => pick(p)}>
           <div className="persona-role">{p.role}</div>
           <div className="persona-name">{p.name}</div>
           <div className="persona-reveal">
@@ -256,7 +272,6 @@ function PersonaMode({
             <span className="tag t-src">{tx('Score', 'الدرجة')} {p.tabaqa_score}</span>
             <span className={`tag ${p.risk_flag === 'low' ? 't-ok' : 't-inf'}`}>{p.risk_flag}</span>
           </div>
-          {picking === p.connection_id && <div className="persona-loading">{tx('Scoring…', 'جارٍ التقييم…')}</div>}
         </button>
       ))}
     </div>

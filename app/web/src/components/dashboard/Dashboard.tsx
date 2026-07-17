@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import { useTx } from '../../lib/tx'
+import { IncomingOrders, OrderToast, fetchOrders, type TabaqaOrder } from './IncomingOrders'
 import { api, type AssistantAction, type ScoreResult, type StatementInput } from '../../lib/api'
 import { DashboardLayout, type NavSpec, type Section } from './DashboardLayout'
 import { Connect, type Picks } from './Connect'
@@ -10,6 +11,7 @@ import { Applicants } from './Applicants'
 import { RevealScreen, ScoreScreen, LedgerScreen } from './Result'
 import { Marketplace } from './Marketplace'
 import { ModelCardPanel } from './ModelCardPanel'
+import { ScaleExplorer } from './ScaleExplorer'
 import { ErrorState } from './ErrorState'
 import { JudgeTour, markTourSeen, tourSeen } from './Tour'
 
@@ -122,6 +124,41 @@ export function Dashboard() {
     setTour(false)
   }
 
+  // ── incoming orders desk — طلبات تطبيق طبقة (TEAM SPEC stages 8–10) ─────────
+  // Poll the sandbox desk; the first UNSEEN pending order after the initial
+  // load raises the "طلب جديد — اقبله خلال 24 ساعة" toast. Stale orders present
+  // at page load never toast (primed guard) — only live arrivals do.
+  const [orders, setOrders] = useState<TabaqaOrder[] | null>(null)
+  const [orderToast, setOrderToast] = useState<TabaqaOrder | null>(null)
+  const seenOrders = useRef<Set<string>>(new Set())
+  const ordersPrimed = useRef(false)
+
+  async function pollOrders() {
+    try {
+      const list = await fetchOrders()
+      setOrders(list)
+      const fresh = list.find((o) => o.status === 'pending' && !seenOrders.current.has(o.order_id))
+      list.forEach((o) => seenOrders.current.add(o.order_id))
+      if (fresh && ordersPrimed.current) setOrderToast(fresh)
+      ordersPrimed.current = true
+    } catch { /* desk offline — keep whatever we last knew */ }
+  }
+
+  useEffect(() => {
+    void pollOrders()
+    const t = window.setInterval(() => { void pollOrders() }, 6000)
+    return () => window.clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!orderToast) return
+    const t = window.setTimeout(() => setOrderToast(null), 12_000)
+    return () => window.clearTimeout(t)
+  }, [orderToast])
+
+  const pendingOrders = orders?.filter((o) => o.status === 'pending').length ?? 0
+
   // Ask-Tabaqa grounded facts: the on-screen person's REAL numbers, and the ONLY
   // numbers the copilot's LLM may use — enforced server-side by the grounding
   // firewall. In the Applicants section the copilot grounds on whoever the
@@ -173,7 +210,8 @@ export function Dashboard() {
     { id: 'home', label: tx('My money', 'أموالي'), cap: tx('What prices your offers', 'ما يُسعّر عروضك') },
     { id: 'income', label: tx('Income & score', 'الدخل والدرجة') },
     { id: 'ledger', label: tx('Ledger', 'السجل') },
-    { id: 'applicants', label: tx('Applicants', 'المتقدمون'), cap: tx('Lender tools', 'أدوات المموّل') },
+    { id: 'orders', label: tx('Incoming orders', 'الطلبات الواردة'), cap: tx('Lender tools', 'أدوات المموّل'), badge: pendingOrders ? String(pendingOrders) : undefined },
+    { id: 'applicants', label: tx('Applicants', 'المتقدمون') },
     { id: 'model', label: tx('Model validation', 'التحقق من النموذج') },
   ]
 
@@ -182,12 +220,13 @@ export function Dashboard() {
     income: { title: tx('Income & score', 'الدخل والدرجة'), sub: tx('Bank-only vs. your true verified income — and the score, one input into your pricing.', 'دخل البنك مقابل دخلك الحقيقي الموثّق — والدرجة، أحد مدخلات تسعيرك.') },
     ledger: { title: tx('Ledger', 'السجل'), sub: tx('Unified bank + wallet activity, labelled.', 'نشاط موحّد للبنك والمحفظة، موسوم.') },
     financing: { title: tx('Financing marketplace', 'سوق التمويل'), sub: tx('Every offer your verified income unlocks — across lenders, ranked for you.', 'كل العروض التي يفتحها دخلك الموثّق — عبر الجهات التمويلية، مرتّبة لك.') },
+    orders: { title: tx('Incoming orders', 'الطلبات الواردة'), sub: tx('Orders sent from the Tabaqa app — accept within 24 hours, the applicant’s verified report attached.', 'طلبات وصلت من تطبيق طبقة — على الجهة اعتمادها خلال 24 ساعة، ومع كل طلب تقرير المتقدم الموثّق.') },
     applicants: { title: tx('Applicants', 'المتقدمون'), sub: tx('Score other people for lending decisions.', 'قيّم أشخاصًا آخرين لاتخاذ قرارات الإقراض.') },
     model: { title: tx('Model validation', 'التحقق من النموذج'), sub: tx('How the Tabaqa score performs on real default outcomes.', 'كيف يؤدي نموذج طبقة على نتائج تعثّر حقيقية.') },
   }
 
   const meta = META[section]
-  const needsMine = section !== 'applicants' && section !== 'model'
+  const needsMine = section !== 'applicants' && section !== 'model' && section !== 'orders'
   // Where the Financial-intelligence panel should source its Claude narrative from.
   const insightsConn = picks.mode === 'own_data' && input
     ? { statement: input }
@@ -212,10 +251,15 @@ export function Dashboard() {
           </button>
         }
       >
-        {section === 'applicants' ? (
+        {section === 'orders' ? (
+          <IncomingOrders orders={orders} onChanged={() => { void pollOrders() }} />
+        ) : section === 'applicants' ? (
           <Applicants onActiveResult={setApplicantResult} />
         ) : section === 'model' ? (
-          <ModelCardPanel />
+          <>
+            <ModelCardPanel />
+            <ScaleExplorer />
+          </>
         ) : needsMine && !themed ? (
           err ? <ErrorState error={err} onRetry={retryLoad} /> : <LoadingScreen />
         ) : themed ? (
@@ -225,6 +269,14 @@ export function Dashboard() {
       {/* Both are bottom-docked — while the tour coaches, the copilot yields the stage. */}
       {!tour && <CommandBar section={section} connected onAction={handleAction} facts={copilotFacts} />}
       {tour && <JudgeTour onNavigate={setSection} onClose={closeTour} />}
+      {/* the "you have a new order" moment — raised live when the app sends one */}
+      {orderToast && section !== 'orders' && (
+        <OrderToast
+          o={orderToast}
+          onOpen={() => { setSection('orders'); setOrderToast(null) }}
+          onClose={() => setOrderToast(null)}
+        />
+      )}
     </>
   )
 }

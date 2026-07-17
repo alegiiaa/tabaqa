@@ -43,8 +43,14 @@ export function AuthPage({ mode }: { mode: Mode }) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/app'
+  // Bank-worker demo default: a plain /login lands on the lender desk (/demo);
+  // guarded routes still return wherever they came from.
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/demo'
   const arrow = dir === 'rtl' ? '←' : '→'
+
+  // The venue demo credential — shown as the placeholder so the worker sees
+  // exactly which email to sign in with (account exists in Supabase auth).
+  const DEMO_EMAIL = 'amdhackathon@tuwaiq.sa'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -136,7 +142,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
                   type="email"
                   name="email"
                   autoComplete="email"
-                  placeholder={t('auth.email')}
+                  placeholder={isSignup ? t('auth.email') : DEMO_EMAIL}
                   aria-label={t('auth.email')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

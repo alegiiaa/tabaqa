@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { StyledQR } from './StyledQR'
-import { api, type ScoreResult, type AffordabilityResult, type StatementInput } from '../lib/api'
+import { API_BASE, api, type ScoreResult, type AffordabilityResult, type StatementInput } from '../lib/api'
 import { decodeStatement, encodeFacts, shortHash } from '../lib/reportlink'
 
 const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
@@ -41,13 +41,38 @@ export function CreditReport() {
   const [params] = useSearchParams()
   const c = params.get('c')
   const dParam = params.get('d')
-  // Own/uploaded data travels as ?d=<encoded statement>; demo connections as ?c=<id>.
-  const statement = useMemo<StatementInput | null>(() => {
+  const oParam = params.get('o')
+  // Own/uploaded data travels as ?d=<encoded statement>; orders from the Tabaqa
+  // app arrive as ?o=<order_id> and the statement is FETCHED from the sandbox
+  // desk (a ~25KB ?d= query string trips Node's 16KB header cap — HTTP 431);
+  // demo connections as ?c=<id>.
+  const dStatement = useMemo<StatementInput | null>(() => {
     if (!dParam) return null
     try { return decodeStatement(dParam) } catch { return null }
   }, [dParam])
-  const decodeFailed = !!dParam && !statement
-  const conn = c || (dParam ? '' : 'con_8842')
+  const decodeFailed = !!dParam && !dStatement
+
+  const [orderStatement, setOrderStatement] = useState<StatementInput | null>(null)
+  const [orderErr, setOrderErr] = useState<string | null>(null)
+  useEffect(() => {
+    if (!oParam) return
+    let on = true
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/sandbox/v1/orders/${encodeURIComponent(oParam)}`)
+        if (!res.ok) throw new Error(`orders HTTP ${res.status}`)
+        const env = (await res.json()) as Record<string, any>
+        const s = decodeStatement(String(env.report_d ?? ''))
+        if (on) setOrderStatement(s)
+      } catch {
+        if (on) setOrderErr('تعذّر جلب ملف الطلب من مكتب الطلبات — تأكد من تشغيل الخادم وأن الطلب ما زال قائمًا.')
+      }
+    })()
+    return () => { on = false }
+  }, [oParam])
+
+  const statement = dStatement ?? orderStatement
+  const conn = c || (dParam || oParam ? '' : 'con_8842')
 
   const [result, setResult] = useState<ScoreResult | null>(null)
   const [afford, setAfford] = useState<AffordabilityResult | null>(null)
@@ -56,6 +81,8 @@ export function CreditReport() {
   useEffect(() => {
     let on = true
     if (decodeFailed) { setErr('تعذّر قراءة بيانات التقرير من الرابط.'); return }
+    // order-based report: hold until the desk hands over the statement (or fails)
+    if (oParam && !statement) { if (orderErr) setErr(orderErr); return }
     ;(async () => {
       try {
         const s = statement ? await api.scoreStatement(statement) : await api.scoreConnection(conn)
@@ -69,16 +96,16 @@ export function CreditReport() {
       } catch { if (on) setErr('تعذّر الوصول إلى خدمة التسجيل. تحقق من اتصالك ثم أعد تحميل الصفحة.') }
     })()
     return () => { on = false }
-    // statement / conn / decodeFailed all derive from c + dParam
+    // statement / conn / decodeFailed derive from c + dParam + the fetched order
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [c, dParam])
+  }, [c, dParam, oParam, statement, orderErr])
 
   if (err) return <div className="rpt-load">تعذّر إنشاء التقرير — {err}</div>
   if (!result) return <div className="rpt-load"><span className="rpt-spin" /> جارٍ إنشاء التقرير الموثّق…</div>
 
   const d = new Date()
   const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
-  const ref = statement ? `TBQ-U${shortHash(dParam as string)}-${ymd}` : refId(conn, d)
+  const ref = statement ? `TBQ-U${shortHash((dParam ?? oParam) as string)}-${ymd}` : refId(conn, d)
   const issued = d.toISOString().slice(0, 10)
   const name = (result.applicant?.name as string) || 'المتقدّم'
   const inc = result.income
