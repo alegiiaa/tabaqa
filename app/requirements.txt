@@ -8,6 +8,11 @@ fastapi>=0.110
 uvicorn[standard]>=0.29
 pydantic>=2.6
 
+# Cohort store (optional) — serves the 500k sandbox population from PostgreSQL
+# (api/cohortdb.py, `python -m api.cohortdb loadpg`). Imported lazily; without it
+# the sandbox falls back to the SQLite file, then the on-demand generator.
+psycopg[binary]>=3.2
+
 # AI augmentation (optional) — Claude long-tail enricher + the financial-intelligence
 # narrative (/v1/insights). The core pipeline/eval import this lazily and run fine
 # WITHOUT it; install it + set ANTHROPIC_API_KEY to light up the real-Claude path.

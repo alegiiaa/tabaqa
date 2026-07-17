@@ -33,15 +33,34 @@ index is a reversible permutation with a Luhn check digit, and every provider pa
 is rebuilt from a NIN-seeded RNG. The same NIN always returns the same person; any of
 the 500,000 can be queried instantly; the whole population costs zero disk.
 
-- `GET /sandbox/v1/cohort?offset=0&limit=25` — page through the population
+- `GET /sandbox/v1/cohort?offset=0&limit=25` — page through the population; with the
+  SQLite store built, real query filters: `region= sector= grade= stage= delinquent=
+  min_salary= max_salary= sort=salary|pd|dbr|score|el&desc=1` (+ `matching` count)
+- `GET /sandbox/v1/cohort/stats` — portfolio aggregates over all 500k (grade / IFRS 9 /
+  region distributions, salary percentiles, portfolio expected loss) via live SQL
+- `GET /sandbox/v1/cohort/{nin}` — the full ~58-column analytical record for one person
 - `GET /sandbox/v1/cohort/sample` — one random member + their five provider endpoints
 - Every `/sandbox/v1/{provider}/{nin}` endpoint accepts cohort NINs: full 6-month
   statements (~60 transactions), employment records, bureau reports with plausible
   obligation mixes, wallet side-income streams — distributions spanning salaries
   4,000–42,000, grades A–E, ~4% delinquency.
 
+**The database store:** `python -m api.sandbox export` materializes the population,
+then either engine loads it — `python -m api.cohortdb loadpg` → a **PostgreSQL**
+`cohort` table (COPY bulk load, 254 MB indexed, ~6s; DSN `TABAQA_COHORT_DSN`,
+default `postgresql://localhost:5433/tabaqa`), or `python -m api.cohortdb build` →
+SQLite `data/synthetic/cohort_500k.db` (~207 MB, gitignored). At runtime the store
+prefers PostgreSQL, falls back to SQLite, then to the on-demand generator — so
+teammates' machines and slim serverless deploys keep working; every response stamps
+which engine served it (`"backing"`). Both are loaded *from* the deterministic
+generator, so the engines can never disagree. On the demo Mac, Homebrew
+`postgresql@17` runs on **port 5433** (5432 is held by a pre-existing system
+PostgreSQL 18 we leave alone); live SQL: `psql -p 5433 tabaqa`.
+
 Judge demo: `curl …/cohort/sample` → take the NIN it returns → pull that stranger's
 credit report and bank statement. Repeat — a different person every time, 500,000 deep.
+Then `curl "…/cohort?region=جدة&grade=E&sort=pd&desc=1"` — a live risk query over the
+population — and `curl …/cohort/stats` for the whole book in one response.
 
 ## Endpoints
 
@@ -49,7 +68,9 @@ credit report and bank statement. Repeat — a different person every time, 500,
 |---|---|
 | `GET /sandbox/v1` | environment metadata, identity directory, provider list, disclaimer |
 | `GET /sandbox/v1/identities` | the curated test identities |
-| `GET /sandbox/v1/cohort` | page through the 500k synthetic population |
+| `GET /sandbox/v1/cohort` | page/filter/sort the 500k population (SQLite-backed) |
+| `GET /sandbox/v1/cohort/stats` | portfolio aggregates over all 500k — live SQL |
+| `GET /sandbox/v1/cohort/{nin}` | one person's full ~58-column analytical record |
 | `GET /sandbox/v1/cohort/sample` | one random cohort member + endpoints |
 | `GET /sandbox/v1/identities/{nin}` | identity verification (KYC-shaped — never underwriting features) |
 | `GET /sandbox/v1/bank-core/{nin}` | the bank's own account statement |
@@ -70,10 +91,11 @@ Identity now returns **age** (clamped consistent with service years) — age com
 from identity, deliberately never from health records.
 
 **The whole population as a file:** `python -m api.sandbox export` writes
-`data/synthetic/cohort_500k.csv` — 500,000 rows × 19 columns (identity, employment,
-obligations, grade, household, portfolio, property) in ~10s, UTF-8-BOM so Excel
-renders Arabic. Gitignored; regenerable byte-for-byte. Any row's NIN answers live
-on the API — the file is a view, the API is the source of truth.
+`data/synthetic/cohort_500k.csv` — 500,000 rows × ~58 columns (identity, employment,
+obligations, household, portfolio, property, plus the full derived risk block),
+UTF-8-BOM so Excel renders Arabic. Gitignored; regenerable byte-for-byte. The CSV is
+a build artifact — it feeds `python -m api.cohortdb build` and never appears in the
+demo; any row's NIN answers live on the API, which stays the source of truth.
 
 Every provider response is wrapped in an envelope:
 

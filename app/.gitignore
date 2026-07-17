@@ -22,3 +22,5 @@ data/synthetic/corpus_saudi/
 data/synthetic/cohort_500k.csv
 data/synthetic/cohort_export/
 data/synthetic/person_*.json
+data/synthetic/cohort_500k.db
+data/synthetic/cohort_500k.db.tmp
