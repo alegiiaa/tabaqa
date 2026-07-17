@@ -12,6 +12,18 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'never',
   },
+  plugins: {
+    // The branded splash (Assets.xcassets/Splash — the Tabaqa light-burst) holds
+    // for a beat instead of flashing mid-zoom, then hands over to the login gate.
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: '#06102e',
+      showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+  },
 }
 
 export default config
