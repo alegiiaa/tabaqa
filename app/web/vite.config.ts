@@ -10,6 +10,7 @@ export default defineConfig({
     // can call /v1/score without CORS friction.
     proxy: {
       '/v1': 'http://localhost:8000',
+      '/sandbox': 'http://localhost:8000',
     },
   },
 })

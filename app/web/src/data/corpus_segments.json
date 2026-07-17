@@ -1,0 +1,85 @@
+{
+  "generator": "numpy Gaussian copula (zero-dependency)",
+  "source": "learned from the real Berka joint feature+label table",
+  "n_source_accounts": 682,
+  "n_synthetic_accounts": 1000000,
+  "n_real_transactions": 191556,
+  "mean_txns_per_account": 280.9,
+  "n_transactions_extrapolated": 280873900,
+  "n_segments": 4,
+  "segments": [
+    {
+      "key": "thin_file",
+      "label": "Thin-file (shortest banking history)",
+      "n": 369679,
+      "share": 0.3697,
+      "bad_rate": 0.1265,
+      "median_profile": {
+        "income_regularity": 0.5452,
+        "income_expense_ratio": 1.2524,
+        "avg_balance": 42338.6045,
+        "min_balance": 600.0,
+        "nsf_count": 0.0,
+        "recurring_obligation_load": 0.1551,
+        "balance_volatility": 0.4133,
+        "age": 39.0,
+        "loan_amount": 110736.0
+      }
+    },
+    {
+      "key": "high_obligation",
+      "label": "Heavily obligated (SME / leveraged)",
+      "n": 148511,
+      "share": 0.1485,
+      "bad_rate": 0.151,
+      "median_profile": {
+        "income_regularity": 0.5259,
+        "income_expense_ratio": 1.1114,
+        "avg_balance": 35544.6995,
+        "min_balance": 600.0,
+        "nsf_count": 0.0,
+        "recurring_obligation_load": 0.3061,
+        "balance_volatility": 0.4151,
+        "age": 37.0,
+        "loan_amount": 216673.0
+      }
+    },
+    {
+      "key": "irregular_income",
+      "label": "Irregular income (gig-like)",
+      "n": 212119,
+      "share": 0.2121,
+      "bad_rate": 0.1307,
+      "median_profile": {
+        "income_regularity": 0.1353,
+        "income_expense_ratio": 1.0786,
+        "avg_balance": 48110.8963,
+        "min_balance": 600.0,
+        "nsf_count": 0.0,
+        "recurring_obligation_load": 0.1339,
+        "balance_volatility": 0.4717,
+        "age": 37.0,
+        "loan_amount": 116817.0
+      }
+    },
+    {
+      "key": "stable_salaried",
+      "label": "Stable salaried (prime)",
+      "n": 269691,
+      "share": 0.2697,
+      "bad_rate": 0.0522,
+      "median_profile": {
+        "income_regularity": 0.6797,
+        "income_expense_ratio": 1.1131,
+        "avg_balance": 44754.3313,
+        "min_balance": 700.0,
+        "nsf_count": 0.0,
+        "recurring_obligation_load": 0.1218,
+        "balance_volatility": 0.3378,
+        "age": 37.0,
+        "loan_amount": 87360.0
+      }
+    }
+  ],
+  "methodology": "Default labels are SAMPLED from a joint distribution learned on real Berka outcomes (never hand-injected), so no feature\u2192default relationship is tautological. Validity is measured only on real data (ablation + Home-Credit cross-check); the synthetic corpus proves scale/capacity, and Train-on-Synthetic/Test-on-Real (see corpus_train.py) confirms the sample carries the real signal."
+}

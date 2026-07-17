@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "source": "open_banking",
+    "institution": "مصرف الراجحي",
+    "account_type": "حساب توفير",
+    "iban_masked": "SA80 80•• •••• •••• 5521",
+    "currency": "SAR",
+    "access": "قراءة فقط (AIS)",
+    "period": "2026-01-01 → 2026-06-30",
+    "persona": "sara",
+    "simulated": true
+  },
+  "transactions": [
+    {
+      "date": "2026-01-28",
+      "description": "تحويل وارد من حسابي — مصرف الواحة",
+      "amount": 500,
+      "type": "credit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-02-18",
+      "description": "سحب من التوفير — مصاريف طارئة",
+      "amount": 387,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-02-28",
+      "description": "تحويل وارد من حسابي — مصرف الواحة",
+      "amount": 500,
+      "type": "credit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-03-18",
+      "description": "سحب من التوفير — مصاريف طارئة",
+      "amount": 463,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-03-28",
+      "description": "تحويل وارد من حسابي — مصرف الواحة",
+      "amount": 500,
+      "type": "credit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-04-28",
+      "description": "تحويل وارد من حسابي — مصرف الواحة",
+      "amount": 500,
+      "type": "credit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-05-28",
+      "description": "تحويل وارد من حسابي — مصرف الواحة",
+      "amount": 500,
+      "type": "credit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-06-28",
+      "description": "تحويل وارد من حسابي — مصرف الواحة",
+      "amount": 500,
+      "type": "credit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    }
+  ]
+}

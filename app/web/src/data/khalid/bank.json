@@ -1,0 +1,665 @@
+{
+  "meta": {
+    "source": "bank_core",
+    "institution": "مصرف الواحة",
+    "account_type": "حساب جاري",
+    "iban_masked": "SA29 05•• •••• •••• 7734",
+    "currency": "SAR",
+    "period": "2026-01-01 → 2026-06-30",
+    "persona": "khalid",
+    "simulated": true
+  },
+  "transactions": [
+    {
+      "date": "2026-01-01",
+      "description": "إيجار سكن — عقد إيجار موثّق",
+      "amount": 1800,
+      "type": "debit",
+      "category": "سكن"
+    },
+    {
+      "date": "2026-01-03",
+      "description": "الشركة السعودية للكهرباء — فاتورة",
+      "amount": 300,
+      "type": "debit",
+      "category": "خدمات"
+    },
+    {
+      "date": "2026-01-06",
+      "description": "سداد بطاقة ائتمانية",
+      "amount": 600,
+      "type": "debit",
+      "category": "سداد بطاقة"
+    },
+    {
+      "date": "2026-01-07",
+      "description": "مدى — بنده الرياض",
+      "amount": 300,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-01-08",
+      "description": "موبايلي — فاتورة الجوال",
+      "amount": 200,
+      "type": "debit",
+      "category": "اتصالات"
+    },
+    {
+      "date": "2026-01-09",
+      "description": "تحويل من الشركة — دفعة عمولات",
+      "amount": 6800,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-01-09",
+      "description": "محطة الدريس — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-01-10",
+      "description": "تأمين مركبة — قسط",
+      "amount": 250,
+      "type": "debit",
+      "category": "تأمين"
+    },
+    {
+      "date": "2026-01-13",
+      "description": "مدى — أسواق العثيم",
+      "amount": 250,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-01-14",
+      "description": "اشتراكات رقمية (شاهد · Spotify)",
+      "amount": 100,
+      "type": "debit",
+      "category": "اشتراكات"
+    },
+    {
+      "date": "2026-01-15",
+      "description": "مطعم البيك",
+      "amount": 66,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-01-18",
+      "description": "جاهز — طلب مطعم",
+      "amount": 107,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-01-20",
+      "description": "مدى — الدانوب",
+      "amount": 200,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-01-21",
+      "description": "جاهز — طلب مطعم",
+      "amount": 125,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-01-23",
+      "description": "ساسكو — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-02-01",
+      "description": "إيجار سكن — عقد إيجار موثّق",
+      "amount": 1800,
+      "type": "debit",
+      "category": "سكن"
+    },
+    {
+      "date": "2026-02-03",
+      "description": "الشركة السعودية للكهرباء — فاتورة",
+      "amount": 300,
+      "type": "debit",
+      "category": "خدمات"
+    },
+    {
+      "date": "2026-02-06",
+      "description": "سداد بطاقة ائتمانية",
+      "amount": 600,
+      "type": "debit",
+      "category": "سداد بطاقة"
+    },
+    {
+      "date": "2026-02-07",
+      "description": "مدى — بنده الرياض",
+      "amount": 300,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-02-08",
+      "description": "موبايلي — فاتورة الجوال",
+      "amount": 200,
+      "type": "debit",
+      "category": "اتصالات"
+    },
+    {
+      "date": "2026-02-09",
+      "description": "محطة الدريس — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-02-10",
+      "description": "تأمين مركبة — قسط",
+      "amount": 250,
+      "type": "debit",
+      "category": "تأمين"
+    },
+    {
+      "date": "2026-02-13",
+      "description": "مدى — أسواق العثيم",
+      "amount": 250,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-02-14",
+      "description": "اشتراكات رقمية (شاهد · Spotify)",
+      "amount": 100,
+      "type": "debit",
+      "category": "اشتراكات"
+    },
+    {
+      "date": "2026-02-15",
+      "description": "كودو",
+      "amount": 43,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-02-18",
+      "description": "هنقرستيشن — طلب",
+      "amount": 66,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-02-20",
+      "description": "مدى — الدانوب",
+      "amount": 200,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-02-21",
+      "description": "كودو",
+      "amount": 46,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-02-23",
+      "description": "ساسكو — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-02-27",
+      "description": "راتب — شركة تجارية (إيداع رواتب)",
+      "amount": 9500,
+      "type": "credit",
+      "category": "راتب"
+    },
+    {
+      "date": "2026-03-01",
+      "description": "إيجار سكن — عقد إيجار موثّق",
+      "amount": 1800,
+      "type": "debit",
+      "category": "سكن"
+    },
+    {
+      "date": "2026-03-03",
+      "description": "الشركة السعودية للكهرباء — فاتورة",
+      "amount": 300,
+      "type": "debit",
+      "category": "خدمات"
+    },
+    {
+      "date": "2026-03-06",
+      "description": "سداد بطاقة ائتمانية",
+      "amount": 600,
+      "type": "debit",
+      "category": "سداد بطاقة"
+    },
+    {
+      "date": "2026-03-07",
+      "description": "مدى — بنده الرياض",
+      "amount": 300,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-03-08",
+      "description": "موبايلي — فاتورة الجوال",
+      "amount": 200,
+      "type": "debit",
+      "category": "اتصالات"
+    },
+    {
+      "date": "2026-03-09",
+      "description": "محطة الدريس — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-03-10",
+      "description": "تأمين مركبة — قسط",
+      "amount": 250,
+      "type": "debit",
+      "category": "تأمين"
+    },
+    {
+      "date": "2026-03-13",
+      "description": "مدى — أسواق العثيم",
+      "amount": 250,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-03-14",
+      "description": "إيداع نقدي — فرع الرياض",
+      "amount": 12400,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-03-14",
+      "description": "اشتراكات رقمية (شاهد · Spotify)",
+      "amount": 100,
+      "type": "debit",
+      "category": "اشتراكات"
+    },
+    {
+      "date": "2026-03-15",
+      "description": "كودو",
+      "amount": 34,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-03-18",
+      "description": "جاهز — طلب مطعم",
+      "amount": 100,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-03-20",
+      "description": "مدى — الدانوب",
+      "amount": 200,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-03-21",
+      "description": "مطعم البيك",
+      "amount": 76,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-03-21",
+      "description": "جرير — مكتبة",
+      "amount": 350,
+      "type": "debit",
+      "category": "تسوق"
+    },
+    {
+      "date": "2026-03-23",
+      "description": "ساسكو — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-04-01",
+      "description": "إيجار سكن — عقد إيجار موثّق",
+      "amount": 1800,
+      "type": "debit",
+      "category": "سكن"
+    },
+    {
+      "date": "2026-04-03",
+      "description": "الشركة السعودية للكهرباء — فاتورة",
+      "amount": 300,
+      "type": "debit",
+      "category": "خدمات"
+    },
+    {
+      "date": "2026-04-06",
+      "description": "سداد بطاقة ائتمانية",
+      "amount": 600,
+      "type": "debit",
+      "category": "سداد بطاقة"
+    },
+    {
+      "date": "2026-04-07",
+      "description": "مدى — بنده الرياض",
+      "amount": 300,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-04-08",
+      "description": "موبايلي — فاتورة الجوال",
+      "amount": 200,
+      "type": "debit",
+      "category": "اتصالات"
+    },
+    {
+      "date": "2026-04-09",
+      "description": "محطة الدريس — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-04-10",
+      "description": "تأمين مركبة — قسط",
+      "amount": 250,
+      "type": "debit",
+      "category": "تأمين"
+    },
+    {
+      "date": "2026-04-11",
+      "description": "تحويل من الشركة — دفعة عمولات",
+      "amount": 8900,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-04-13",
+      "description": "مدى — أسواق العثيم",
+      "amount": 250,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-04-14",
+      "description": "اشتراكات رقمية (شاهد · Spotify)",
+      "amount": 100,
+      "type": "debit",
+      "category": "اشتراكات"
+    },
+    {
+      "date": "2026-04-15",
+      "description": "هنقرستيشن — طلب",
+      "amount": 94,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-04-18",
+      "description": "كودو",
+      "amount": 47,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-04-20",
+      "description": "مدى — الدانوب",
+      "amount": 200,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-04-21",
+      "description": "هنقرستيشن — طلب",
+      "amount": 84,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-04-23",
+      "description": "ساسكو — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-05-01",
+      "description": "إيجار سكن — عقد إيجار موثّق",
+      "amount": 1800,
+      "type": "debit",
+      "category": "سكن"
+    },
+    {
+      "date": "2026-05-03",
+      "description": "الشركة السعودية للكهرباء — فاتورة",
+      "amount": 300,
+      "type": "debit",
+      "category": "خدمات"
+    },
+    {
+      "date": "2026-05-06",
+      "description": "سداد بطاقة ائتمانية",
+      "amount": 600,
+      "type": "debit",
+      "category": "سداد بطاقة"
+    },
+    {
+      "date": "2026-05-07",
+      "description": "مدى — بنده الرياض",
+      "amount": 300,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-05-08",
+      "description": "موبايلي — فاتورة الجوال",
+      "amount": 200,
+      "type": "debit",
+      "category": "اتصالات"
+    },
+    {
+      "date": "2026-05-09",
+      "description": "محطة الدريس — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-05-10",
+      "description": "تأمين مركبة — قسط",
+      "amount": 250,
+      "type": "debit",
+      "category": "تأمين"
+    },
+    {
+      "date": "2026-05-13",
+      "description": "مدى — أسواق العثيم",
+      "amount": 250,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-05-14",
+      "description": "اشتراكات رقمية (شاهد · Spotify)",
+      "amount": 100,
+      "type": "debit",
+      "category": "اشتراكات"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "هنقرستيشن — طلب",
+      "amount": 89,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-05-18",
+      "description": "مطعم البيك",
+      "amount": 49,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-05-19",
+      "description": "حوالة واردة — مالك الشركة",
+      "amount": 5200,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-05-20",
+      "description": "مدى — الدانوب",
+      "amount": 200,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-05-21",
+      "description": "هنقرستيشن — طلب",
+      "amount": 75,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-05-21",
+      "description": "نون — تسوق إلكتروني",
+      "amount": 196,
+      "type": "debit",
+      "category": "تسوق"
+    },
+    {
+      "date": "2026-05-23",
+      "description": "ساسكو — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-06-01",
+      "description": "إيجار سكن — عقد إيجار موثّق",
+      "amount": 1800,
+      "type": "debit",
+      "category": "سكن"
+    },
+    {
+      "date": "2026-06-03",
+      "description": "الشركة السعودية للكهرباء — فاتورة",
+      "amount": 300,
+      "type": "debit",
+      "category": "خدمات"
+    },
+    {
+      "date": "2026-06-06",
+      "description": "سداد بطاقة ائتمانية",
+      "amount": 600,
+      "type": "debit",
+      "category": "سداد بطاقة"
+    },
+    {
+      "date": "2026-06-07",
+      "description": "مدى — بنده الرياض",
+      "amount": 300,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-06-08",
+      "description": "موبايلي — فاتورة الجوال",
+      "amount": 200,
+      "type": "debit",
+      "category": "اتصالات"
+    },
+    {
+      "date": "2026-06-09",
+      "description": "محطة الدريس — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-06-10",
+      "description": "تأمين مركبة — قسط",
+      "amount": 250,
+      "type": "debit",
+      "category": "تأمين"
+    },
+    {
+      "date": "2026-06-13",
+      "description": "مدى — أسواق العثيم",
+      "amount": 250,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-06-14",
+      "description": "اشتراكات رقمية (شاهد · Spotify)",
+      "amount": 100,
+      "type": "debit",
+      "category": "اشتراكات"
+    },
+    {
+      "date": "2026-06-15",
+      "description": "كودو",
+      "amount": 39,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-06-18",
+      "description": "مطعم البيك",
+      "amount": 60,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-06-20",
+      "description": "مدى — الدانوب",
+      "amount": 200,
+      "type": "debit",
+      "category": "غذاء"
+    },
+    {
+      "date": "2026-06-21",
+      "description": "مطعم البيك",
+      "amount": 58,
+      "type": "debit",
+      "category": "مطاعم ومقاهي"
+    },
+    {
+      "date": "2026-06-21",
+      "description": "جرير — مكتبة",
+      "amount": 296,
+      "type": "debit",
+      "category": "تسوق"
+    },
+    {
+      "date": "2026-06-23",
+      "description": "ساسكو — وقود",
+      "amount": 200,
+      "type": "debit",
+      "category": "مواصلات"
+    },
+    {
+      "date": "2026-06-27",
+      "description": "راتب — شركة تجارية (إيداع رواتب) — شامل متأخرات",
+      "amount": 17600,
+      "type": "credit",
+      "category": "راتب"
+    }
+  ]
+}

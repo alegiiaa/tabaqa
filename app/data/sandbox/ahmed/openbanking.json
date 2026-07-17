@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "source": "open_banking",
+    "institution": "مصرف الإنماء",
+    "account_type": "حساب جاري",
+    "iban_masked": "SA03 05•• •••• •••• 1234",
+    "currency": "SAR",
+    "access": "قراءة فقط (AIS)",
+    "period": "2026-01-01 → 2026-06-30",
+    "persona": "ahmed",
+    "simulated": true
+  },
+  "transactions": [
+    {
+      "date": "2026-01-04",
+      "description": "مدى — صيدلية النهدي",
+      "amount": 103,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-01-15",
+      "description": "أبل باي — مقهى بارنز",
+      "amount": 97,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-01-27",
+      "description": "راتب — جهة حكومية (إيداع رواتب)",
+      "amount": 18000,
+      "type": "credit",
+      "category": "راتب"
+    },
+    {
+      "date": "2026-01-28",
+      "description": "تحويل صادر إلى حسابي — مصرف الواحة",
+      "amount": 10500,
+      "type": "debit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-01-29",
+      "description": "تحويل عائلي — دعم الوالدين",
+      "amount": 2000,
+      "type": "debit",
+      "category": "تحويلات عائلية"
+    },
+    {
+      "date": "2026-02-04",
+      "description": "مدى — كارفور",
+      "amount": 71,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-02-15",
+      "description": "STC Pay شحن رصيد",
+      "amount": 138,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-02-27",
+      "description": "راتب — جهة حكومية (إيداع رواتب)",
+      "amount": 18000,
+      "type": "credit",
+      "category": "راتب"
+    },
+    {
+      "date": "2026-02-28",
+      "description": "تحويل صادر إلى حسابي — مصرف الواحة",
+      "amount": 10500,
+      "type": "debit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-02-29",
+      "description": "تحويل عائلي — دعم الوالدين",
+      "amount": 2000,
+      "type": "debit",
+      "category": "تحويلات عائلية"
+    },
+    {
+      "date": "2026-03-04",
+      "description": "مدى — صيدلية النهدي",
+      "amount": 151,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-03-15",
+      "description": "مدى — صيدلية النهدي",
+      "amount": 107,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-03-27",
+      "description": "راتب — جهة حكومية (إيداع رواتب)",
+      "amount": 18000,
+      "type": "credit",
+      "category": "راتب"
+    },
+    {
+      "date": "2026-03-28",
+      "description": "تحويل صادر إلى حسابي — مصرف الواحة",
+      "amount": 10500,
+      "type": "debit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-03-29",
+      "description": "تحويل عائلي — دعم الوالدين",
+      "amount": 2000,
+      "type": "debit",
+      "category": "تحويلات عائلية"
+    },
+    {
+      "date": "2026-04-04",
+      "description": "أبل باي — مقهى بارنز",
+      "amount": 162,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-04-15",
+      "description": "STC Pay شحن رصيد",
+      "amount": 99,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-04-27",
+      "description": "راتب — جهة حكومية (إيداع رواتب)",
+      "amount": 18000,
+      "type": "credit",
+      "category": "راتب"
+    },
+    {
+      "date": "2026-04-28",
+      "description": "تحويل صادر إلى حسابي — مصرف الواحة",
+      "amount": 10500,
+      "type": "debit",
+      "category": "تحويل داخلي",
+      "internal_transfer": true
+    },
+    {
+      "date": "2026-04-29",
+      "description": "تحويل عائلي — دعم الوالدين",
+      "amount": 2000,
+      "type": "debit",
+      "category": "تحويلات عائلية"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "رسوم إدارية — لا عمليات",
+      "amount": 0,
+      "type": "debit",
+      "category": "متفرقات"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "source": "open_banking",
+    "institution": "مصرف الإنماء",
+    "account_type": "حساب جاري",
+    "iban_masked": "SA03 05•• •••• •••• 8846",
+    "currency": "SAR",
+    "access": "قراءة فقط (AIS)",
+    "period": "2026-01-01 → 2026-06-30",
+    "persona": "khalid",
+    "simulated": true
+  },
+  "transactions": [
+    {
+      "date": "2026-01-04",
+      "description": "أبل باي — مقهى",
+      "amount": 94,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-01-16",
+      "description": "مدى — صيدلية النهدي",
+      "amount": 89,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-02-04",
+      "description": "مدى — كارفور",
+      "amount": 65,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-02-16",
+      "description": "STC Pay شحن رصيد",
+      "amount": 126,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-03-04",
+      "description": "أبل باي — مقهى",
+      "amount": 139,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-03-16",
+      "description": "أبل باي — مقهى",
+      "amount": 99,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-03-22",
+      "description": "تحويل من الشركة — دفعة عمولات",
+      "amount": 4300,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-04-04",
+      "description": "مدى — صيدلية النهدي",
+      "amount": 148,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-04-16",
+      "description": "STC Pay شحن رصيد",
+      "amount": 91,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-05-04",
+      "description": "STC Pay شحن رصيد",
+      "amount": 96,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-05-16",
+      "description": "تحويل من الشركة — دفعة عمولات",
+      "amount": 3900,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-05-16",
+      "description": "مدى — كارفور",
+      "amount": 126,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-06-04",
+      "description": "مدى — كارفور",
+      "amount": 157,
+      "type": "debit",
+      "category": "متفرقات"
+    },
+    {
+      "date": "2026-06-16",
+      "description": "أبل باي — مقهى",
+      "amount": 164,
+      "type": "debit",
+      "category": "متفرقات"
+    }
+  ]
+}

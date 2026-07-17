@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "source": "credit_bureau",
+    "provider": "مزوّد السجل الائتماني (محاكاة)",
+    "persona": "ahmed",
+    "simulated": true
+  },
+  "report": {
+    "credit_grade": "B",
+    "serious_delinquency": false,
+    "payment_history": "منتظم — لا تأخير في آخر 24 شهرًا",
+    "recent_inquiries": 1,
+    "obligations": [
+      {
+        "type": "تمويل شخصي",
+        "lender": "بنك آخر",
+        "monthly_payment": 1800,
+        "outstanding": 43200,
+        "remaining_months": 24
+      },
+      {
+        "type": "بطاقة ائتمانية",
+        "lender": "بنك آخر",
+        "monthly_payment": 500,
+        "outstanding": 8500,
+        "remaining_months": null
+      },
+      {
+        "type": "دفعات آجلة (BNPL)",
+        "lender": "مزوّد دفعات",
+        "monthly_payment": 300,
+        "outstanding": 1800,
+        "remaining_months": 6
+      }
+    ],
+    "total_monthly_obligations": 2600,
+    "total_outstanding": 53500,
+    "retrieved_at": "2026-07-16T10:41:04+03:00"
+  }
+}

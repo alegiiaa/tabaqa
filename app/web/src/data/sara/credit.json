@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "source": "credit_bureau",
+    "provider": "مزوّد السجل الائتماني (محاكاة)",
+    "persona": "sara",
+    "simulated": true
+  },
+  "report": {
+    "credit_grade": "C",
+    "serious_delinquency": false,
+    "payment_history": "منتظم — لا تأخير في آخر 24 شهرًا",
+    "recent_inquiries": 4,
+    "obligations": [
+      {
+        "type": "تمويل شخصي",
+        "lender": "بنك آخر",
+        "monthly_payment": 2600,
+        "outstanding": 78000,
+        "remaining_months": 30
+      },
+      {
+        "type": "تمويل مركبة",
+        "lender": "بنك آخر",
+        "monthly_payment": 1400,
+        "outstanding": 42000,
+        "remaining_months": 30
+      },
+      {
+        "type": "بطاقة ائتمانية",
+        "lender": "بنك آخر",
+        "monthly_payment": 500,
+        "outstanding": 9500,
+        "remaining_months": null
+      },
+      {
+        "type": "دفعات آجلة (BNPL)",
+        "lender": "مزوّد دفعات",
+        "monthly_payment": 300,
+        "outstanding": 1500,
+        "remaining_months": 5
+      }
+    ],
+    "total_monthly_obligations": 4800,
+    "total_outstanding": 131000,
+    "retrieved_at": "2026-07-16T10:41:04+03:00"
+  }
+}

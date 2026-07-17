@@ -1,0 +1,238 @@
+{
+  "meta": {
+    "source": "wallet",
+    "institution": "urpay",
+    "wallet_id_masked": "05•• ••• 7734",
+    "currency": "SAR",
+    "access": "قراءة فقط — بموافقة العميل",
+    "period": "2026-01-01 → 2026-06-30",
+    "persona": "khalid",
+    "simulated": true
+  },
+  "transactions": [
+    {
+      "date": "2026-01-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-01-08",
+      "description": "جاهز — طلب مطعم",
+      "amount": 91,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-01-12",
+      "description": "هنقرستيشن — تسوية دخل توصيل",
+      "amount": 800,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-01-15",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 85,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-01-22",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 102,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-02-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-02-08",
+      "description": "جاهز — طلب مطعم",
+      "amount": 53,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-02-12",
+      "description": "هنقرستيشن — تسوية دخل توصيل",
+      "amount": 800,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-02-15",
+      "description": "شحن رصيد ألعاب",
+      "amount": 81,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-02-22",
+      "description": "جاهز — طلب مطعم",
+      "amount": 101,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-03-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-03-08",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 51,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-03-12",
+      "description": "هنقرستيشن — تسوية دخل توصيل",
+      "amount": 800,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-03-13",
+      "description": "حوالة واردة — فهد العتيبي",
+      "amount": 1200,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-03-15",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 58,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-03-22",
+      "description": "هنقرستيشن",
+      "amount": 49,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-04-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-04-08",
+      "description": "هنقرستيشن",
+      "amount": 63,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-04-12",
+      "description": "هنقرستيشن — تسوية دخل توصيل",
+      "amount": 800,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-04-15",
+      "description": "هنقرستيشن",
+      "amount": 88,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-04-22",
+      "description": "شحن رصيد ألعاب",
+      "amount": 97,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-05-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-05-08",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 110,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-05-12",
+      "description": "هنقرستيشن — تسوية دخل توصيل",
+      "amount": 800,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "شحن رصيد ألعاب",
+      "amount": 83,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-05-22",
+      "description": "جاهز — طلب مطعم",
+      "amount": 111,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-06-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-06-08",
+      "description": "جاهز — طلب مطعم",
+      "amount": 72,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-06-10",
+      "description": "حوالة واردة — فهد العتيبي",
+      "amount": 900,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-06-12",
+      "description": "هنقرستيشن — تسوية دخل توصيل",
+      "amount": 800,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-06-15",
+      "description": "شحن رصيد ألعاب",
+      "amount": 96,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-06-22",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 109,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    }
+  ]
+}

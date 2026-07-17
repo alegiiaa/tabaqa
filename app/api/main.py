@@ -64,6 +64,7 @@ from .models import (  # noqa: E402
 )
 from .auth import KeyCtx, api_key  # noqa: E402
 from . import keystore  # noqa: E402
+from . import sandbox  # noqa: E402
 from .personas import list_personas, persona_fixtures  # noqa: E402
 
 DATA_DIR = APP_DIR / "data" / "synthetic"
@@ -81,6 +82,8 @@ def _cors_origins() -> list[str]:
         return ["http://localhost:5173", "http://127.0.0.1:5173"]
     return [o.strip() for o in env.split(",") if o.strip()]
 
+
+app.include_router(sandbox.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -223,7 +226,7 @@ def health(llm_check: int = 0) -> dict:
     # `keyed` tells the frontend whether real key issuance/metering is live (a
     # service_role key is configured) or the API is running in open demo mode.
     out = {"status": "ok", "connections": sorted(FIXTURES),
-           "keyed": keystore.configured()}
+           "keyed": keystore.configured(), "sandbox": sandbox.summary()}
     if llm_check:  # opt-in ops probe: is the narrative LLM reachable from THIS runtime?
         from pipeline import llm as _llm
         provider = _llm._active()

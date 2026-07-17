@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "source": "employment_registry",
+    "provider": "مصدر التوظيف والرواتب الرسمي (محاكاة)",
+    "persona": "khalid",
+    "simulated": true
+  },
+  "record": {
+    "full_name": "خالد العتيبي",
+    "national_id_masked": "1•••••7734",
+    "employer_name": "شركة تجارية — الرياض",
+    "employment_sector": "خاص",
+    "employment_type": "دوام كامل — عقد سنوي",
+    "job_title": "مندوب مبيعات أول",
+    "employment_start_date": "2024-03-01",
+    "service_years": 2,
+    "verified_monthly_salary": 16000,
+    "salary_frequency": "شهري",
+    "verification_status": "موثّق",
+    "retrieved_at": "2026-07-16T10:41:03+03:00"
+  }
+}

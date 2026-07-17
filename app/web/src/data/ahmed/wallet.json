@@ -1,0 +1,294 @@
+{
+  "meta": {
+    "source": "wallet",
+    "institution": "urpay",
+    "wallet_id_masked": "05•• ••• 4821",
+    "currency": "SAR",
+    "access": "قراءة فقط — بموافقة العميل",
+    "period": "2026-01-01 → 2026-06-30",
+    "persona": "ahmed",
+    "simulated": true
+  },
+  "transactions": [
+    {
+      "date": "2026-01-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-01-08",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 69,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-01-10",
+      "description": "منصة مستقل — دفعة مشروع تصميم",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-01-15",
+      "description": "هنقرستيشن",
+      "amount": 61,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-01-22",
+      "description": "شحن رصيد ألعاب",
+      "amount": 105,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-01-24",
+      "description": "تحويل — دروس خصوصية",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-01-25",
+      "description": "حوالة واردة — عبدالله القحطاني",
+      "amount": 900,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-02-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-02-08",
+      "description": "شحن رصيد ألعاب",
+      "amount": 64,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-02-10",
+      "description": "منصة مستقل — دفعة مشروع تصميم",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-02-15",
+      "description": "هنقرستيشن",
+      "amount": 128,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-02-22",
+      "description": "هنقرستيشن",
+      "amount": 112,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-02-24",
+      "description": "تحويل — دروس خصوصية",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-03-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-03-08",
+      "description": "جاهز — طلب مطعم",
+      "amount": 56,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-03-10",
+      "description": "منصة مستقل — دفعة مشروع تصميم",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-03-15",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 85,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-03-19",
+      "description": "حوالة واردة — عبدالله القحطاني",
+      "amount": 2400,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-03-22",
+      "description": "جاهز — طلب مطعم",
+      "amount": 107,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-03-24",
+      "description": "تحويل — دروس خصوصية",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-04-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-04-08",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 118,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-04-10",
+      "description": "منصة مستقل — دفعة مشروع تصميم",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-04-15",
+      "description": "جاهز — طلب مطعم",
+      "amount": 113,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-04-22",
+      "description": "جاهز — طلب مطعم",
+      "amount": 98,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-04-24",
+      "description": "تحويل — دروس خصوصية",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-05-02",
+      "description": "حوالة واردة — عبدالله القحطاني",
+      "amount": 1200,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-05-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-05-08",
+      "description": "هنقرستيشن",
+      "amount": 66,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-05-10",
+      "description": "منصة مستقل — دفعة مشروع تصميم",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-05-15",
+      "description": "هنقرستيشن",
+      "amount": 93,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-05-22",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 103,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-05-24",
+      "description": "تحويل — دروس خصوصية",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-06-05",
+      "description": "تابي — قسط دفعات آجلة",
+      "amount": 300,
+      "type": "debit",
+      "category": "التزام تمويلي"
+    },
+    {
+      "date": "2026-06-08",
+      "description": "شحن رصيد ألعاب",
+      "amount": 82,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-06-10",
+      "description": "منصة مستقل — دفعة مشروع تصميم",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    },
+    {
+      "date": "2026-06-15",
+      "description": "سلة — متجر إلكتروني",
+      "amount": 59,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-06-22",
+      "description": "حوالة واردة — عبدالله القحطاني",
+      "amount": 4500,
+      "type": "credit",
+      "category": "تحويلات غير منتظمة"
+    },
+    {
+      "date": "2026-06-22",
+      "description": "شحن رصيد ألعاب",
+      "amount": 79,
+      "type": "debit",
+      "category": "مصروفات محفظة"
+    },
+    {
+      "date": "2026-06-24",
+      "description": "تحويل — دروس خصوصية",
+      "amount": 1000,
+      "type": "credit",
+      "category": "دخل جانبي"
+    }
+  ]
+}

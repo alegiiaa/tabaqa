@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "source": "credit_bureau",
+    "provider": "مزوّد السجل الائتماني (محاكاة)",
+    "persona": "khalid",
+    "simulated": true
+  },
+  "report": {
+    "credit_grade": "C",
+    "serious_delinquency": false,
+    "payment_history": "تأخير طفيف — دفعة واحدة متأخرة خلال آخر 24 شهرًا",
+    "recent_inquiries": 3,
+    "obligations": [
+      {
+        "type": "بطاقة ائتمانية",
+        "lender": "بنك آخر",
+        "monthly_payment": 600,
+        "outstanding": 9900,
+        "remaining_months": null
+      },
+      {
+        "type": "دفعات آجلة (BNPL)",
+        "lender": "مزوّد دفعات",
+        "monthly_payment": 300,
+        "outstanding": 1800,
+        "remaining_months": 6
+      }
+    ],
+    "total_monthly_obligations": 900,
+    "total_outstanding": 11700,
+    "retrieved_at": "2026-07-16T10:41:04+03:00"
+  }
+}

@@ -2,7 +2,7 @@
 // In dev, VITE_API_BASE is empty → calls hit "/v1/*" and Vite proxies to :8000.
 // In prod, set VITE_API_BASE=https://<api-host> so the browser calls it directly.
 
-const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '')
+export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '')
 
 // ── response shapes (mirror api/models.py) ────────────────────────────────
 export interface IncomeComponent {

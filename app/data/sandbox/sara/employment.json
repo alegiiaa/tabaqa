@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "source": "employment_registry",
+    "provider": "مصدر التوظيف والرواتب الرسمي (محاكاة)",
+    "persona": "sara",
+    "simulated": true
+  },
+  "record": {
+    "full_name": "سارة الشمري",
+    "national_id_masked": "2•••••3377",
+    "employer_name": "شركة قطاع خاص — الرياض",
+    "employment_sector": "خاص",
+    "employment_type": "دوام كامل — عقد دائم",
+    "job_title": "محاسبة أولى",
+    "employment_start_date": "2021-03-01",
+    "service_years": 5,
+    "verified_monthly_salary": 11000,
+    "salary_frequency": "شهري",
+    "verification_status": "موثّق",
+    "retrieved_at": "2026-07-16T10:41:03+03:00"
+  }
+}

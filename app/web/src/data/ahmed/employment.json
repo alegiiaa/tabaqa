@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "source": "employment_registry",
+    "provider": "مصدر التوظيف والرواتب الرسمي (محاكاة)",
+    "persona": "ahmed",
+    "simulated": true
+  },
+  "record": {
+    "full_name": "أحمد القحطاني",
+    "national_id_masked": "1•••••4821",
+    "employer_name": "جهة حكومية — الرياض",
+    "employment_sector": "حكومي",
+    "employment_type": "دوام كامل — عقد دائم",
+    "job_title": "أخصائي إداري أول",
+    "employment_start_date": "2022-06-01",
+    "service_years": 4,
+    "verified_monthly_salary": 18000,
+    "salary_frequency": "شهري",
+    "verification_status": "موثّق",
+    "retrieved_at": "2026-07-16T10:41:03+03:00"
+  }
+}
